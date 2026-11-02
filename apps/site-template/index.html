@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="green">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dr. Maanvita Kumari | HealthConsult Family Clinic</title>
+  <meta name="description" content="Consult Dr. Maanvita Kumari (MBBS, MD) at HealthConsult Family Clinic, Sector 18 Noida. Compassionate general medicine, diabetes & infection care." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./src/styles.css" />
+  
+  <!-- Structured Data: Physician & MedicalClinic per brain/08_UI_SPEC.md § 2 -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": ["Physician", "MedicalClinic"],
+    "name": "Dr. Maanvita Kumari - HealthConsult Family Clinic",
+    "image": "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=640",
+    "telephone": "+919876543210",
+    "email": "contact@healthconsult.in",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Plot 14, Health Plaza, Central Market, Sector 18",
+      "addressLocality": "Noida",
+      "addressRegion": "Uttar Pradesh",
+      "postalCode": "201301",
+      "addressCountry": "IN"
+    },
+    "medicalSpecialty": "General Medicine",
+    "priceRange": "₹600",
+    "openingHoursSpecification": [
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        "opens": "09:00",
+        "closes": "20:00"
+      },
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": "Saturday",
+        "opens": "09:00",
+        "closes": "16:00"
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <!-- Section 0: Accessibility Skip Link -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Top Theme Selector Bar (Demonstrating Reference 1 Green & Reference 2 Teal) -->
+  <aside class="theme-bar" aria-label="Theme Customizer">
+    <div class="theme-bar-inner">
+      <span class="theme-label">Visual Direction (Reference Screenshots):</span>
+      <div class="theme-buttons">
+        <button type="button" id="theme-green-btn" class="theme-btn active" onclick="setTheme('green')">
+          <span class="color-dot green"></span> Screenshot 1: Green Landing
+        </button>
+        <button type="button" id="theme-teal-btn" class="theme-btn" onclick="setTheme('teal')">
+          <span class="color-dot teal"></span> Screenshot 2: Teal Poster
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Section 2: Header (Brand + Navigation) -->
+  <header class="site-header">
+    <div class="container header-container">
+      <a href="#" class="brand-logo" aria-label="HealthConsult Clinic Home">
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          <path d="M7 12h2l1-3 2 6 1-3h4" />
+        </svg>
+        <span class="brand-name"><strong>Health</strong>Consult</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Main Navigation">
+        <a href="#hero" class="nav-link active">Home</a>
+        <a href="#services" class="nav-link">Services</a>
+        <a href="#about" class="nav-link">About Doctor</a>
+        <a href="#clinic" class="nav-link">Clinic & Timings</a>
+        <a href="#contact" class="nav-link">Contact</a>
+      </nav>
+
+      <div class="header-action">
+        <a href="tel:+919876543210" class="btn btn-primary btn-sm" id="header-call-btn">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+          </svg>
+          Call Doctor
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <!-- Section 3: Hero (Split Layout matching Screenshot 1 & 2) -->
+    <section id="hero" class="hero-section">
+      <div class="container hero-grid">
+        <div class="hero-content">
+          <div class="trust-badge">
+            <span class="badge-dot"></span> Verified Medical Professional • DMC Registered
+          </div>
+          <h1 class="hero-title">
+            Consult your health with our doctor <span class="highlight">anywhere, anytime</span>
+          </h1>
+          <p class="hero-subtitle">
+            We provide expert care with a personal touch. From preventive wellness to chronic disease management, your health is our priority.
+          </p>
+
+          <div class="hero-cta-group">
+            <a href="tel:+919876543210" class="btn btn-primary btn-lg" id="hero-call-cta">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+              </svg>
+              Call Dr. Maanvita
+            </a>
+            <a href="https://wa.me/919876543210?text=Hello%20Dr.%20Maanvita%2C%20I%20would%20like%20to%20consult%20you" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-lg" id="hero-whatsapp-cta">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.41a8.17 8.17 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.25-.75-.67-1.26-1.5-1.41-1.75-.14-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44s-.56-1.36-.77-1.86c-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.71 4.3 3.8.6.26 1.07.41 1.43.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.1-.23-.17-.48-.29z"/>
+              </svg>
+              Book on WhatsApp
+            </a>
+          </div>
+
+          <!-- Poster-style Contact Highlights from Screenshot 2 -->
+          <div class="hero-contact-strip">
+            <div class="contact-pill">
+              <span class="pill-icon">📞</span>
+              <div>
+                <span class="pill-label">Call directly:</span>
+                <a href="tel:+919876543210" class="pill-val">+91 98765 43210</a>
+              </div>
+            </div>
+            <div class="contact-pill">
+              <span class="pill-icon">📍</span>
+              <div>
+                <span class="pill-label">Clinic Location:</span>
+                <span class="pill-val">Sector 18, Noida</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Doctor Cutout Card (Matching Screenshot 1 & 2) -->
+        <div class="hero-visual">
+          <div class="doctor-card-wrapper">
+            <div class="doctor-shape-backdrop"></div>
+            <img 
+              src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=640" 
+              alt="Dr. Maanvita Kumari, MBBS, MD - Consultant Physician" 
+              class="doctor-photo"
+              width="480"
+              height="580"
+              fetchpriority="high"
+            />
+            <!-- Nameplate Plate from Reference 2 -->
+            <div class="doctor-nameplate">
+              <span class="doctor-title">DR. MAANVITA KUMARI</span>
+              <span class="doctor-degree">(MBBS, MD - General Medicine)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Credentials & Registrations -->
+    <section id="about" class="section credentials-section">
+      <div class="container">
+        <div class="section-header text-center">
+          <span class="section-tag">Doctor Verification</span>
+          <h2 class="section-title">Verified Credentials & Registrations</h2>
+          <p class="section-desc">Medical qualifications and council registrations transparently displayed for patient peace of mind.</p>
+        </div>
+
+        <div class="credentials-grid">
+          <div class="credential-card">
+            <div class="cred-icon">🎓</div>
+            <h3 class="cred-title">Medical Degrees</h3>
+            <p class="cred-val">MBBS, MD in General Medicine</p>
+            <span class="cred-sub">Top Tier Medical College, New Delhi</span>
+          </div>
+          <div class="credential-card">
+            <div class="cred-icon">📜</div>
+            <h3 class="cred-title">Council Registration</h3>
+            <p class="cred-val">Reg. No: DMC/R/28491</p>
+            <span class="cred-sub">Delhi Medical Council (Verified)</span>
+          </div>
+          <div class="credential-card">
+            <div class="cred-icon">🩺</div>
+            <h3 class="cred-title">Clinical Experience</h3>
+            <p class="cred-val">14+ Years Active Practice</p>
+            <span class="cred-sub">Over 25,000+ Patient Consultations</span>
+          </div>
+          <div class="credential-card">
+            <div class="cred-icon">💬</div>
+            <h3 class="cred-title">Languages Spoken</h3>
+            <p class="cred-val">English & Hindi</p>
+            <span class="cred-sub">Fluent consultation in native language</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Services Grid (Max 9 services) -->
+    <section id="services" class="section services-section">
+      <div class="container">
+        <div class="section-header text-center">
+          <span class="section-tag">Clinical Services</span>
+          <h2 class="section-title">Expert Care For Your Family</h2>
+          <p class="section-desc">Personalized diagnosis, modern medical protocols, and long-term care plans.</p>
+        </div>
+
+        <div class="services-grid">
+          <article class="service-card">
+            <div class="service-icon">🔬</div>
+            <h3 class="service-title">General Health Checkup</h3>
+            <p class="service-desc">Complete physical examination, baseline vital assessments, and personalized preventive health roadmaps.</p>
+          </article>
+          <article class="service-card">
+            <div class="service-icon">🩸</div>
+            <h3 class="service-title">Diabetes & Hypertension</h3>
+            <p class="service-desc">Careful blood sugar monitoring, blood pressure stabilization, diet consultation, and organ protection.</p>
+          </article>
+          <article class="service-card">
+            <div class="service-icon">🌡️</div>
+            <h3 class="service-title">Fevers & Seasonal Illnesses</h3>
+            <p class="service-desc">Rapid diagnostic assessment for dengue, malaria, typhoid, viral flu, respiratory, and chest infections.</p>
+          </article>
+          <article class="service-card">
+            <div class="service-icon">💊</div>
+            <h3 class="service-title">Thyroid & Endocrine Care</h3>
+            <p class="service-desc">Expert evaluation of hypothyroidism, hyperthyroidism, metabolic shifts, and fatigue syndromes.</p>
+          </article>
+          <article class="service-card">
+            <div class="service-icon">👵</div>
+            <h3 class="service-title">Geriatric & Elderly Care</h3>
+            <p class="service-desc">Compassionate primary healthcare, chronic medicine reviews, and mobility support for senior citizens.</p>
+          </article>
+          <article class="service-card">
+            <div class="service-icon">💉</div>
+            <h3 class="service-title">Adult Vaccinations</h3>
+            <p class="service-desc">Annual influenza shots, pneumococcal protection, hepatitis boosters, and preventive immunization.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6: Clinic Info & Map Facade -->
+    <section id="clinic" class="section clinic-section">
+      <div class="container">
+        <div class="clinic-grid">
+          <div class="clinic-details">
+            <span class="section-tag">Clinic Visit</span>
+            <h2 class="section-title">HealthConsult Family Clinic</h2>
+            <p class="clinic-tagline">"We Nurture Your Health, Every Day"</p>
+
+            <div class="clinic-info-list">
+              <div class="clinic-info-item">
+                <span class="item-icon">📍</span>
+                <div>
+                  <strong>Address:</strong>
+                  <p>Plot 14, Health Plaza, Central Market, Sector 18, Noida, Uttar Pradesh – 201301</p>
+                </div>
+              </div>
+              <div class="clinic-info-item">
+                <span class="item-icon">🕒</span>
+                <div>
+                  <strong>Consultation Hours:</strong>
+                  <table class="hours-table">
+                    <tr><td>Mon – Fri:</td><td>09:00 AM – 08:00 PM</td></tr>
+                    <tr><td>Saturday:</td><td>09:00 AM – 04:00 PM</td></tr>
+                    <tr><td>Sunday:</td><td><span class="text-closed">Closed</span></td></tr>
+                  </table>
+                </div>
+              </div>
+              <div class="clinic-info-item">
+                <span class="item-icon">💵</span>
+                <div>
+                  <strong>Consultation Fee:</strong>
+                  <p>₹600 (Includes 7-day complimentary follow-up)</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Click-to-load Map Facade per SD-045 (Zero external requests before user click) -->
+          <div class="map-facade-container" id="map-container">
+            <div class="map-facade" onclick="loadMap()">
+              <div class="map-facade-content">
+                <span class="map-pin">📍</span>
+                <h4>HealthConsult Clinic Location</h4>
+                <p>Sector 18, Noida</p>
+                <button type="button" class="btn btn-secondary btn-sm">Click to Load Interactive Map</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 7: Patient Reviews -->
+    <section class="section reviews-section">
+      <div class="container">
+        <div class="section-header text-center">
+          <span class="section-tag">Patient Feedback</span>
+          <h2 class="section-title">What Patients Say</h2>
+          <p class="section-desc">Real experiences from patients treated at our clinic.</p>
+        </div>
+
+        <div class="reviews-grid">
+          <div class="review-card">
+            <div class="review-stars">★★★★★</div>
+            <p class="review-text">"Dr. Maanvita is exceptionally patient and thorough. She explained my mother's blood tests in simple Hindi and adjusted her medications smoothly."</p>
+            <div class="review-author">
+              <span class="author-avatar">R</span>
+              <div>
+                <strong>R. Sharma</strong>
+                <span class="author-badge">Verified Patient</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="review-card">
+            <div class="review-stars">★★★★★</div>
+            <p class="review-text">"Very clean clinic and minimal waiting time. The doctor listened carefully and avoided unnecessary antibiotics. Highly recommended!"</p>
+            <div class="review-author">
+              <span class="author-avatar">A</span>
+              <div>
+                <strong>A. Verma</strong>
+                <span class="author-badge">Verified Patient</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="review-card">
+            <div class="review-stars">★★★★★</div>
+            <p class="review-text">"Quick WhatsApp reply for consultation hours and excellent bedside manner. The clinic location is very convenient with good parking."</p>
+            <div class="review-author">
+              <span class="author-avatar">P</span>
+              <div>
+                <strong>P. Gupta</strong>
+                <span class="author-badge">Verified Patient</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 8: FAQ Accordion (Zero JS using <details>) -->
+    <section class="section faq-section">
+      <div class="container max-w-reading">
+        <div class="section-header text-center">
+          <span class="section-tag">Frequently Asked Questions</span>
+          <h2 class="section-title">Common Patient Enquiries</h2>
+        </div>
+
+        <div class="faq-list">
+          <details class="faq-item" open>
+            <summary class="faq-question">Do I need a prior appointment before visiting?</summary>
+            <div class="faq-answer">
+              <p>Walk-ins are always welcomed during clinic hours. However, messaging on WhatsApp or calling ahead helps reduce waiting time.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">What is the consultation fee and follow-up policy?</summary>
+            <div class="faq-answer">
+              <p>The regular consultation fee is ₹600. Follow-up visits within 7 days for the same ailment are complimentary.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">Is home blood sample collection available?</summary>
+            <div class="faq-answer">
+              <p>Yes, our clinic partners with certified NABL diagnostic laboratories for reliable at-home sample collection.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">What modes of payment are accepted?</summary>
+            <div class="faq-answer">
+              <p>We accept UPI (Google Pay, PhonePe, Paytm), credit/debit cards, and cash.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 9: Contact Form with Honeypot & Fallback -->
+    <section id="contact" class="section contact-section">
+      <div class="container max-w-reading">
+        <div class="contact-card">
+          <div class="section-header text-center">
+            <span class="section-tag">Direct Contact</span>
+            <h2 class="section-title">Send An Enquiry</h2>
+            <p class="section-desc">Leave your message and our clinic staff will call you back shortly.</p>
+          </div>
+
+          <form id="lead-form" class="lead-form" onsubmit="handleFormSubmit(event)">
+            <!-- Honeypot anti-spam field per SD-044 (Hidden from real users) -->
+            <div class="honeypot" style="display:none" aria-hidden="true">
+              <label for="form-website">Leave blank</label>
+              <input type="text" id="form-website" name="website" tabindex="-1" autocomplete="off" />
+            </div>
+
+            <div class="form-group">
+              <label for="form-name">Your Full Name *</label>
+              <input type="text" id="form-name" name="name" required placeholder="e.g. Rajesh Kumar" class="form-input" />
+            </div>
+
+            <div class="form-group">
+              <label for="form-phone">Mobile Number *</label>
+              <input type="tel" id="form-phone" name="phone" required placeholder="e.g. +91 98765 43210" pattern="^(\+91[\-\s]?)?[6789]\d{9}$" class="form-input" />
+              <small class="form-hint">10-digit Indian mobile number</small>
+            </div>
+
+            <div class="form-group">
+              <label for="form-message">Brief Health Query or Purpose of Visit</label>
+              <textarea id="form-message" name="message" rows="3" placeholder="Describe your symptoms or preferred consultation time..." class="form-textarea"></textarea>
+            </div>
+
+            <!-- DPDP Act 2023 Consent Checkbox per brain/10_SECURITY.md § 8 -->
+            <div class="form-checkbox-group">
+              <input type="checkbox" id="form-consent" name="consent" required />
+              <label for="form-consent">
+                I give consent to HealthConsult Clinic to contact me via Call or WhatsApp regarding this healthcare enquiry.
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg" id="form-submit-btn">
+              Submit Enquiry
+            </button>
+
+            <div id="form-status" class="form-status" aria-live="polite"></div>
+          </form>
+
+          <!-- Fallback options if offline or network fails -->
+          <div class="fallback-links text-center">
+            <p>Prefer instant assistance? Connect directly:</p>
+            <div class="fallback-btn-group">
+              <a href="tel:+919876543210" class="btn btn-outline btn-sm">📞 Call Directly</a>
+              <a href="https://wa.me/919876543210" class="btn btn-outline btn-sm">💬 WhatsApp Clinic</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Section 10: Footer (NAP + Legal + EcoDigiTech Credit) -->
+  <footer class="site-footer">
+    <div class="container footer-container">
+      <div class="footer-col">
+        <span class="footer-brand">HealthConsult Family Clinic</span>
+        <p class="footer-nap">
+          Plot 14, Health Plaza, Sector 18, Noida, Uttar Pradesh – 201301<br />
+          Phone: +91 98765 43210 | Email: contact@healthconsult.in
+        </p>
+      </div>
+
+      <div class="footer-col text-right">
+        <p class="footer-privacy">
+          Patient data processed in accordance with the Digital Personal Data Protection (DPDP) Act, 2023.
+        </p>
+        <p class="footer-credit">
+          Designed & Hosted by <strong>EcoDigiTech</strong> • Fast, Verified Doctor Presence
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Section 1: Sticky Mobile CTA Bar (< 768px, 48px Touch Targets) -->
+  <aside class="sticky-mobile-bar" aria-label="Quick Actions">
+    <a href="tel:+919876543210" class="mobile-cta-btn cta-call" aria-label="Call Dr. Maanvita Kumari">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mobile-cta-icon">
+        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+      </svg>
+      <span>Call</span>
+    </a>
+    <a href="https://wa.me/919876543210?text=Hello%20Dr.%20Maanvita%2C%20I%20would%20like%20to%20consult%20you" class="mobile-cta-btn cta-wa" aria-label="WhatsApp Dr. Maanvita Kumari">
+      <svg viewBox="0 0 24 24" fill="currentColor" class="mobile-cta-icon">
+        <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.41a8.17 8.17 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.25-.75-.67-1.26-1.5-1.41-1.75-.14-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44s-.56-1.36-.77-1.86c-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.71 4.3 3.8.6.26 1.07.41 1.43.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.1-.23-.17-.48-.29z"/>
+      </svg>
+      <span>WhatsApp</span>
+    </a>
+    <a href="#contact" class="mobile-cta-btn cta-form" aria-label="Book or Inquire via Form">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mobile-cta-icon">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+        <polyline points="22,6 12,13 2,6"/>
+      </svg>
+      <span>Enquire</span>
+    </a>
+  </aside>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+{
+  "schemaVersion": "1.0.0",
+  "doctor": {
+    "name": "Dr. Maanvita Kumari",
+    "degree": "MBBS, MD (General Medicine)",
+    "specialty": "Consultant Physician & Family Medicine Specialist",
+    "experienceYears": 14,
+    "registrationNumber": "DMC/R/28491",
+    "medicalCouncil": "Delhi Medical Council",
+    "bio": "Dr. Maanvita Kumari is a trusted family physician with over 14 years of dedicated clinical experience in managing chronic conditions, preventive wellness, and everyday acute illnesses. Committed to compassionate, evidence-based care for patients of all age groups.",
+    "photoUrl": "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=640",
+    "photoAlt": "Dr. Maanvita Kumari, MBBS, MD - Consultant Physician"
+  },
+  "clinic": {
+    "name": "HealthConsult Family Clinic",
+    "tagline": "We Nurture Your Health, Every Day",
+    "address": {
+      "street": "Plot 14, Health Plaza, Central Market",
+      "area": "Sector 18",
+      "city": "Noida",
+      "state": "Uttar Pradesh",
+      "pincode": "201301"
+    },
+    "googleMapsUrl": "https://maps.google.com/?q=28.5700,77.3200",
+    "phone": "+919876543210",
+    "alternatePhone": "+919876543211",
+    "whatsappNumber": "+919876543210",
+    "email": "contact@healthconsult.in",
+    "consultationFee": 600
+  },
+  "hours": [
+    {
+      "days": "Monday – Friday",
+      "open": "09:00 AM",
+      "close": "08:00 PM",
+      "isClosed": false
+    },
+    {
+      "days": "Saturday",
+      "open": "09:00 AM",
+      "close": "04:00 PM",
+      "isClosed": false
+    },
+    {
+      "days": "Sunday",
+      "open": "Closed",
+      "close": "Closed",
+      "isClosed": true
+    }
+  ],
+  "services": [
+    {
+      "title": "General Health Checkup",
+      "description": "Comprehensive physical examination and preventive diagnostic evaluations for adults and seniors."
+    },
+    {
+      "title": "Diabetes & Hypertension Management",
+      "description": "Personalized blood sugar and blood pressure monitoring, medication review, and lifestyle counseling."
+    },
+    {
+      "title": "Fever, Infection & Seasonal Care",
+      "description": "Prompt clinical diagnosis and tailored management for viral fevers, flu, respiratory, and gastric infections."
+    },
+    {
+      "title": "Thyroid & Endocrine Health",
+      "description": "Specialized assessment for thyroid imbalances, metabolic disorders, and ongoing hormonal care."
+    },
+    {
+      "title": "Pediatric & Geriatric Wellness",
+      "description": "Gentle, compassionate primary healthcare catering specifically to growing children and aging elders."
+    },
+    {
+      "title": "Vaccination & Preventive Shots",
+      "description": "Annual influenza shots, hepatitis boosters, tetanus prophylaxis, and adult immunization schedules."
+    }
+  ],
+  "reviews": [
+    {
+      "authorInitial": "R. Sharma",
+      "rating": 5,
+      "text": "Dr. Maanvita is exceptionally patient and thorough. She explained my mother's blood tests in simple Hindi and adjusted her medications smoothly.",
+      "source": "Verified Patient"
+    },
+    {
+      "authorInitial": "A. Verma",
+      "rating": 5,
+      "text": "Very clean clinic and minimal waiting time. The doctor listened carefully and avoided unnecessary antibiotics. Highly recommended!",
+      "source": "Verified Patient"
+    },
+    {
+      "authorInitial": "P. Gupta",
+      "rating": 5,
+      "text": "Quick WhatsApp reply for consultation hours and excellent bedside manner. The clinic location is very convenient with good parking.",
+      "source": "Verified Patient"
+    }
+  ],
+  "faq": [
+    {
+      "question": "Do I need a prior appointment before visiting?",
+      "answer": "Walk-ins are always welcomed during clinic hours. However, messaging on WhatsApp or calling ahead helps reduce waiting time."
+    },
+    {
+      "question": "What is the consultation fee?",
+      "answer": "The regular consultation fee is ₹600. Follow-up visits within 7 days for the same ailment are complimentary."
+    },
+    {
+      "question": "Is home blood sample collection available?",
+      "answer": "Yes, our clinic partners with certified NABL diagnostic laboratories for reliable at-home sample collection."
+    },
+    {
+      "question": "What modes of payment are accepted?",
+      "answer": "We accept UPI (Google Pay, PhonePe, Paytm), credit/debit cards, and cash."
+    }
+  ],
+  "theme": "green",
+  "lang": "en",
+  "seo": {
+    "metaTitle": "Dr. Maanvita Kumari | Consultant Physician in Noida",
+    "metaDescription": "Consult Dr. Maanvita Kumari (MBBS, MD) at HealthConsult Family Clinic, Sector 18 Noida. Compassionate general medicine, diabetes & infection care.",
+    "keywords": ["Doctor in Noida", "General Physician Noida", "Dr Maanvita Kumari", "HealthConsult Clinic", "Family Doctor Sector 18"]
+  }
+}

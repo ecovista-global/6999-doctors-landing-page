@@ -1,0 +1,14 @@
+{
+  "name": "@ecodigitech/config",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.js",
+  "exports": {
+    "./tsconfig.base.json": "./tsconfig.base.json",
+    "./eslint.config.js": "./eslint.config.js",
+    "./prettier": "./.prettierrc"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
