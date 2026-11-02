@@ -1,0 +1,1 @@
+/home/nakul/Documents/EcoDigitech/UPDATE_2026-11-02_MONDAY_NAKUL.md
