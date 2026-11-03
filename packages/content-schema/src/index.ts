@@ -1,20 +1,23 @@
 import { z } from 'zod';
 
-// Security check: ban script tags and dangerous HTML in any text input
-const safeText = (maxChars: number = 500) =>
+// Security check: ban script tags and dangerous HTML/JS in any text input
+export const safeText = (maxChars: number = 500) =>
   z
     .string()
     .trim()
     .max(maxChars)
-    .refine((val) => !/<script\b[^>]*>([\s\S]*?)<\/script>/gi.test(val), {
+    .refine((val) => !/<script\b[^>]*>([\s\S]*?)<\/script>/gi.test(val) && !/<script\b/gi.test(val), {
       message: 'Malicious script tags are strictly prohibited',
     })
     .refine((val) => !/javascript:/gi.test(val), {
       message: 'javascript: URI schemes are prohibited',
+    })
+    .refine((val) => !/onload\s*=|onerror\s*=/gi.test(val), {
+      message: 'Inline event handlers are prohibited',
     });
 
 // E.164 phone number validator (+91 for Indian mobile / clinic numbers)
-const phoneSchema = z
+export const phoneSchema = z
   .string()
   .trim()
   .regex(/^\+91[6-9]\d{9}$/, {
@@ -67,10 +70,12 @@ export const ServiceItemSchema = z.object({
 });
 
 export const ReviewItemSchema = z.object({
-  authorInitial: safeText(10), // e.g. "Priya K."
+  authorInitial: safeText(50), // e.g. "Priya K."
   rating: z.number().int().min(1).max(5),
   text: safeText(400),
   source: safeText(50).default('Verified Patient'),
+  treatmentTag: safeText(50).optional(),
+  consentObtained: z.boolean().default(true),
 });
 
 export const FaqItemSchema = z.object({
@@ -91,8 +96,21 @@ export type ThemeType = z.infer<typeof ThemeEnum>;
 export const LangEnum = z.enum(['en', 'hi']);
 export type LangType = z.infer<typeof LangEnum>;
 
+export const PlanEnum = z.enum(['basic', 'growth']);
+export type PlanType = z.infer<typeof PlanEnum>;
+
+export const PagesConfigSchema = z
+  .object({
+    about: z.boolean().default(true),
+    services: z.boolean().default(true),
+    testimonials: z.boolean().default(true),
+    contact: z.boolean().default(true),
+  })
+  .optional();
+
 export const ContentSheetSchema = z.object({
-  schemaVersion: z.literal('1.0.0').default('1.0.0'),
+  schemaVersion: z.enum(['1.0.0', '1.1.0']).default('1.0.0'),
+  plan: PlanEnum.default('basic'),
   doctor: DoctorProfileSchema,
   clinic: ClinicInfoSchema,
   hours: z.array(ClinicHourSchema).min(1).max(7),
@@ -102,6 +120,7 @@ export const ContentSheetSchema = z.object({
   theme: ThemeEnum.default('green'),
   lang: LangEnum.default('en'),
   seo: SeoSchema,
+  pages: PagesConfigSchema,
 });
 
 export type ContentSheet = z.infer<typeof ContentSheetSchema>;
@@ -110,3 +129,4 @@ export type ClinicInfo = z.infer<typeof ClinicInfoSchema>;
 export type ServiceItem = z.infer<typeof ServiceItemSchema>;
 export type ReviewItem = z.infer<typeof ReviewItemSchema>;
 export type FaqItem = z.infer<typeof FaqItemSchema>;
+export type SeoConfig = z.infer<typeof SeoSchema>;
