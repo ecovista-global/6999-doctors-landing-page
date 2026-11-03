@@ -6,7 +6,7 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "lint": "turbo run lint",
+    "lint": "eslint .",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
     "clean": "turbo run clean",
@@ -15,8 +15,12 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css}\""
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.14.0",
+    "globals": "^17.14.0",
     "prettier": "^3.5.0",
     "turbo": "^2.4.4",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.72.1"
   }
 }

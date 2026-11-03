@@ -2,13 +2,22 @@
   "name": "@ecodigitech/config",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "main": "index.js",
   "exports": {
     "./tsconfig.base.json": "./tsconfig.base.json",
     "./eslint.config.js": "./eslint.config.js",
     "./prettier": "./.prettierrc"
   },
+  "scripts": {
+    "test": "node --test test/lint-bans.test.mjs"
+  },
+  "dependencies": {
+    "@eslint/js": "^10.0.1",
+    "typescript-eslint": "^8.72.1"
+  },
   "devDependencies": {
+    "eslint": "^10.14.0",
     "typescript": "^5.7.3"
   }
 }
