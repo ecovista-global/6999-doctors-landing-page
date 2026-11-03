@@ -1,0 +1,72 @@
+name: gates
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: gates-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docs-touched:
+    name: Docs-Touched Gate (00 § 4)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check whether changelog is updated when apps or packages change
+        run: |
+          echo "Comparing changes against origin/main..."
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
+          echo "Changed files in this PR:"
+          echo "$CHANGED_FILES"
+
+          TOUCHES_CODE=$(echo "$CHANGED_FILES" | grep -E '^(apps/|packages/)' || true)
+          TOUCHES_CHANGELOG=$(echo "$CHANGED_FILES" | grep -E '(brain/16_CHANGELOG.md|files/16_CHANGELOG.md)' || true)
+
+          if [ -n "$TOUCHES_CODE" ]; then
+            if [ -z "$TOUCHES_CHANGELOG" ]; then
+              echo "::error::PR touches code in apps/ or packages/ but does not update brain/16_CHANGELOG.md. Gate failed per 00_MASTER_RULES.md § 4."
+              exit 1
+            fi
+            echo "Gate passed: Code changed and changelog updated."
+          else
+            echo "Gate passed: No application or package code changed."
+          fi
+
+  gitleaks:
+    name: Secret Detection Gate (10 § SD-019)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks secret scanner
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  pnpm-audit:
+    name: Dependency Vulnerability Audit (12 § 2)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js 22 with pnpm cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Run pnpm audit (high severity and above)
+        run: pnpm audit --prod --audit-level=high
