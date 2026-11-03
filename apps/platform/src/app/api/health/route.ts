@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { withGateway } from '@/lib/gateway';
+import { withGateway } from '../../../lib/gateway';
 
 /**
  * Liveness Healthcheck Endpoint (SD-074)

@@ -230,12 +230,12 @@ export class AppError extends Error {
   public readonly status: number;
   public readonly title: string;
   public readonly detail: string;
-  public readonly invalidParams?: Array<{ name: string; reason: string }>;
+  public readonly invalidParams?: Array<{ name: string; reason: string }> | undefined;
 
   constructor(
     code: ErrorCode,
     detail?: string,
-    invalidParams?: Array<{ name: string; reason: string }>
+    invalidParams?: Array<{ name: string; reason: string }> | undefined
   ) {
     const def = ERROR_REGISTRY[code] || {
       code,

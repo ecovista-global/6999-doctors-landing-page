@@ -2,7 +2,7 @@
 purpose: Keep-a-Changelog history for platform, template, content-schema and docs
 owner: EcoDigiTech founding team
 status: Draft v0.1
-last_updated: 2026-11-02
+last_updated: 2026-11-03
 related: [00_MASTER_RULES.md, 07_API_CONTRACT.md, 12_GITHUB_ACTIONS.md, 17_DECISIONS.md]
 ---
 
@@ -22,6 +22,17 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 ## 2. Entries
 
 ## [Unreleased]
+
+### Added (Milestone M0: Foundations — MT-001 through MT-008)
+
+- **MT-001 (Monorepo scaffold):** Configured pnpm workspaces, Turborepo pipeline (`build`, `lint`, `test`, `typecheck`), and directory layout (`apps/platform`, `apps/site-template`, `packages/config`, `packages/content-schema`, `packages/ui`).
+- **MT-002 (TS strict + lint config):** Implemented strict TypeScript base config (`packages/config/tsconfig.base.json`) and flat ESLint config (`packages/config/eslint.config.js`) enforcing bans on top-level `let` (SD-080), `dangerouslySetInnerHTML` (SD-042), and raw SQL string interpolation (SD-042). Verified with automated unit test suite.
+- **MT-003 (Local stack):** Configured `docker-compose.yml` for PostgreSQL 16, Redis 7, and Mailpit with healthchecks; added comprehensive `.env.example`.
+- **MT-004 (PR pipeline skeleton):** Configured `.github/workflows/pr.yml` with pnpm store caching, Turborepo cache, concurrency cancellation, and full CI validation.
+- **MT-005 (content-schema v1 & v1.1):** Built `@ecodigitech/content-schema` Zod validation schemas enforcing strict caps (services ≤ 9, reviews ≤ 6, FAQs ≤ 8), phone format, XSS script injection rejection, and v1.1.0 Practice Growth plan/pages extensions. Tested against `fixtures/golden.json` and garbage/injection payloads.
+- **MT-006 (Drizzle + base migration):** Configured Drizzle ORM with `pg` driver, generated `drizzle/0000_base.sql` with `pgcrypto` and `citext` extensions, migration runner `src/db/migrate.ts`, and verified typed query test against live PostgreSQL.
+- **MT-007 (Gateway skeleton):** Built `withGateway()` edge wrapper with request/trace ID propagation, structured JSON event logging, E-code catalogue (`E-1xxx` through `E-4xxx`), and RFC-7807 Problem Details error responses without leaking stack traces.
+- **MT-008 (Docs/secret CI gates):** Configured `.github/workflows/gates.yml` containing `docs-touched` gate, Gitleaks scanner (SD-019), and dependency audit. Verified with test suite asserting PR rejection on missing changelog and planted fake key detection.
 
 ### Added (docs MINOR - MT-000)
 
