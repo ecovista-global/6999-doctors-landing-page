@@ -1,14 +1,16 @@
 {
   "content": {
-    "theme": "Green Trust",
+    "theme": "Navy Gold",
     "announcement": "Complimentary 7-day follow-up consultation included with every visit.",
     "doctor": {
       "name": "Dr. Maanvita Kumari",
-      "degree": "MBBS, MD (General Medicine)",
+      "degree": " ",
+      "college": "Maulana Azad Medical College, New Delhi",
       "specialty": "Consultant Physician & Family Medicine Specialist",
       "experienceYears": 14,
       "registrationNumber": "DMC/R/28491",
       "medicalCouncil": "Delhi Medical Council",
+      "languages": "English & Hindi",
       "bio": "Trusted family physician with over 14 years of clinical experience from Maulana Azad Medical College. Committed to evidence-based, compassionate care for adults, seniors, and chronic lifestyle disorders.",
       "consultationFee": 600,
       "phone": "+91 98765 43210",
@@ -18,20 +20,31 @@
     "clinic": {
       "name": "HealthConsult Clinic",
       "tagline": "Compassionate Clinical Care & Chronic Wellness",
-      "street": "Plot 14, Health Plaza, Central Market",
+      "taglineQuote": "\"We Nurture Your Health, Every Day\"",
+      "street": ",Sector 18",
       "area": "Sector 18",
       "city": "Noida",
       "state": "Uttar Pradesh",
       "pincode": "201301",
+      "schedule": {
+        "weekdayHours": "Monday – Friday: 09:00 AM – 08:00 PM",
+        "saturdayHours": "Saturday: 09:00 AM – 04:00 PM",
+        "sundayHours": "Sunday: Closed (Emergency On-Call)"
+      },
       "morningHours": "10:00 AM – 01:30 PM",
       "eveningHours": "05:30 PM – 08:30 PM",
       "sundayHours": "Closed (Emergency Hotline Active)",
+      "feePolicy": "₹600 regular consultation. Includes a 7-day complimentary follow-up visit for the same medical issue.",
       "amenities": [
         "NABH Hygiene Standards",
         "In-House Pharmacy",
         "Digital WhatsApp Reports",
         "Wheelchair Accessible"
-      ]
+      ],
+      "transitGuidance": "Located directly in Central Market Sector 18, just 200 meters from Noida Sector 18 Metro Station (Blue Line, Gate 2). Ample multi-level car parking available next to Health Plaza.",
+      "mapLocationName": "HealthConsult Clinic Location",
+      "mapSubtitle": "Sector 18 Central Market, Noida",
+      "googleMapEmbedUrl": "https://maps.google.com/maps?q=Sector%2018%2C%20Noida&t=&z=15&ie=UTF8&iwloc=&output=embed"
     },
     "hero": {
       "headline": "Trusted Family Medicine & Chronic Care in Noida",
@@ -40,6 +53,58 @@
       "statRating": "4.9 / 5",
       "statExperience": "14+ Yrs"
     },
+    "whyChooseUs": [
+      {
+        "id": "wcu-1",
+        "icon": "⏱️",
+        "title": "Minimal Waiting Time",
+        "description": "WhatsApp slot coordination ensures you spend minimal time in the waiting area, receiving prompt doctor attention."
+      },
+      {
+        "id": "wcu-2",
+        "icon": "🩺",
+        "title": "Evidence-Based Medicine",
+        "description": "Rational clinical diagnoses with zero unnecessary lab investigations or heavy over-prescription of antibiotics."
+      },
+      {
+        "id": "wcu-3",
+        "icon": "📲",
+        "title": "Digital Health Records",
+        "description": "Clear digital prescriptions delivered instantly to your WhatsApp, accessible whenever you need them."
+      },
+      {
+        "id": "wcu-4",
+        "icon": "🤝",
+        "title": "Dedicated Consultation",
+        "description": "Thorough 15+ minute consultation sessions allowing ample time to address your symptoms, queries, and lifestyle concerns."
+      }
+    ],
+    "accreditations": [
+      {
+        "id": "acc-1",
+        "icon": "🛡️",
+        "title": "NABH Safety Standards",
+        "description": "Sterilized clinic environment & protocols"
+      },
+      {
+        "id": "acc-2",
+        "icon": "💊",
+        "title": "Transparent Consultation",
+        "description": "Complimentary 7-day follow-up included"
+      },
+      {
+        "id": "acc-3",
+        "icon": "⚡",
+        "title": "Digital WhatsApp Reports",
+        "description": "Instant prescription & diagnostic delivery"
+      },
+      {
+        "id": "acc-4",
+        "icon": "🔒",
+        "title": "DPDP Act 2023 Compliant",
+        "description": "100% encrypted & private health records"
+      }
+    ],
     "services": [
       {
         "id": "srv-1",
@@ -76,6 +141,98 @@
         "title": "Preventive Executive Health",
         "description": "Comprehensive annual physical examinations, lipid profiles, and early detection screens.",
         "icon": "🛡️"
+      }
+    ],
+    "reviews": [
+      {
+        "id": "rev-1",
+        "patientName": "R. Sharma",
+        "location": "Sector 19, Noida",
+        "treatment": "Senior Citizen Diabetes Care",
+        "rating": 5,
+        "reviewText": "Dr. Maanvita is exceptionally patient and thorough. She explained my mother's blood tests in simple Hindi and adjusted her medications smoothly without piling on unnecessary drugs."
+      },
+      {
+        "id": "rev-2",
+        "patientName": "A. Verma",
+        "location": "Sector 27, Noida",
+        "treatment": "Dengue Fever Recovery",
+        "rating": 5,
+        "reviewText": "Very clean clinic and minimal waiting time. When I had high viral fever, doctor monitored my platelet counts daily on WhatsApp. Highly empathetic and knowledgeable!"
+      },
+      {
+        "id": "rev-3",
+        "patientName": "P. Gupta",
+        "location": "Sector 18, Noida",
+        "treatment": "Hypertension Management",
+        "rating": 5,
+        "reviewText": "Quick WhatsApp reply for consultation hours and excellent bedside manner. My blood pressure is now well controlled within 3 weeks with simple lifestyle tweaks."
+      },
+      {
+        "id": "rev-4",
+        "patientName": "S. Nair",
+        "location": "Sector 15, Noida",
+        "treatment": "Thyroid Balance Treatment",
+        "rating": 5,
+        "reviewText": "Diagnosed my chronic thyroid fatigue after multiple other clinics dismissed it as stress. Her dosage guidance was spot-on and my energy levels have bounced back."
+      },
+      {
+        "id": "rev-5",
+        "patientName": "M. Chawla",
+        "location": "Sector 30, Noida",
+        "treatment": "Family Health & Allergy",
+        "rating": 5,
+        "reviewText": "Our entire family consults Dr. Maanvita for any fever or seasonal illness. She listens carefully for 15+ minutes and never rushes the patient out of the room."
+      },
+      {
+        "id": "rev-6",
+        "patientName": "V. Singhal",
+        "location": "Sector 29, Noida",
+        "treatment": "Preventive Executive Checkup",
+        "rating": 5,
+        "reviewText": "Very sensible medical approach. She reviewed my annual lipid profile and gave practical diet guidance instead of prescribing statins straight away. Truly trustworthy."
+      }
+    ],
+    "faqs": [
+      {
+        "id": "faq-1",
+        "question": "Do I need a prior appointment before visiting?",
+        "answer": "Walk-ins are welcomed during all clinic hours. However, messaging on WhatsApp or calling ahead helps assign an estimated consultation window, minimizing your waiting room time."
+      },
+      {
+        "id": "faq-2",
+        "question": "What is the consultation fee and follow-up policy?",
+        "answer": "The standard consultation fee is ₹600. All patients are eligible for one complimentary follow-up visit within 7 days of the initial consultation for review of lab reports or treatment progress."
+      },
+      {
+        "id": "faq-3",
+        "question": "Is home blood sample collection available?",
+        "answer": "Yes, our clinic partners with certified NABL diagnostic laboratory partners. You can schedule a phlebotomist visit for home sample collection by informing clinic reception."
+      },
+      {
+        "id": "faq-4",
+        "question": "What payment modes are accepted at the clinic?",
+        "answer": "We accept all digital payment options including UPI (Google Pay, PhonePe, Paytm, BHIM), debit/credit cards, and cash."
+      },
+      {
+        "id": "faq-5",
+        "question": "How do I receive my prescription and reports?",
+        "answer": "You receive both a printed hard copy and an official verified digital prescription delivered directly to your WhatsApp number immediately following the consultation."
+      },
+      {
+        "id": "faq-6",
+        "question": "Can I consult Dr. Maanvita over WhatsApp for follow-ups?",
+        "answer": "Yes! Existing patients can send their lab test reports and quick dosage follow-up queries to the clinic WhatsApp number during clinic working hours."
+      },
+      {
+        "id": "faq-7",
+        "question": "Are medical fitness and sick leave certificates provided?",
+        "answer": "Yes, official verified medical fitness certificates and sick leave verification are issued following physical clinical assessment, stamped with DMC registration credentials."
+      },
+      {
+        "id": "faq-8",
+        "question": "What emergency facilities are available?",
+        "answer": "The clinic provides primary acute emergency stabilization (oxygen, nebulization, primary wound dressing, glucose revival). Severe trauma or cardiac emergencies are stabilized and referred to partner tertiary hospitals."
       }
     ]
   },

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { DoctorContent, AppointmentRecord } from '@/lib/contentStore';
 
 type Tab = 'dashboard' | 'appointments' | 'editor' | 'media' | 'themes' | 'settings';
+type EditorSection = 'hero' | 'doctor' | 'clinic' | 'pillars' | 'services' | 'reviews' | 'faqs';
 
 const THEME_PRESETS: Array<{
   name: string;
@@ -66,6 +67,7 @@ const THEME_PRESETS: Array<{
 
 export default function CmsPanelPage() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
+  const [editorSection, setEditorSection] = useState<EditorSection>('clinic');
   const [deviceViewport, setDeviceViewport] = useState<'360px' | '768px' | '100%'>('100%');
   const [publishStatus, setPublishStatus] = useState<'idle' | 'publishing' | 'published' | 'error'>('idle');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -82,12 +84,12 @@ export default function CmsPanelPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
-  // Quick Walk-in Appointment Modal/Form state
+  // Quick Walk-in Appointment Modal state
   const [showAddAptModal, setShowAddAptModal] = useState(false);
   const [newAptData, setNewAptData] = useState({
     patientName: '',
     phone: '',
-    service: 'General Consultation',
+    service: 'General Health Checkup',
     preferredDate: new Date().toISOString().split('T')[0],
     shift: 'Morning' as 'Morning' | 'Afternoon' | 'Evening',
     notes: 'Walk-in booking recorded by front desk',
@@ -127,7 +129,6 @@ export default function CmsPanelPage() {
     fetchContent();
     fetchAppointments();
 
-    // Poll appointments every 4 seconds so patient submissions on '/' show up automatically
     const interval = setInterval(() => {
       fetchAppointments();
     }, 4000);
@@ -146,10 +147,24 @@ export default function CmsPanelPage() {
         doctor: { ...content.doctor, [field]: value },
       });
     } else if (section === 'clinic') {
-      setContent({
-        ...content,
-        clinic: { ...content.clinic, [field]: value },
-      });
+      if (field.startsWith('schedule.')) {
+        const scheduleKey = field.split('.')[1] as 'weekdayHours' | 'saturdayHours' | 'sundayHours';
+        setContent({
+          ...content,
+          clinic: {
+            ...content.clinic,
+            schedule: {
+              ...content.clinic.schedule,
+              [scheduleKey]: value,
+            },
+          },
+        });
+      } else {
+        setContent({
+          ...content,
+          clinic: { ...content.clinic, [field]: value },
+        });
+      }
     } else if (section === 'hero') {
       setContent({
         ...content,
@@ -163,7 +178,7 @@ export default function CmsPanelPage() {
     }
   };
 
-  // 3. Publish Changes to /api/content (Synchronizes with Patient Page)
+  // 3. Publish Changes to /api/content
   const handlePublish = async (overrideContent?: DoctorContent) => {
     const payload = overrideContent || content;
     if (!payload) return;
@@ -185,7 +200,6 @@ export default function CmsPanelPage() {
         setPublishStatus('published');
         setLastPublishedAt(new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
 
-        // Broadcast to other tabs & reload iframe preview
         try {
           localStorage.setItem('doctorsite_sync_event', Date.now().toString());
         } catch (_) {}
@@ -248,7 +262,7 @@ export default function CmsPanelPage() {
         setNewAptData({
           patientName: '',
           phone: '',
-          service: 'General Consultation',
+          service: content?.services[0]?.title || 'General Health Checkup',
           preferredDate: new Date().toISOString().split('T')[0],
           shift: 'Morning',
           notes: 'Walk-in booking recorded by front desk',
@@ -271,7 +285,122 @@ export default function CmsPanelPage() {
     await handlePublish(updated);
   };
 
-  // 7. DPDP Patient Data Export
+  // Array item helpers (Services, FAQs, Reviews, Pillars)
+  const updateService = (idx: number, field: string, val: string) => {
+    if (!content) return;
+    const newServices = [...content.services];
+    newServices[idx] = { ...newServices[idx], [field]: val } as any;
+    setContent({ ...content, services: newServices });
+    setHasUnsavedChanges(true);
+  };
+
+  const addService = () => {
+    if (!content) return;
+    const newService = {
+      id: `srv-${Date.now()}`,
+      title: 'New Clinical Procedure',
+      description: 'Comprehensive evaluation and treatment protocol for adult and family health.',
+      icon: '🩺',
+    };
+    setContent({ ...content, services: [...content.services, newService] });
+    setHasUnsavedChanges(true);
+  };
+
+  const removeService = (idx: number) => {
+    if (!content) return;
+    const newServices = content.services.filter((_, i) => i !== idx);
+    setContent({ ...content, services: newServices });
+    setHasUnsavedChanges(true);
+  };
+
+  const updateReview = (idx: number, field: string, val: any) => {
+    if (!content) return;
+    const newReviews = [...content.reviews];
+    newReviews[idx] = { ...newReviews[idx], [field]: val } as any;
+    setContent({ ...content, reviews: newReviews });
+    setHasUnsavedChanges(true);
+  };
+
+  const addReview = () => {
+    if (!content) return;
+    const newReview = {
+      id: `rev-${Date.now()}`,
+      patientName: 'New Verified Patient',
+      location: 'Sector 18, Noida',
+      treatment: 'General Health Review',
+      rating: 5,
+      reviewText: 'Excellent medical consultation. The doctor took ample time to listen and explain everything clearly.',
+    };
+    setContent({ ...content, reviews: [...content.reviews, newReview] });
+    setHasUnsavedChanges(true);
+  };
+
+  const removeReview = (idx: number) => {
+    if (!content) return;
+    const newReviews = content.reviews.filter((_, i) => i !== idx);
+    setContent({ ...content, reviews: newReviews });
+    setHasUnsavedChanges(true);
+  };
+
+  const updateFaq = (idx: number, field: string, val: string) => {
+    if (!content) return;
+    const newFaqs = [...content.faqs];
+    newFaqs[idx] = { ...newFaqs[idx], [field]: val } as any;
+    setContent({ ...content, faqs: newFaqs });
+    setHasUnsavedChanges(true);
+  };
+
+  const addFaq = () => {
+    if (!content) return;
+    const newFaq = {
+      id: `faq-${Date.now()}`,
+      question: 'New Frequently Asked Question?',
+      answer: 'Clear, concise clinical response provided by the doctor or clinic desk.',
+    };
+    setContent({ ...content, faqs: [...content.faqs, newFaq] });
+    setHasUnsavedChanges(true);
+  };
+
+  const removeFaq = (idx: number) => {
+    if (!content) return;
+    const newFaqs = content.faqs.filter((_, i) => i !== idx);
+    setContent({ ...content, faqs: newFaqs });
+    setHasUnsavedChanges(true);
+  };
+
+  const updateAmenity = (idx: number, val: string) => {
+    if (!content) return;
+    const newAmenities = [...content.clinic.amenities];
+    newAmenities[idx] = val;
+    setContent({ ...content, clinic: { ...content.clinic, amenities: newAmenities } });
+    setHasUnsavedChanges(true);
+  };
+
+  const addAmenity = () => {
+    if (!content) return;
+    setContent({
+      ...content,
+      clinic: { ...content.clinic, amenities: [...content.clinic.amenities, 'New Clinic Facility'] },
+    });
+    setHasUnsavedChanges(true);
+  };
+
+  const removeAmenity = (idx: number) => {
+    if (!content) return;
+    const newAmenities = content.clinic.amenities.filter((_, i) => i !== idx);
+    setContent({ ...content, clinic: { ...content.clinic, amenities: newAmenities } });
+    setHasUnsavedChanges(true);
+  };
+
+  const updateWhyChooseUs = (idx: number, field: string, val: string) => {
+    if (!content) return;
+    const newPillars = [...content.whyChooseUs];
+    newPillars[idx] = { ...newPillars[idx], [field]: val } as any;
+    setContent({ ...content, whyChooseUs: newPillars });
+    setHasUnsavedChanges(true);
+  };
+
+  // DPDP Patient Data Export
   const downloadDPDPExport = () => {
     const exportData = {
       exportDate: new Date().toISOString(),
@@ -300,7 +429,6 @@ export default function CmsPanelPage() {
     URL.revokeObjectURL(url);
   };
 
-  // Filtered Appointments
   const filteredAppointments = appointments.filter((apt) => {
     const matchesFilter = aptFilter === 'all' ? true : apt.status === aptFilter;
     const matchesSearch =
@@ -348,7 +476,6 @@ export default function CmsPanelPage() {
           zIndex: 60,
         }}
       >
-        {/* Left: Branding & Clinic Context */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
           <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>
             🩺
@@ -382,10 +509,7 @@ export default function CmsPanelPage() {
           </div>
         </div>
 
-        {/* Right: Quick Links, Live Edge Status & Publish Action */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-          
-          {/* Quick link to Main Patient Landing Page (localhost:3000) */}
           <a
             href="/"
             target="_blank"
@@ -409,7 +533,6 @@ export default function CmsPanelPage() {
             <span>🌐</span> View Patient Site (localhost:3000) &rarr;
           </a>
 
-          {/* Master Publish Button */}
           <button
             onClick={() => handlePublish()}
             disabled={publishStatus === 'publishing'}
@@ -449,7 +572,6 @@ export default function CmsPanelPage() {
             {publishStatus === 'error' && '❌ Retry Publishing'}
           </button>
 
-          {/* User & Staff Badge */}
           <div style={{ borderLeft: '1px solid rgba(255,255,255,0.25)', paddingLeft: '12px', fontSize: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <div style={{ fontWeight: '700', color: '#FFFFFF' }}>Dr. Rajiv (Owner)</div>
             <div style={{ color: '#CCFBF1', fontSize: '11px' }}>Staff: Sunita (Front Desk)</div>
@@ -458,7 +580,7 @@ export default function CmsPanelPage() {
       </header>
 
       {/* ========================================================= */}
-      {/* 2. NAVIGATION BAR (FIXED & POLISHED)                      */}
+      {/* 2. NAVIGATION BAR (SEGMENTED PILL TABS)                   */}
       {/* ========================================================= */}
       <nav
         style={{
@@ -475,7 +597,6 @@ export default function CmsPanelPage() {
           zIndex: 50,
         }}
       >
-        {/* Navigation Tabs */}
         <div style={{ display: 'flex', gap: '4px', padding: '6px 0' }}>
           {[
             { id: 'dashboard', label: '📊 Dashboard', badge: null },
@@ -532,14 +653,10 @@ export default function CmsPanelPage() {
           })}
         </div>
 
-        {/* Status Pill on Far Right */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '12px', color: '#64748B', padding: '6px 0' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#F1F5F9', padding: '4px 10px', borderRadius: '6px' }}>
             <span>🎨 Theme:</span>
             <strong style={{ color: '#0F766E' }}>{content.theme}</strong>
-          </div>
-          <div style={{ display: 'none', gap: '4px' }}>
-            <span>Last Sync: {lastPublishedAt}</span>
           </div>
         </div>
       </nav>
@@ -548,7 +665,7 @@ export default function CmsPanelPage() {
       {hasUnsavedChanges && (
         <div style={{ background: '#FEF3C7', borderBottom: '1px solid #FCD34D', padding: '8px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', color: '#92400E' }}>
           <div>
-            ⚠️ <strong>You have unsaved changes!</strong> Edits in doctor info or theme will not appear on the patient site until published.
+            ⚠️ <strong>You have unsaved changes!</strong> Edits will not appear on the live patient site until published.
           </div>
           <button
             onClick={() => handlePublish()}
@@ -578,10 +695,7 @@ export default function CmsPanelPage() {
         {/* ========================================================= */}
         {activeTab === 'dashboard' && (
           <div>
-            {/* KPI Cards Row */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-              
-              {/* Total Appointments Card */}
               <div
                 onClick={() => setActiveTab('appointments')}
                 style={{ background: '#FFFFFF', padding: '20px', borderRadius: '10px', border: '1px solid #E2E8F0', cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}
@@ -595,7 +709,6 @@ export default function CmsPanelPage() {
                 </div>
               </div>
 
-              {/* Consultation Fee Card */}
               <div
                 onClick={() => setActiveTab('editor')}
                 style={{ background: '#FFFFFF', padding: '20px', borderRadius: '10px', border: '1px solid #E2E8F0', cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}
@@ -609,14 +722,12 @@ export default function CmsPanelPage() {
                 </div>
               </div>
 
-              {/* Core Web Vitals Card */}
               <div style={{ background: '#FFFFFF', padding: '20px', borderRadius: '10px', border: '1px solid #E2E8F0', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
                 <div style={{ color: '#64748B', fontSize: '13px', fontWeight: '500' }}>Core Web Vitals (4G Mobile)</div>
                 <div style={{ fontSize: '28px', fontWeight: '800', color: '#15803D', margin: '4px 0' }}>0.9s</div>
                 <div style={{ fontSize: '12px', color: '#15803D' }}>⚡ LCP Target &lt; 2.0s &bull; WCAG 2.2 AA Passing</div>
               </div>
 
-              {/* Active Theme Card */}
               <div
                 onClick={() => setActiveTab('themes')}
                 style={{ background: '#FFFFFF', padding: '20px', borderRadius: '10px', border: '1px solid #E2E8F0', cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}
@@ -631,60 +742,54 @@ export default function CmsPanelPage() {
               </div>
             </div>
 
-            {/* Front Desk Operating Guidelines Notice */}
             <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', padding: '16px 20px', borderRadius: '10px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
               <div>
                 <strong style={{ color: '#166534', fontSize: '14px' }}>Front-Desk Notice for Sunita:</strong>
                 <span style={{ color: '#14532D', marginLeft: '8px', fontSize: '13px' }}>
-                  {content.doctor.name} OPD shifts are Morning ({content.clinic.morningHours}) and Evening ({content.clinic.eveningHours}). Request-first model requires contacting patient via WhatsApp before confirming slots.
+                  {content.doctor.name} OPD shifts are: {content.clinic.schedule.weekdayHours} and {content.clinic.schedule.saturdayHours}. Request-first model requires contacting patient via WhatsApp before confirming slots.
                 </span>
               </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button
-                  onClick={() => setActiveTab('appointments')}
-                  style={{ background: '#166534', color: '#FFFFFF', border: 'none', padding: '8px 16px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}
-                >
-                  Go to Appointments Inbox &rarr;
-                </button>
-              </div>
+              <button
+                onClick={() => setActiveTab('appointments')}
+                style={{ background: '#166534', color: '#FFFFFF', border: 'none', padding: '8px 16px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}
+              >
+                Go to Appointments Inbox &rarr;
+              </button>
             </div>
 
-            {/* Quick Actions & Recent Appointments Preview */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
-              
-              {/* Quick Navigation Shortcuts */}
               <div style={{ background: '#FFFFFF', borderRadius: '10px', border: '1px solid #E2E8F0', padding: '20px' }}>
                 <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', color: '#0F172A' }}>⚡ Clinic Control Quick Actions</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <button
-                    onClick={() => setActiveTab('editor')}
+                    onClick={() => { setActiveTab('editor'); setEditorSection('clinic'); }}
                     style={{ textAlign: 'left', padding: '12px 14px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                   >
                     <div>
-                      <div style={{ fontWeight: '600', fontSize: '13px', color: '#0F172A' }}>✏️ Edit Doctor Profile &amp; Timings</div>
-                      <div style={{ fontSize: '12px', color: '#64748B' }}>Update name, consultation fee, bio, and OPD shifts</div>
+                      <div style={{ fontWeight: '600', fontSize: '13px', color: '#0F172A' }}>🏥 Edit Clinic Schedule, Map &amp; Amenities</div>
+                      <div style={{ fontSize: '12px', color: '#64748B' }}>Update timings, fee policy, address, and transit guidance</div>
                     </div>
                     <span style={{ color: '#94A3B8' }}>&rarr;</span>
                   </button>
 
                   <button
-                    onClick={() => setActiveTab('themes')}
+                    onClick={() => { setActiveTab('editor'); setEditorSection('services'); }}
                     style={{ textAlign: 'left', padding: '12px 14px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                   >
                     <div>
-                      <div style={{ fontWeight: '600', fontSize: '13px', color: '#0F172A' }}>🎨 Switch Website Theme Palette</div>
-                      <div style={{ fontSize: '12px', color: '#64748B' }}>Choose from Green Trust, Navy Gold, Rose Clinic...</div>
+                      <div style={{ fontWeight: '600', fontSize: '13px', color: '#0F172A' }}>🔬 Manage Clinical Services ({content.services.length})</div>
+                      <div style={{ fontSize: '12px', color: '#64748B' }}>Add or edit outpatient treatments and procedures</div>
                     </div>
                     <span style={{ color: '#94A3B8' }}>&rarr;</span>
                   </button>
 
                   <button
-                    onClick={() => setActiveTab('appointments')}
+                    onClick={() => { setActiveTab('editor'); setEditorSection('reviews'); }}
                     style={{ textAlign: 'left', padding: '12px 14px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                   >
                     <div>
-                      <div style={{ fontWeight: '600', fontSize: '13px', color: '#0F172A' }}>💬 Process Patient WhatsApp Confirmations</div>
-                      <div style={{ fontSize: '12px', color: '#64748B' }}>Verify shifts and confirm patient appointments</div>
+                      <div style={{ fontWeight: '600', fontSize: '13px', color: '#0F172A' }}>💬 Manage Patient Reviews ({content.reviews.length})</div>
+                      <div style={{ fontSize: '12px', color: '#64748B' }}>Add or update patient testimonials &amp; ratings</div>
                     </div>
                     <span style={{ color: '#94A3B8' }}>&rarr;</span>
                   </button>
@@ -704,7 +809,6 @@ export default function CmsPanelPage() {
                 </div>
               </div>
 
-              {/* Recent Patient Requests */}
               <div style={{ background: '#FFFFFF', borderRadius: '10px', border: '1px solid #E2E8F0', padding: '20px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                   <h3 style={{ margin: 0, fontSize: '16px', color: '#0F172A' }}>📋 Latest Patient Inquiries</h3>
@@ -776,8 +880,6 @@ export default function CmsPanelPage() {
         {/* ========================================================= */}
         {activeTab === 'appointments' && (
           <div style={{ background: '#FFFFFF', borderRadius: '12px', border: '1px solid #E2E8F0', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
-            
-            {/* Header & Controls */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
               <div>
                 <h2 style={{ margin: '0 0 6px 0', fontSize: '20px', color: '#0F172A' }}>
@@ -824,7 +926,6 @@ export default function CmsPanelPage() {
               </div>
             </div>
 
-            {/* Filter Pills & Search */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                 {[
@@ -955,7 +1056,6 @@ export default function CmsPanelPage() {
               </div>
             )}
 
-            {/* Appointments Table */}
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
                 <thead>
@@ -1016,9 +1116,7 @@ export default function CmsPanelPage() {
                                   ? '#E0F2FE'
                                   : apt.status === 'confirmed'
                                   ? '#DCFCE7'
-                                  : apt.status === 'completed'
-                                  ? '#F1F5F9'
-                                  : '#FEE2E2',
+                                  : '#F1F5F9',
                               color:
                                 apt.status === 'new'
                                   ? '#92400E'
@@ -1026,9 +1124,7 @@ export default function CmsPanelPage() {
                                   ? '#0369A1'
                                   : apt.status === 'confirmed'
                                   ? '#15803D'
-                                  : apt.status === 'completed'
-                                  ? '#475569'
-                                  : '#B91C1C',
+                                  : '#475569',
                             }}
                           >
                             {apt.status}
@@ -1097,7 +1193,7 @@ export default function CmsPanelPage() {
                   Interactive Block Editor &bull; Live Preview
                 </h2>
                 <p style={{ margin: 0, fontSize: '13px', color: '#64748B' }}>
-                  Edit clinical details, fees, and headline below. Click &quot;Publish to Live Site&quot; to push changes to the patient page immediately.
+                  Edit all sections (including Clinic Schedule, Google Map, Why Choose Us, 9 Services, Reviews, FAQs). Click &quot;Publish to Live Site&quot; to push changes immediately.
                 </p>
               </div>
 
@@ -1151,24 +1247,59 @@ export default function CmsPanelPage() {
               </div>
             </div>
 
+            {/* Sub-Navigation for Block Sections */}
+            <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '12px', marginBottom: '16px', borderBottom: '1px solid #E2E8F0' }}>
+              {[
+                { id: 'clinic', label: '🏥 Clinic, Timings & Map (Photo Match)' },
+                { id: 'hero', label: '📢 Hero & Announcements' },
+                { id: 'doctor', label: '👩‍⚕️ Doctor Credentials & Pricing' },
+                { id: 'pillars', label: '⭐ Why Choose Us (4 Pillars)' },
+                { id: 'services', label: `🔬 Clinical Services (${content.services.length})` },
+                { id: 'reviews', label: `💬 Patient Reviews (${content.reviews.length})` },
+                { id: 'faqs', label: `❓ FAQs (${content.faqs.length})` },
+              ].map((sec) => (
+                <button
+                  key={sec.id}
+                  onClick={() => setEditorSection(sec.id as EditorSection)}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    fontWeight: editorSection === sec.id ? '700' : '500',
+                    border: editorSection === sec.id ? '1px solid #0F766E' : '1px solid #CBD5E1',
+                    background: editorSection === sec.id ? '#0F766E' : '#FFFFFF',
+                    color: editorSection === sec.id ? '#FFFFFF' : '#334155',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {sec.label}
+                </button>
+              ))}
+            </div>
+
             {/* Split Grid: Left Editor Forms & Right Live Preview */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(380px, 460px) 1fr', gap: '24px', alignItems: 'flex-start' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(380px, 500px) 1fr', gap: '24px', alignItems: 'flex-start' }}>
               
               {/* Left Column: Form Fields */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 
-                {/* Save / Publish Banner inside Editor */}
+                {/* Save Banner */}
                 <div style={{ background: '#FFFFFF', padding: '16px', borderRadius: '10px', border: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <div style={{ fontWeight: '700', fontSize: '13px', color: '#0F172A' }}>Sync with Patient Page</div>
-                    <div style={{ fontSize: '11px', color: '#64748B' }}>Status: {hasUnsavedChanges ? 'Unsaved edits present' : 'Synced & Live'}</div>
+                    <div style={{ fontWeight: '700', fontSize: '13px', color: '#0F766E' }}>
+                      Editing: {editorSection.toUpperCase()}
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#64748B' }}>
+                      {hasUnsavedChanges ? '⚠️ Unsaved changes ready to publish' : '✓ All synced with live patient page'}
+                    </div>
                   </div>
                   <button
                     onClick={() => handlePublish()}
                     disabled={publishStatus === 'publishing'}
                     style={{
-                      background: hasUnsavedChanges ? '#0F766E' : '#F1F5F9',
-                      color: hasUnsavedChanges ? '#FFFFFF' : '#475569',
+                      background: hasUnsavedChanges ? '#D97706' : '#0F766E',
+                      color: '#FFFFFF',
                       border: 'none',
                       padding: '8px 16px',
                       borderRadius: '6px',
@@ -1181,178 +1312,588 @@ export default function CmsPanelPage() {
                   </button>
                 </div>
 
-                {/* Section 1: Doctor Credentials & Consultation Fee */}
-                <div style={{ background: '#FFFFFF', padding: '20px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
-                  <h3 style={{ margin: '0 0 14px 0', fontSize: '15px', color: '#0F766E', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span>👩‍⚕️</span> Doctor Profile &amp; Pricing
-                  </h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Doctor Name</label>
-                      <input
-                        type="text"
-                        value={content.doctor.name}
-                        onChange={(e) => handleContentChange('doctor', 'name', e.target.value)}
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
-                      />
-                    </div>
+                {/* =================================================== */}
+                {/* SECTION: CLINIC, SCHEDULE & MAP (USER UPLOAD MATCH) */}
+                {/* =================================================== */}
+                {editorSection === 'clinic' && (
+                  <div style={{ background: '#FFFFFF', padding: '20px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+                    <h3 style={{ margin: '0 0 14px 0', fontSize: '16px', color: '#0F766E', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span>🏥</span> Clinic Address, Consultation Schedule &amp; Map Facade
+                    </h3>
+                    <p style={{ fontSize: '12px', color: '#64748B', margin: '0 0 16px 0' }}>
+                      Matches the uploaded design card: tagline quote, consultation schedule table, fee policy, amenities, map title, and transit guidance.
+                    </p>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                       <div>
-                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Consultation Fee (₹)</label>
-                        <input
-                          type="number"
-                          value={content.doctor.consultationFee}
-                          onChange={(e) => handleContentChange('doctor', 'consultationFee', Number(e.target.value))}
-                          style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
-                        />
-                      </div>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Experience (Yrs)</label>
-                        <input
-                          type="number"
-                          value={content.doctor.experienceYears}
-                          onChange={(e) => handleContentChange('doctor', 'experienceYears', Number(e.target.value))}
-                          style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Degrees &amp; Qualifications</label>
-                      <input
-                        type="text"
-                        value={content.doctor.degree}
-                        onChange={(e) => handleContentChange('doctor', 'degree', e.target.value)}
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
-                      />
-                    </div>
-
-                    <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Specialty</label>
-                      <input
-                        type="text"
-                        value={content.doctor.specialty}
-                        onChange={(e) => handleContentChange('doctor', 'specialty', e.target.value)}
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
-                      />
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Registration Lic.</label>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '4px' }}>
+                          Tagline Quote (Shown on top of card in green italics)
+                        </label>
                         <input
                           type="text"
-                          value={content.doctor.registrationNumber}
-                          onChange={(e) => handleContentChange('doctor', 'registrationNumber', e.target.value)}
+                          value={content.clinic.taglineQuote || ''}
+                          onChange={(e) => handleContentChange('clinic', 'taglineQuote', e.target.value)}
+                          placeholder='"We Nurture Your Health, Every Day"'
                           style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
                         />
                       </div>
+
                       <div>
-                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Medical Council</label>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '4px' }}>Clinic Name</label>
                         <input
                           type="text"
-                          value={content.doctor.medicalCouncil}
-                          onChange={(e) => handleContentChange('doctor', 'medicalCouncil', e.target.value)}
+                          value={content.clinic.name}
+                          onChange={(e) => handleContentChange('clinic', 'name', e.target.value)}
                           style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
                         />
                       </div>
-                    </div>
 
-                    <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Doctor Bio</label>
-                      <textarea
-                        rows={3}
-                        value={content.doctor.bio}
-                        onChange={(e) => handleContentChange('doctor', 'bio', e.target.value)}
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
-                      />
+                      <div>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '4px' }}>📍 Full Clinic Street Address</label>
+                        <input
+                          type="text"
+                          value={content.clinic.street}
+                          onChange={(e) => handleContentChange('clinic', 'street', e.target.value)}
+                          style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
+                        />
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', marginBottom: '2px' }}>Area</label>
+                          <input
+                            type="text"
+                            value={content.clinic.area}
+                            onChange={(e) => handleContentChange('clinic', 'area', e.target.value)}
+                            style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', marginBottom: '2px' }}>City</label>
+                          <input
+                            type="text"
+                            value={content.clinic.city}
+                            onChange={(e) => handleContentChange('clinic', 'city', e.target.value)}
+                            style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', marginBottom: '2px' }}>Pincode</label>
+                          <input
+                            type="text"
+                            value={content.clinic.pincode}
+                            onChange={(e) => handleContentChange('clinic', 'pincode', e.target.value)}
+                            style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Consultation Schedule Table Inputs */}
+                      <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '8px', color: '#1E293B' }}>
+                          🕒 Consultation Schedule (Table Rows)
+                        </label>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          <div>
+                            <span style={{ fontSize: '11px', color: '#64748B' }}>Monday – Friday:</span>
+                            <input
+                              type="text"
+                              value={content.clinic.schedule?.weekdayHours || ''}
+                              onChange={(e) => handleContentChange('clinic', 'schedule.weekdayHours', e.target.value)}
+                              placeholder="Monday – Friday: 09:00 AM – 08:00 PM"
+                              style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                            />
+                          </div>
+                          <div>
+                            <span style={{ fontSize: '11px', color: '#64748B' }}>Saturday:</span>
+                            <input
+                              type="text"
+                              value={content.clinic.schedule?.saturdayHours || ''}
+                              onChange={(e) => handleContentChange('clinic', 'schedule.saturdayHours', e.target.value)}
+                              placeholder="Saturday: 09:00 AM – 04:00 PM"
+                              style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                            />
+                          </div>
+                          <div>
+                            <span style={{ fontSize: '11px', color: '#64748B' }}>Sunday:</span>
+                            <input
+                              type="text"
+                              value={content.clinic.schedule?.sundayHours || ''}
+                              onChange={(e) => handleContentChange('clinic', 'schedule.sundayHours', e.target.value)}
+                              placeholder="Sunday: Closed (Emergency On-Call)"
+                              style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Consultation Fee & Policy */}
+                      <div>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '4px' }}>
+                          💵 Consultation Fee &amp; Policy Text
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={content.clinic.feePolicy || ''}
+                          onChange={(e) => handleContentChange('clinic', 'feePolicy', e.target.value)}
+                          placeholder="₹600 regular consultation. Includes a 7-day complimentary follow-up visit for the same medical issue."
+                          style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
+                        />
+                      </div>
+
+                      {/* Amenities Editor */}
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                          <label style={{ fontSize: '12px', fontWeight: '700' }}>🏥 Clinic Amenities ({content.clinic.amenities.length})</label>
+                          <button
+                            type="button"
+                            onClick={addAmenity}
+                            style={{ background: '#F1F5F9', border: '1px solid #CBD5E1', borderRadius: '4px', padding: '2px 8px', fontSize: '11px', cursor: 'pointer' }}
+                          >
+                            + Add Facility
+                          </button>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          {content.clinic.amenities.map((amenity, idx) => (
+                            <div key={idx} style={{ display: 'flex', gap: '6px' }}>
+                              <input
+                                type="text"
+                                value={amenity}
+                                onChange={(e) => updateAmenity(idx, e.target.value)}
+                                style={{ flex: 1, padding: '6px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeAmenity(idx)}
+                                style={{ background: '#FEE2E2', border: 'none', color: '#B91C1C', borderRadius: '4px', padding: '0 8px', cursor: 'pointer' }}
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Google Map & Transit Guidance */}
+                      <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+                        <strong style={{ fontSize: '12px', display: 'block', marginBottom: '8px', color: '#1E293B' }}>
+                          📍 Google Map Facade &amp; Transit Guidance
+                        </strong>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          <div>
+                            <span style={{ fontSize: '11px', color: '#64748B' }}>Map Location Title:</span>
+                            <input
+                              type="text"
+                              value={content.clinic.mapLocationName || ''}
+                              onChange={(e) => handleContentChange('clinic', 'mapLocationName', e.target.value)}
+                              placeholder="HealthConsult Clinic Location"
+                              style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                            />
+                          </div>
+                          <div>
+                            <span style={{ fontSize: '11px', color: '#64748B' }}>Map Subtitle:</span>
+                            <input
+                              type="text"
+                              value={content.clinic.mapSubtitle || ''}
+                              onChange={(e) => handleContentChange('clinic', 'mapSubtitle', e.target.value)}
+                              placeholder="Sector 18 Central Market, Noida"
+                              style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                            />
+                          </div>
+                          <div>
+                            <span style={{ fontSize: '11px', color: '#64748B' }}>Transit &amp; Parking Guidance:</span>
+                            <textarea
+                              rows={2}
+                              value={content.clinic.transitGuidance || ''}
+                              onChange={(e) => handleContentChange('clinic', 'transitGuidance', e.target.value)}
+                              placeholder="Located directly in Central Market Sector 18, just 200 meters from Noida Sector 18 Metro Station..."
+                              style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
                     </div>
                   </div>
-                </div>
+                )}
 
-                {/* Section 2: Hero Headline & Announcement */}
-                <div style={{ background: '#FFFFFF', padding: '20px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
-                  <h3 style={{ margin: '0 0 14px 0', fontSize: '15px', color: '#0F766E', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span>📢</span> Hero Section &amp; Announcement
-                  </h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Top Announcement Bar</label>
-                      <input
-                        type="text"
-                        value={content.announcement}
-                        onChange={(e) => handleContentChange('announcement' as any, '', e.target.value)}
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
-                      />
-                    </div>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Hero Main Headline</label>
-                      <input
-                        type="text"
-                        value={content.hero.headline}
-                        onChange={(e) => handleContentChange('hero', 'headline', e.target.value)}
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
-                      />
-                    </div>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Hero Subtitle</label>
-                      <textarea
-                        rows={2}
-                        value={content.hero.subtitle}
-                        onChange={(e) => handleContentChange('hero', 'subtitle', e.target.value)}
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Section 3: Clinic Location & OPD Timings */}
-                <div style={{ background: '#FFFFFF', padding: '20px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
-                  <h3 style={{ margin: '0 0 14px 0', fontSize: '15px', color: '#0F766E', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span>🏥</span> Clinic Address &amp; OPD Shifts
-                  </h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Clinic Name</label>
-                      <input
-                        type="text"
-                        value={content.clinic.name}
-                        onChange={(e) => handleContentChange('clinic', 'name', e.target.value)}
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
-                      />
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                {/* =================================================== */}
+                {/* SECTION: HERO & HIGHLIGHTS                          */}
+                {/* =================================================== */}
+                {editorSection === 'hero' && (
+                  <div style={{ background: '#FFFFFF', padding: '20px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+                    <h3 style={{ margin: '0 0 14px 0', fontSize: '16px', color: '#0F766E' }}>
+                      📢 Hero Section, Metrics &amp; Top Announcements
+                    </h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                       <div>
-                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Morning OPD</label>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '4px' }}>Top Emergency &amp; Announcement Bar</label>
                         <input
                           type="text"
-                          value={content.clinic.morningHours}
-                          onChange={(e) => handleContentChange('clinic', 'morningHours', e.target.value)}
+                          value={content.announcement}
+                          onChange={(e) => handleContentChange('announcement' as any, '', e.target.value)}
                           style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
                         />
                       </div>
                       <div>
-                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Evening OPD</label>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '4px' }}>Hero Main Headline</label>
                         <input
                           type="text"
-                          value={content.clinic.eveningHours}
-                          onChange={(e) => handleContentChange('clinic', 'eveningHours', e.target.value)}
+                          value={content.hero.headline}
+                          onChange={(e) => handleContentChange('hero', 'headline', e.target.value)}
+                          style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '4px' }}>Hero Subtitle</label>
+                        <textarea
+                          rows={2}
+                          value={content.hero.subtitle}
+                          onChange={(e) => handleContentChange('hero', 'subtitle', e.target.value)}
+                          style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
+                        />
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', marginBottom: '2px' }}>Practice Stat</label>
+                          <input
+                            type="text"
+                            value={content.hero.statExperience}
+                            onChange={(e) => handleContentChange('hero', 'statExperience', e.target.value)}
+                            style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', marginBottom: '2px' }}>Patients Stat</label>
+                          <input
+                            type="text"
+                            value={content.hero.statConsultations}
+                            onChange={(e) => handleContentChange('hero', 'statConsultations', e.target.value)}
+                            style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', marginBottom: '2px' }}>Rating Stat</label>
+                          <input
+                            type="text"
+                            value={content.hero.statRating}
+                            onChange={(e) => handleContentChange('hero', 'statRating', e.target.value)}
+                            style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* =================================================== */}
+                {/* SECTION: DOCTOR CREDENTIALS                         */}
+                {/* =================================================== */}
+                {editorSection === 'doctor' && (
+                  <div style={{ background: '#FFFFFF', padding: '20px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+                    <h3 style={{ margin: '0 0 14px 0', fontSize: '16px', color: '#0F766E' }}>
+                      👩‍⚕️ Doctor Credentials, Pricing &amp; Bio
+                    </h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '4px' }}>Doctor Name</label>
+                        <input
+                          type="text"
+                          value={content.doctor.name}
+                          onChange={(e) => handleContentChange('doctor', 'name', e.target.value)}
+                          style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
+                        />
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '4px' }}>Consultation Fee (₹)</label>
+                          <input
+                            type="number"
+                            value={content.doctor.consultationFee}
+                            onChange={(e) => handleContentChange('doctor', 'consultationFee', Number(e.target.value))}
+                            style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '4px' }}>Languages Spoken</label>
+                          <input
+                            type="text"
+                            value={content.doctor.languages || 'English & Hindi'}
+                            onChange={(e) => handleContentChange('doctor', 'languages', e.target.value)}
+                            style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '4px' }}>Medical Degrees</label>
+                        <input
+                          type="text"
+                          value={content.doctor.degree}
+                          onChange={(e) => handleContentChange('doctor', 'degree', e.target.value)}
+                          style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '4px' }}>College / Alma Mater</label>
+                        <input
+                          type="text"
+                          value={content.doctor.college || ''}
+                          onChange={(e) => handleContentChange('doctor', 'college', e.target.value)}
+                          style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
+                        />
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '4px' }}>Registration Lic.</label>
+                          <input
+                            type="text"
+                            value={content.doctor.registrationNumber}
+                            onChange={(e) => handleContentChange('doctor', 'registrationNumber', e.target.value)}
+                            style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '4px' }}>Medical Council</label>
+                          <input
+                            type="text"
+                            value={content.doctor.medicalCouncil}
+                            onChange={(e) => handleContentChange('doctor', 'medicalCouncil', e.target.value)}
+                            style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '4px' }}>Doctor Bio</label>
+                        <textarea
+                          rows={3}
+                          value={content.doctor.bio}
+                          onChange={(e) => handleContentChange('doctor', 'bio', e.target.value)}
                           style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
                         />
                       </div>
                     </div>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Address</label>
-                      <input
-                        type="text"
-                        value={`${content.clinic.street}, ${content.clinic.area}`}
-                        onChange={(e) => handleContentChange('clinic', 'street', e.target.value)}
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
-                      />
+                  </div>
+                )}
+
+                {/* =================================================== */}
+                {/* SECTION: WHY CHOOSE US (4 TRUST PILLARS)            */}
+                {/* =================================================== */}
+                {editorSection === 'pillars' && (
+                  <div style={{ background: '#FFFFFF', padding: '20px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+                    <h3 style={{ margin: '0 0 14px 0', fontSize: '16px', color: '#0F766E' }}>
+                      ⭐ Why Choose Us &bull; Clinic Trust Pillars
+                    </h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {content.whyChooseUs?.map((pillar, idx) => (
+                        <div key={pillar.id} style={{ border: '1px solid #E2E8F0', padding: '12px', borderRadius: '8px', background: '#F8FAFC' }}>
+                          <div style={{ display: 'flex', gap: '8px', marginBottom: '6px' }}>
+                            <input
+                              type="text"
+                              value={pillar.icon}
+                              onChange={(e) => updateWhyChooseUs(idx, 'icon', e.target.value)}
+                              style={{ width: '48px', textAlign: 'center', fontSize: '18px', padding: '4px', borderRadius: '6px', border: '1px solid #CBD5E1' }}
+                            />
+                            <input
+                              type="text"
+                              value={pillar.title}
+                              onChange={(e) => updateWhyChooseUs(idx, 'title', e.target.value)}
+                              style={{ flex: 1, fontWeight: '700', padding: '6px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px' }}
+                            />
+                          </div>
+                          <textarea
+                            rows={2}
+                            value={pillar.description}
+                            onChange={(e) => updateWhyChooseUs(idx, 'description', e.target.value)}
+                            style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </div>
+                )}
+
+                {/* =================================================== */}
+                {/* SECTION: SERVICES (ALL 9 PROCEDURES)                */}
+                {/* =================================================== */}
+                {editorSection === 'services' && (
+                  <div style={{ background: '#FFFFFF', padding: '20px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                      <h3 style={{ margin: 0, fontSize: '16px', color: '#0F766E' }}>
+                        🔬 Clinical Services ({content.services.length})
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={addService}
+                        style={{ background: '#0F766E', color: '#FFF', border: 'none', padding: '5px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
+                      >
+                        + Add Service
+                      </button>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {content.services.map((srv, idx) => (
+                        <div key={srv.id} style={{ border: '1px solid #E2E8F0', padding: '12px', borderRadius: '8px', background: '#F8FAFC' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                            <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
+                              <input
+                                type="text"
+                                value={srv.icon}
+                                onChange={(e) => updateService(idx, 'icon', e.target.value)}
+                                style={{ width: '48px', textAlign: 'center', fontSize: '18px', padding: '4px', borderRadius: '6px', border: '1px solid #CBD5E1' }}
+                              />
+                              <input
+                                type="text"
+                                value={srv.title}
+                                onChange={(e) => updateService(idx, 'title', e.target.value)}
+                                style={{ flex: 1, fontWeight: '700', padding: '6px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px' }}
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeService(idx)}
+                              style={{ background: 'none', border: 'none', color: '#B91C1C', cursor: 'pointer', marginLeft: '8px', fontWeight: 'bold' }}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                          <textarea
+                            rows={2}
+                            value={srv.description}
+                            onChange={(e) => updateService(idx, 'description', e.target.value)}
+                            style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* =================================================== */}
+                {/* SECTION: PATIENT REVIEWS                            */}
+                {/* =================================================== */}
+                {editorSection === 'reviews' && (
+                  <div style={{ background: '#FFFFFF', padding: '20px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                      <h3 style={{ margin: 0, fontSize: '16px', color: '#0F766E' }}>
+                        💬 Patient Feedback &amp; Reviews ({content.reviews.length})
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={addReview}
+                        style={{ background: '#0F766E', color: '#FFF', border: 'none', padding: '5px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
+                      >
+                        + Add Review
+                      </button>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {content.reviews.map((rev, idx) => (
+                        <div key={rev.id} style={{ border: '1px solid #E2E8F0', padding: '12px', borderRadius: '8px', background: '#F8FAFC' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                            <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
+                              <input
+                                type="text"
+                                placeholder="Patient Name"
+                                value={rev.patientName}
+                                onChange={(e) => updateReview(idx, 'patientName', e.target.value)}
+                                style={{ width: '120px', fontWeight: '700', padding: '6px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                              />
+                              <input
+                                type="text"
+                                placeholder="Treatment Tag"
+                                value={rev.treatment}
+                                onChange={(e) => updateReview(idx, 'treatment', e.target.value)}
+                                style={{ flex: 1, padding: '6px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeReview(idx)}
+                              style={{ background: 'none', border: 'none', color: '#B91C1C', cursor: 'pointer', marginLeft: '8px', fontWeight: 'bold' }}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                          <div style={{ display: 'flex', gap: '8px', marginBottom: '6px' }}>
+                            <input
+                              type="text"
+                              placeholder="Location (e.g. Sector 18, Noida)"
+                              value={rev.location}
+                              onChange={(e) => updateReview(idx, 'location', e.target.value)}
+                              style={{ flex: 1, padding: '4px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '11px' }}
+                            />
+                            <select
+                              value={rev.rating}
+                              onChange={(e) => updateReview(idx, 'rating', Number(e.target.value))}
+                              style={{ padding: '4px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '11px' }}
+                            >
+                              <option value={5}>★★★★★ (5 Stars)</option>
+                              <option value={4}>★★★★☆ (4 Stars)</option>
+                            </select>
+                          </div>
+                          <textarea
+                            rows={2}
+                            placeholder="Review Text"
+                            value={rev.reviewText}
+                            onChange={(e) => updateReview(idx, 'reviewText', e.target.value)}
+                            style={{ width: '100%', padding: '6px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* =================================================== */}
+                {/* SECTION: FAQS                                       */}
+                {/* =================================================== */}
+                {editorSection === 'faqs' && (
+                  <div style={{ background: '#FFFFFF', padding: '20px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                      <h3 style={{ margin: 0, fontSize: '16px', color: '#0F766E' }}>
+                        ❓ Frequently Asked Questions ({content.faqs.length})
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={addFaq}
+                        style={{ background: '#0F766E', color: '#FFF', border: 'none', padding: '5px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
+                      >
+                        + Add FAQ
+                      </button>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {content.faqs.map((faq, idx) => (
+                        <div key={faq.id} style={{ border: '1px solid #E2E8F0', padding: '12px', borderRadius: '8px', background: '#F8FAFC' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                            <input
+                              type="text"
+                              value={faq.question}
+                              onChange={(e) => updateFaq(idx, 'question', e.target.value)}
+                              placeholder="Question"
+                              style={{ flex: 1, fontWeight: '700', padding: '6px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px' }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeFaq(idx)}
+                              style={{ background: 'none', border: 'none', color: '#B91C1C', cursor: 'pointer', marginLeft: '8px', fontWeight: 'bold' }}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                          <textarea
+                            rows={2}
+                            value={faq.answer}
+                            onChange={(e) => updateFaq(idx, 'answer', e.target.value)}
+                            placeholder="Answer"
+                            style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
               </div>
 
@@ -1368,11 +1909,10 @@ export default function CmsPanelPage() {
                   boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.06)',
                 }}
               >
-                {/* Preview Toolbar */}
                 <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', fontSize: '13px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1E293B', fontWeight: '600' }}>
                     <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', display: 'inline-block' }} />
-                    Live Preview (http://localhost:3000/)
+                    Live Patient Site Preview (http://localhost:3000/)
                   </div>
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <button
@@ -1393,12 +1933,11 @@ export default function CmsPanelPage() {
                   </div>
                 </div>
 
-                {/* Embedded Iframe Container */}
                 <div
                   style={{
                     width: deviceViewport,
                     maxWidth: '100%',
-                    height: '760px',
+                    height: '800px',
                     background: '#FFFFFF',
                     borderRadius: '10px',
                     boxShadow: '0 12px 30px rgba(0,0,0,0.15)',
@@ -1485,7 +2024,7 @@ export default function CmsPanelPage() {
         )}
 
         {/* ========================================================= */}
-        {/* TAB 5: 6 CLINICAL THEMES (SYNCED TO PATIENT PAGE)        */}
+        {/* TAB 5: 6 CLINICAL THEMES                                 */}
         {/* ========================================================= */}
         {activeTab === 'themes' && (
           <div>
@@ -1532,7 +2071,6 @@ export default function CmsPanelPage() {
                         )}
                       </div>
 
-                      {/* Color Swatches */}
                       <div style={{ display: 'flex', gap: '10px', marginBottom: '14px' }}>
                         <div style={{ flex: 1, height: '44px', borderRadius: '8px', background: theme.primary, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFF', fontSize: '11px', fontWeight: 'bold' }}>
                           Primary
@@ -1591,26 +2129,21 @@ export default function CmsPanelPage() {
             </p>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
-              
-              {/* Operational Shift Timings */}
               <div style={{ border: '1px solid #E2E8F0', padding: '20px', borderRadius: '10px' }}>
                 <h3 style={{ fontSize: '15px', color: '#1E293B', margin: '0 0 12px 0' }}>Clinic Operational Shifts</h3>
                 <p style={{ fontSize: '13px', color: '#475569', lineHeight: 1.6, margin: '0 0 16px 0' }}>
-                  <strong>Monday – Saturday:</strong><br />
-                  Morning: {content.clinic.morningHours}<br />
-                  Evening: {content.clinic.eveningHours}<br /><br />
-                  <strong>Sunday:</strong><br />
-                  {content.clinic.sundayHours}
+                  <strong>{content.clinic.schedule.weekdayHours}</strong><br />
+                  <strong>{content.clinic.schedule.saturdayHours}</strong><br />
+                  <strong>{content.clinic.schedule.sundayHours}</strong>
                 </p>
                 <button
-                  onClick={() => setActiveTab('editor')}
+                  onClick={() => { setActiveTab('editor'); setEditorSection('clinic'); }}
                   style={{ background: '#F1F5F9', border: '1px solid #CBD5E1', padding: '7px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}
                 >
                   ✏️ Edit Hours in Block Editor
                 </button>
               </div>
 
-              {/* 18% GST Compliance */}
               <div style={{ border: '1px solid #E2E8F0', padding: '20px', borderRadius: '10px' }}>
                 <h3 style={{ fontSize: '15px', color: '#1E293B', margin: '0 0 12px 0' }}>18% GST Compliance &amp; Billing</h3>
                 <div style={{ fontSize: '13px', color: '#475569', lineHeight: 1.6, marginBottom: '16px' }}>
@@ -1628,7 +2161,6 @@ export default function CmsPanelPage() {
                 </button>
               </div>
 
-              {/* DPDP Act 2023 Export */}
               <div style={{ border: '1px solid #E2E8F0', padding: '20px', borderRadius: '10px' }}>
                 <h3 style={{ fontSize: '15px', color: '#1E293B', margin: '0 0 12px 0' }}>DPDP Act 2023 Patient Privacy</h3>
                 <div style={{ fontSize: '13px', color: '#475569', lineHeight: 1.6, marginBottom: '16px' }}>
@@ -1644,14 +2176,12 @@ export default function CmsPanelPage() {
                   📥 Export Patient Consent &amp; Appointment Ledger
                 </button>
               </div>
-
             </div>
           </div>
         )}
 
       </main>
 
-      {/* Footer */}
       <footer style={{ borderTop: '1px solid #E2E8F0', background: '#FFFFFF', padding: '16px 24px', textAlign: 'center', fontSize: '12px', color: '#94A3B8' }}>
         DoctorSite Pro v0.2.0 &bull; Control Plane CMS &bull; DPDP Act 2023 &amp; Razorpay Compliant &bull; Connected to http://localhost:3000/
       </footer>
