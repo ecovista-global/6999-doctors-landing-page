@@ -1,0 +1,310 @@
+/* Google Fonts: Plus Jakarta Sans & Noto Sans Devanagari */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
+
+/* Base Reset & Box Sizing */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-hindi: 'Noto Sans Devanagari', var(--font-sans);
+  
+  /* Shared neutral scale */
+  --slate-50: #F8FAFC;
+  --slate-100: #F1F5F9;
+  --slate-200: #E2E8F0;
+  --slate-300: #CBD5E1;
+  --slate-400: #94A3B8;
+  --slate-500: #64748B;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1E293B;
+  --slate-900: #0F172A;
+
+  /* Elevation Shadows */
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.03);
+  --shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.03);
+
+  /* Radius Scale */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--slate-900);
+  background-color: #FFFFFF;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Accessible Skip Link */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 20px;
+  background: #0F766E;
+  color: #FFFFFF;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 14px;
+  z-index: 9999;
+  text-decoration: none;
+  transition: top 0.2s ease;
+}
+.skip-link:focus {
+  top: 16px;
+}
+
+/* Layout Utilities */
+.container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* Responsive Grid Helpers */
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 1024px) {
+  .grid-3, .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .grid-2, .grid-3, .grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mobile Sticky Bottom Action Bar: HIDDEN ON DESKTOP, VISIBLE ONLY ON MOBILE (< 768px) */
+.mobile-sticky-cta {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .mobile-sticky-cta {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #FFFFFF;
+    border-top: 1px solid var(--slate-200);
+    padding: 10px 16px;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    z-index: 999;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+  }
+}
+
+/* Smooth Focus Rings */
+input:focus, textarea:focus, select:focus, button:focus-visible, a:focus-visible {
+  outline: none;
+  border-color: #0F766E !important;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.18) !important;
+}
+
+/* ========================================================= */
+/* PREMIUM UX INTERACTIONS: BUTTON POP-UP, CARD ELEVATION    */
+/* ========================================================= */
+
+/* 1. Smooth Button Pop-Up & Tactile Press */
+button,
+a[role="button"],
+.ux-btn,
+a.btn,
+a[href^="tel:"],
+a[href^="https://wa.me"] {
+  position: relative;
+  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.2s ease,
+              border-color 0.2s ease,
+              filter 0.2s ease;
+  will-change: transform, box-shadow;
+}
+
+button:hover,
+a[role="button"]:hover,
+.ux-btn:hover,
+a.btn:hover,
+a[href^="tel:"]:hover,
+a[href^="https://wa.me"]:hover {
+  transform: translateY(-2.5px) scale(1.02);
+  box-shadow: 0 10px 22px -4px rgba(15, 118, 110, 0.25), 0 4px 8px -2px rgba(0, 0, 0, 0.06);
+  filter: brightness(1.03);
+}
+
+button:active,
+a[role="button"]:active,
+.ux-btn:active,
+a.btn:active,
+a[href^="tel:"]:active,
+a[href^="https://wa.me"]:active {
+  transform: translateY(0.5px) scale(0.985);
+  box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.12);
+  filter: brightness(0.98);
+}
+
+/* 2. Interactive Card Elevation & Micro-Interactions */
+.ux-card,
+.card-hover {
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.28s ease,
+              background-color 0.28s ease !important;
+  will-change: transform, box-shadow;
+}
+
+.ux-card:hover,
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px -8px rgba(15, 23, 42, 0.08), 0 6px 14px -2px rgba(15, 118, 110, 0.05) !important;
+  border-color: rgba(15, 118, 110, 0.35) !important;
+}
+
+/* 3. Icon Scaling within Interactive Cards */
+.ux-card:hover .ux-icon-box,
+.card-hover:hover .ux-icon-box {
+  transform: scale(1.12) rotate(2deg);
+  transition: transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.ux-icon-box {
+  transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+/* 4. Interactive Nav Links with Animated Underline */
+.nav-link {
+  position: relative;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background-color: currentColor;
+  border-radius: 2px;
+  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* 5. Live Pulsing Beacon / Radar Dot */
+.pulse-beacon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pulse-beacon::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: inherit;
+  opacity: 0.75;
+  animation: beacon-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes beacon-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  75%, 100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+/* 6. Form Inputs Fluid Transition */
+input, textarea, select {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+/* 7. Table Row Subtle Highlight */
+tbody tr {
+  transition: background-color 0.15s ease;
+}
+tbody tr:hover {
+  background-color: #F8FAFC;
+}
+
+/* 8. Reduced Motion Respect */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Custom Scrollbar for Previews */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+

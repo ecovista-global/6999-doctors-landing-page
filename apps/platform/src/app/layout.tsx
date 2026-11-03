@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import React from 'react';
+import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'EcoDigiTech Platform | Control Plane',
-  description: 'Digital presence automation factory for doctors and clinics.',
+  title: 'Dr. Maanvita Kumari | HealthConsult Family Clinic',
+  description: 'Compassionate internal medicine, diabetes care, and family health consultations by Dr. Maanvita Kumari (MBBS, MD) in Sector 18, Noida.',
 };
 
 export default function RootLayout({
@@ -13,7 +14,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body style={{ margin: 0, fontFamily: 'system-ui, sans-serif' }}>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body>
         {children}
       </body>
     </html>

@@ -3,6 +3,35 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { DoctorContent } from '@/lib/contentStore';
+import {
+  StethoscopeIcon,
+  PhoneIcon,
+  MessageCircleIcon,
+  CalendarIcon,
+  ClockIcon,
+  MapPinIcon,
+  BanknoteIcon,
+  BuildingIcon,
+  ShieldCheckIcon,
+  AwardIcon,
+  FileTextIcon,
+  ActivityIcon,
+  GlobeIcon,
+  PillIcon,
+  ZapIcon,
+  LockIcon,
+  MicroscopeIcon,
+  HeartPulseIcon,
+  ThermometerIcon,
+  UserCheckIcon,
+  SyringeIcon,
+  StarIcon,
+  CheckIcon,
+  CheckCircleIcon,
+  ChevronDownIcon,
+  ExternalLinkIcon,
+  LockIcon as KeyIcon,
+} from '@/components/Icons';
 
 const DEFAULT_PALETTE = { primary: '#0F766E', primaryDark: '#115E59', accent: '#047857', bg: '#F0FDF4', text: '#0F172A' };
 
@@ -14,6 +43,23 @@ const THEME_PALETTES: Record<string, { primary: string; primaryDark: string; acc
   'Slate Clean': { primary: '#334155', primaryDark: '#0F172A', accent: '#475569', bg: '#F8FAFC', text: '#0F172A' },
   'Rose Clinic': { primary: '#BE123C', primaryDark: '#881337', accent: '#E11D48', bg: '#FFF1F2', text: '#1F2937' },
 };
+
+// SVG icon selector for services and trust pillars
+function renderServiceIcon(iconName: string, color: string) {
+  switch (iconName) {
+    case 'heartPulse': return <HeartPulseIcon size={28} color={color} />;
+    case 'thermometer': return <ThermometerIcon size={28} color={color} />;
+    case 'pill': return <PillIcon size={28} color={color} />;
+    case 'userCheck': return <UserCheckIcon size={28} color={color} />;
+    case 'syringe': return <SyringeIcon size={28} color={color} />;
+    case 'activity': return <ActivityIcon size={28} color={color} />;
+    case 'microscope': return <MicroscopeIcon size={28} color={color} />;
+    case 'shield': return <ShieldCheckIcon size={28} color={color} />;
+    case 'clock': return <ClockIcon size={28} color={color} />;
+    case 'message': return <MessageCircleIcon size={28} color={color} />;
+    default: return <StethoscopeIcon size={28} color={color} />;
+  }
+}
 
 export default function PatientLandingPage() {
   const [content, setContent] = useState<DoctorContent | null>(null);
@@ -50,7 +96,6 @@ export default function PatientLandingPage() {
 
   useEffect(() => {
     fetchContent();
-    // Poll every 4 seconds to reflect CMS updates live without manual page refresh
     const interval = setInterval(fetchContent, 4000);
 
     const handleStorageEvent = (e: StorageEvent) => {
@@ -107,7 +152,7 @@ export default function PatientLandingPage() {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F8FAFC' }}>
         <div style={{ textAlign: 'center', color: '#0F766E' }}>
-          <div style={{ fontSize: '42px', marginBottom: '14px' }}>🩺</div>
+          <StethoscopeIcon size={48} color="#0F766E" style={{ marginBottom: '14px' }} />
           <div style={{ fontSize: '20px', fontWeight: 'bold' }}>Loading Clinical Presence...</div>
           <div style={{ fontSize: '13px', color: '#64748B', marginTop: '6px' }}>Connecting to DoctorSite Pro Control Plane...</div>
         </div>
@@ -118,10 +163,10 @@ export default function PatientLandingPage() {
   const theme = (content?.theme && THEME_PALETTES[content.theme]) ? THEME_PALETTES[content.theme]! : DEFAULT_PALETTE;
 
   return (
-    <div style={{ minHeight: '100vh', background: '#FFFFFF', color: theme.text, fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+    <div style={{ minHeight: '100vh', background: '#FFFFFF', color: theme.text, fontFamily: 'var(--font-sans)' }}>
       
       {/* ========================================================= */}
-      {/* 1. TOP ANNOUNCEMENT & CMS SHORTCUT BAR                    */}
+      {/* 1. TOP LIVE EDGE SYNC & CMS SHORTCUT BAR                  */}
       {/* ========================================================= */}
       <div
         style={{
@@ -152,19 +197,21 @@ export default function PatientLandingPage() {
             textDecoration: 'none',
             fontWeight: '700',
             fontSize: '12px',
-            display: 'flex',
+            display: 'inline-flex',
             alignItems: 'center',
             gap: '6px',
             boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
           }}
         >
-          <span>🔐</span> Staff CMS Control Panel (Edit All Content &amp; Manage Appointments) &rarr;
+          <KeyIcon size={14} color="#FFFFFF" />
+          <span>Staff CMS Control Panel (Edit All Content &amp; Manage Appointments) &rarr;</span>
         </Link>
       </div>
 
       {/* Emergency Notice & Announcement Strip */}
       <div style={{ background: theme.bg, borderBottom: `1px solid ${theme.primary}22`, padding: '10px 24px', textAlign: 'center', fontSize: '13px', color: theme.primaryDark, fontWeight: '600' }}>
-        🛡️ {content.announcement} &bull; Emergency Direct Hotline: <strong>{content.doctor.phone}</strong>
+        <ShieldCheckIcon size={15} color={theme.primaryDark} style={{ verticalAlign: 'middle', marginRight: '6px' }} />
+        {content.announcement} &bull; Emergency Direct Hotline: <strong>{content.doctor.phone}</strong>
       </div>
 
       {/* ========================================================= */}
@@ -185,8 +232,8 @@ export default function PatientLandingPage() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: theme.primary, color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px' }}>
-            🩺
+          <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: theme.primary, color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <StethoscopeIcon size={22} color="#FFFFFF" />
           </div>
           <div>
             <div style={{ fontWeight: '800', fontSize: '18px', color: theme.primary }}>{content.clinic.name}</div>
@@ -197,15 +244,16 @@ export default function PatientLandingPage() {
         </div>
 
         <nav style={{ display: 'flex', gap: '20px', alignItems: 'center', fontSize: '14px', fontWeight: '600' }}>
-          <a href="#about" style={{ textDecoration: 'none', color: '#334155' }}>Credentials</a>
-          <a href="#features" style={{ textDecoration: 'none', color: '#334155' }}>Why Choose Us</a>
-          <a href="#services" style={{ textDecoration: 'none', color: '#334155' }}>Services</a>
-          <a href="#clinic" style={{ textDecoration: 'none', color: '#334155' }}>Clinic &amp; Timings</a>
-          <a href="#reviews" style={{ textDecoration: 'none', color: '#334155' }}>Reviews</a>
-          <a href="#faq" style={{ textDecoration: 'none', color: '#334155' }}>FAQ</a>
-          <a href="#booking" style={{ textDecoration: 'none', color: theme.primary, fontWeight: '700' }}>Book Slot</a>
+          <a href="#about" className="nav-link" style={{ color: '#334155' }}>Credentials</a>
+          <a href="#features" className="nav-link" style={{ color: '#334155' }}>Why Choose Us</a>
+          <a href="#services" className="nav-link" style={{ color: '#334155' }}>Services</a>
+          <a href="#clinic" className="nav-link" style={{ color: '#334155' }}>Clinic &amp; Timings</a>
+          <a href="#reviews" className="nav-link" style={{ color: '#334155' }}>Reviews</a>
+          <a href="#faq" className="nav-link" style={{ color: '#334155' }}>FAQ</a>
+          <a href="#booking" className="nav-link" style={{ color: theme.primary, fontWeight: '700' }}>Book Slot</a>
           <a
             href={`tel:${content.doctor.phone.replace(/[^0-9+]/g, '')}`}
+            className="ux-btn"
             style={{
               background: theme.primary,
               color: '#FFFFFF',
@@ -213,12 +261,13 @@ export default function PatientLandingPage() {
               borderRadius: '8px',
               textDecoration: 'none',
               fontWeight: '700',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
             }}
           >
-            📞 Call Clinic
+            <PhoneIcon size={16} color="#FFFFFF" />
+            <span>Call Clinic</span>
           </a>
         </nav>
       </header>
@@ -230,7 +279,8 @@ export default function PatientLandingPage() {
         <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '48px', alignItems: 'center' }}>
           <div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: `${theme.primary}15`, color: theme.primary, padding: '4px 12px', borderRadius: '999px', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '16px' }}>
-              <span>✓</span> DMC Registered &bull; {content.doctor.registrationNumber} &bull; {content.hero.statExperience} Practice
+              <CheckCircleIcon size={14} color={theme.primary} />
+              <span>DMC Registered &bull; {content.doctor.registrationNumber} &bull; {content.hero.statExperience} Practice</span>
             </div>
             
             <h1 style={{ fontSize: '42px', lineHeight: 1.2, fontWeight: '800', color: theme.primaryDark, margin: '0 0 16px 0' }}>
@@ -245,6 +295,7 @@ export default function PatientLandingPage() {
             <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', marginBottom: '32px' }}>
               <a
                 href={`tel:${content.doctor.phone.replace(/[^0-9+]/g, '')}`}
+                className="ux-btn"
                 style={{
                   background: theme.primary,
                   color: '#FFFFFF',
@@ -253,19 +304,21 @@ export default function PatientLandingPage() {
                   textDecoration: 'none',
                   fontWeight: 'bold',
                   fontSize: '15px',
-                  display: 'flex',
+                  display: 'inline-flex',
                   alignItems: 'center',
                   gap: '8px',
                   boxShadow: `0 4px 14px ${theme.primary}40`,
                 }}
               >
-                📞 Call Dr. {content.doctor.name.split(' ')[1] || 'Doctor'}
+                <PhoneIcon size={18} color="#FFFFFF" />
+                <span>Call Dr. {content.doctor.name.split(' ')[1] || 'Doctor'}</span>
               </a>
 
               <a
                 href={`https://wa.me/${content.doctor.whatsappNumber.replace(/[^0-9]/g, '')}?text=Hello%20${encodeURIComponent(content.doctor.name)},%20I%20would%20like%20to%20consult%20you.`}
                 target="_blank"
                 rel="noreferrer"
+                className="ux-btn"
                 style={{
                   background: '#FFFFFF',
                   color: '#047857',
@@ -275,16 +328,18 @@ export default function PatientLandingPage() {
                   textDecoration: 'none',
                   fontWeight: 'bold',
                   fontSize: '15px',
-                  display: 'flex',
+                  display: 'inline-flex',
                   alignItems: 'center',
                   gap: '8px',
                 }}
               >
-                💬 Book on WhatsApp
+                <MessageCircleIcon size={18} color="#047857" />
+                <span>Book on WhatsApp</span>
               </a>
 
               <a
                 href="#booking"
+                className="ux-btn"
                 style={{
                   background: '#F1F5F9',
                   color: '#334155',
@@ -294,12 +349,13 @@ export default function PatientLandingPage() {
                   textDecoration: 'none',
                   fontWeight: '600',
                   fontSize: '14px',
-                  display: 'flex',
+                  display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
                 }}
               >
-                📅 Request Slot
+                <CalendarIcon size={16} color="#334155" />
+                <span>Request Slot</span>
               </a>
             </div>
 
@@ -320,27 +376,33 @@ export default function PatientLandingPage() {
             </div>
 
             {/* Poster-Style Contact Highlights Strip */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', background: '#FFFFFF', padding: '12px 16px', borderRadius: '10px', border: '1px solid #E2E8F0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', background: '#FFFFFF', padding: '14px 18px', borderRadius: '10px', border: '1px solid #E2E8F0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '20px' }}>📞</span>
+                <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: `${theme.primary}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <PhoneIcon size={18} color={theme.primary} />
+                </div>
                 <div>
                   <div style={{ fontSize: '11px', color: '#64748B' }}>Call directly:</div>
                   <strong style={{ fontSize: '13px', color: theme.primaryDark }}>{content.doctor.phone}</strong>
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '20px' }}>📍</span>
+                <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: `${theme.primary}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <MapPinIcon size={18} color={theme.primary} />
+                </div>
                 <div>
                   <div style={{ fontSize: '11px', color: '#64748B' }}>Clinic Location:</div>
                   <strong style={{ fontSize: '13px', color: theme.primaryDark }}>{content.clinic.area}, {content.clinic.city}</strong>
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '20px' }}>🕒</span>
+                <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: `${theme.primary}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ClockIcon size={18} color={theme.primary} />
+                </div>
                 <div>
-                  <div style={{ fontSize: '11px', color: '#64748B' }}>Consultation Schedule:</div>
+                  <div style={{ fontSize: '11px', color: '#64748B' }}>Schedule:</div>
                   <strong style={{ fontSize: '13px', color: theme.primaryDark }}>
-                    {content.clinic.schedule?.weekdayHours?.split(':')[1]?.trim() || '9 AM – 8 PM'}
+                    {content.clinic.schedule?.weekdayHours?.replace('Monday – Friday:', '').trim() || '09:00 AM – 08:00 PM'}
                   </strong>
                 </div>
               </div>
@@ -349,13 +411,16 @@ export default function PatientLandingPage() {
 
           {/* Doctor Portrait & Profile Card */}
           <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <div style={{ width: '100%', maxWidth: '440px', background: '#FFFFFF', borderRadius: '16px', overflow: 'hidden', border: '1px solid #E2E8F0', boxShadow: '0 20px 40px rgba(0,0,0,0.06)' }}>
+            <div className="ux-card" style={{ width: '100%', maxWidth: '440px', background: '#FFFFFF', borderRadius: '16px', overflow: 'hidden', border: '1px solid #E2E8F0', boxShadow: '0 20px 40px rgba(0,0,0,0.06)' }}>
               <div style={{ height: '340px', background: `linear-gradient(135deg, ${theme.primary} 0%, ${theme.primaryDark} 100%)`, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ fontSize: '120px' }}>👩‍⚕️</div>
-                <div style={{ position: 'absolute', top: '16px', right: '16px', background: '#047857', color: '#FFFFFF', padding: '4px 10px', borderRadius: '999px', fontSize: '11px', fontWeight: 'bold' }}>
-                  ● In-Clinic Today
+                <div className="ux-icon-box" style={{ width: '180px', height: '180px', borderRadius: '50%', background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <StethoscopeIcon size={96} color="#FFFFFF" strokeWidth={1.5} />
                 </div>
-                <div style={{ position: 'absolute', bottom: '16px', left: '16px', right: '16px', background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(8px)', padding: '12px 16px', borderRadius: '10px' }}>
+                <div style={{ position: 'absolute', top: '16px', right: '16px', background: '#047857', color: '#FFFFFF', padding: '5px 12px', borderRadius: '999px', fontSize: '11px', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <span className="pulse-beacon" style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#34D399', display: 'inline-block' }} />
+                  <span>In-Clinic Today</span>
+                </div>
+                <div style={{ position: 'absolute', bottom: '16px', left: '16px', right: '16px', background: 'rgba(255,255,255,0.96)', backdropFilter: 'blur(8px)', padding: '12px 16px', borderRadius: '10px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
                   <div style={{ fontWeight: 'bold', color: '#0F172A', fontSize: '16px' }}>{content.doctor.name}</div>
                   <div style={{ color: theme.primary, fontSize: '12px', fontWeight: '700' }}>{content.doctor.degree}</div>
                   <div style={{ fontSize: '11px', color: '#64748B' }}>{content.doctor.specialty}</div>
@@ -396,29 +461,37 @@ export default function PatientLandingPage() {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '32px' }}>
-          <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '20px' }}>
-            <div style={{ fontSize: '32px', marginBottom: '10px' }}>🎓</div>
+          <div className="ux-card" style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+            <div className="ux-icon-box" style={{ width: '48px', height: '48px', borderRadius: '10px', background: `${theme.primary}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '14px' }}>
+              <AwardIcon size={26} color={theme.primary} />
+            </div>
             <h3 style={{ fontSize: '16px', fontWeight: 'bold', margin: '0 0 6px 0', color: theme.primaryDark }}>Medical Degrees</h3>
             <p style={{ margin: '0 0 4px 0', fontWeight: '600', color: '#1E293B' }}>{content.doctor.degree}</p>
             <span style={{ fontSize: '12px', color: '#64748B' }}>{content.doctor.college}</span>
           </div>
 
-          <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '20px' }}>
-            <div style={{ fontSize: '32px', marginBottom: '10px' }}>📜</div>
+          <div className="ux-card" style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+            <div className="ux-icon-box" style={{ width: '48px', height: '48px', borderRadius: '10px', background: `${theme.primary}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '14px' }}>
+              <FileTextIcon size={26} color={theme.primary} />
+            </div>
             <h3 style={{ fontSize: '16px', fontWeight: 'bold', margin: '0 0 6px 0', color: theme.primaryDark }}>Council Registration</h3>
             <p style={{ margin: '0 0 4px 0', fontWeight: '600', color: '#1E293B' }}>Reg. No: {content.doctor.registrationNumber}</p>
             <span style={{ fontSize: '12px', color: '#64748B' }}>{content.doctor.medicalCouncil}</span>
           </div>
 
-          <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '20px' }}>
-            <div style={{ fontSize: '32px', marginBottom: '10px' }}>🩺</div>
+          <div className="ux-card" style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+            <div className="ux-icon-box" style={{ width: '48px', height: '48px', borderRadius: '10px', background: `${theme.primary}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '14px' }}>
+              <ActivityIcon size={26} color={theme.primary} />
+            </div>
             <h3 style={{ fontSize: '16px', fontWeight: 'bold', margin: '0 0 6px 0', color: theme.primaryDark }}>Clinical Experience</h3>
             <p style={{ margin: '0 0 4px 0', fontWeight: '600', color: '#1E293B' }}>{content.doctor.experienceYears}+ Years Active Practice</p>
             <span style={{ fontSize: '12px', color: '#64748B' }}>Over {content.hero.statConsultations} Adult &amp; Family Consultations</span>
           </div>
 
-          <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '20px' }}>
-            <div style={{ fontSize: '32px', marginBottom: '10px' }}>💬</div>
+          <div className="ux-card" style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+            <div className="ux-icon-box" style={{ width: '48px', height: '48px', borderRadius: '10px', background: `${theme.primary}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '14px' }}>
+              <GlobeIcon size={26} color={theme.primary} />
+            </div>
             <h3 style={{ fontSize: '16px', fontWeight: 'bold', margin: '0 0 6px 0', color: theme.primaryDark }}>Languages Spoken</h3>
             <p style={{ margin: '0 0 4px 0', fontWeight: '600', color: '#1E293B' }}>{content.doctor.languages}</p>
             <span style={{ fontSize: '12px', color: '#64748B' }}>Fluent consultation in patient&apos;s native language</span>
@@ -427,15 +500,42 @@ export default function PatientLandingPage() {
 
         {/* Accreditations Banner */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', background: '#F8FAFC', padding: '20px', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
-          {content.accreditations?.map((acc) => (
-            <div key={acc.id} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontSize: '24px' }}>{acc.icon}</span>
-              <div>
-                <strong style={{ fontSize: '13px', display: 'block', color: '#0F172A' }}>{acc.title}</strong>
-                <span style={{ fontSize: '12px', color: '#64748B' }}>{acc.description}</span>
-              </div>
+          <div className="ux-card" style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#FFFFFF', padding: '12px 16px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+            <div className="ux-icon-box">
+              <ShieldCheckIcon size={26} color={theme.primary} />
             </div>
-          ))}
+            <div>
+              <strong style={{ fontSize: '13px', display: 'block', color: '#0F172A' }}>NABH Safety Standards</strong>
+              <span style={{ fontSize: '12px', color: '#64748B' }}>Sterilized clinic environment &amp; protocols</span>
+            </div>
+          </div>
+          <div className="ux-card" style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#FFFFFF', padding: '12px 16px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+            <div className="ux-icon-box">
+              <PillIcon size={26} color={theme.primary} />
+            </div>
+            <div>
+              <strong style={{ fontSize: '13px', display: 'block', color: '#0F172A' }}>Transparent Consultation</strong>
+              <span style={{ fontSize: '12px', color: '#64748B' }}>Complimentary 7-day follow-up included</span>
+            </div>
+          </div>
+          <div className="ux-card" style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#FFFFFF', padding: '12px 16px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+            <div className="ux-icon-box">
+              <ZapIcon size={26} color={theme.primary} />
+            </div>
+            <div>
+              <strong style={{ fontSize: '13px', display: 'block', color: '#0F172A' }}>Digital WhatsApp Reports</strong>
+              <span style={{ fontSize: '12px', color: '#64748B' }}>Instant prescription &amp; diagnostic delivery</span>
+            </div>
+          </div>
+          <div className="ux-card" style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#FFFFFF', padding: '12px 16px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+            <div className="ux-icon-box">
+              <LockIcon size={26} color={theme.primary} />
+            </div>
+            <div>
+              <strong style={{ fontSize: '13px', display: 'block', color: '#0F172A' }}>DPDP Act 2023 Compliant</strong>
+              <span style={{ fontSize: '12px', color: '#64748B' }}>100% encrypted &amp; private health records</span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -456,8 +556,10 @@ export default function PatientLandingPage() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
             {content.whyChooseUs?.map((pillar) => (
-              <div key={pillar.id} style={{ background: '#FFFFFF', padding: '28px', borderRadius: '12px', border: '1px solid #E2E8F0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-                <div style={{ fontSize: '36px', marginBottom: '14px' }}>{pillar.icon}</div>
+              <div key={pillar.id} className="ux-card" style={{ background: '#FFFFFF', padding: '28px', borderRadius: '12px', border: '1px solid #E2E8F0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                <div className="ux-icon-box" style={{ width: '52px', height: '52px', borderRadius: '12px', background: `${theme.primary}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+                  {renderServiceIcon(pillar.icon, theme.primary)}
+                </div>
                 <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: theme.primaryDark, margin: '0 0 10px 0' }}>{pillar.title}</h3>
                 <p style={{ fontSize: '14px', lineHeight: 1.6, color: '#64748B', margin: 0 }}>{pillar.description}</p>
               </div>
@@ -482,9 +584,11 @@ export default function PatientLandingPage() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
           {content.services.map((srv) => (
-            <div key={srv.id} style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 2px 6px rgba(0,0,0,0.02)' }}>
+            <div key={srv.id} className="ux-card" style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 2px 6px rgba(0,0,0,0.02)' }}>
               <div>
-                <div style={{ fontSize: '36px', marginBottom: '12px' }}>{srv.icon}</div>
+                <div className="ux-icon-box" style={{ width: '48px', height: '48px', borderRadius: '10px', background: `${theme.primary}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '14px' }}>
+                  {renderServiceIcon(srv.icon, theme.primary)}
+                </div>
                 <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: theme.primaryDark, margin: '0 0 8px 0' }}>{srv.title}</h3>
                 <p style={{ fontSize: '14px', lineHeight: 1.6, color: '#64748B', margin: '0 0 16px 0' }}>{srv.description}</p>
               </div>
@@ -492,7 +596,8 @@ export default function PatientLandingPage() {
                 href="#booking"
                 style={{ color: theme.primary, textDecoration: 'none', fontWeight: '700', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
               >
-                Consult Doctor &rarr;
+                <span>Consult Doctor</span>
+                <span>&rarr;</span>
               </a>
             </div>
           ))}
@@ -518,7 +623,7 @@ export default function PatientLandingPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '32px', alignItems: 'stretch' }}>
             
             {/* Left Card: Exactly matching user uploaded image */}
-            <div style={{ background: '#FFFFFF', borderRadius: '16px', padding: '32px', border: '1px solid #E2E8F0', boxShadow: '0 4px 16px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div className="ux-card" style={{ background: '#FFFFFF', borderRadius: '16px', padding: '32px', border: '1px solid #E2E8F0', boxShadow: '0 4px 16px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', gap: '24px' }}>
               
               {/* Tagline Quote */}
               <div style={{ color: '#16A34A', fontStyle: 'italic', fontWeight: '700', fontSize: '17px' }}>
@@ -527,7 +632,9 @@ export default function PatientLandingPage() {
 
               {/* Clinic Address */}
               <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-                <span style={{ fontSize: '24px', lineHeight: 1 }}>📍</span>
+                <div className="ux-icon-box" style={{ width: '36px', height: '36px', borderRadius: '8px', background: `${theme.primary}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <MapPinIcon size={20} color={theme.primary} />
+                </div>
                 <div>
                   <strong style={{ display: 'block', fontSize: '15px', color: '#0F172A', marginBottom: '4px' }}>Clinic Address:</strong>
                   <p style={{ margin: 0, fontSize: '14px', lineHeight: 1.6, color: '#475569' }}>
@@ -538,7 +645,9 @@ export default function PatientLandingPage() {
 
               {/* Consultation Schedule Table */}
               <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-                <span style={{ fontSize: '24px', lineHeight: 1 }}>🕒</span>
+                <div className="ux-icon-box" style={{ width: '36px', height: '36px', borderRadius: '8px', background: `${theme.primary}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <ClockIcon size={20} color={theme.primary} />
+                </div>
                 <div style={{ width: '100%' }}>
                   <strong style={{ display: 'block', fontSize: '15px', color: '#0F172A', marginBottom: '8px' }}>Consultation Schedule:</strong>
                   <table style={{ width: '100%', fontSize: '14px', borderCollapse: 'collapse' }}>
@@ -568,7 +677,9 @@ export default function PatientLandingPage() {
 
               {/* Consultation Fee & Policy */}
               <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-                <span style={{ fontSize: '24px', lineHeight: 1 }}>💵</span>
+                <div className="ux-icon-box" style={{ width: '36px', height: '36px', borderRadius: '8px', background: `${theme.primary}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <BanknoteIcon size={20} color={theme.primary} />
+                </div>
                 <div>
                   <strong style={{ display: 'block', fontSize: '15px', color: '#0F172A', marginBottom: '4px' }}>Consultation Fee &amp; Policy:</strong>
                   <p style={{ margin: 0, fontSize: '14px', lineHeight: 1.6, color: '#475569' }}>
@@ -579,13 +690,16 @@ export default function PatientLandingPage() {
 
               {/* Clinic Amenities */}
               <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-                <span style={{ fontSize: '24px', lineHeight: 1 }}>🏥</span>
+                <div className="ux-icon-box" style={{ width: '36px', height: '36px', borderRadius: '8px', background: `${theme.primary}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <BuildingIcon size={20} color={theme.primary} />
+                </div>
                 <div>
                   <strong style={{ display: 'block', fontSize: '15px', color: '#0F172A', marginBottom: '8px' }}>Clinic Amenities:</strong>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                     {content.clinic.amenities.map((amenity, idx) => (
-                      <span key={idx} style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '5px 12px', borderRadius: '6px', fontSize: '12px', color: '#334155' }}>
-                        ✓ {amenity}
+                      <span key={idx} style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '5px 12px', borderRadius: '6px', fontSize: '12px', color: '#334155', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <CheckIcon size={12} color="#16A34A" />
+                        <span>{amenity}</span>
                       </span>
                     ))}
                   </div>
@@ -599,6 +713,7 @@ export default function PatientLandingPage() {
               
               {/* Map Facade Box */}
               <div
+                className="ux-card"
                 style={{
                   flex: 1,
                   background: '#E2E8F0',
@@ -614,7 +729,9 @@ export default function PatientLandingPage() {
               >
                 {!showInteractiveMap ? (
                   <div style={{ textAlign: 'center', padding: '32px' }}>
-                    <div style={{ fontSize: '48px', marginBottom: '12px' }}>📍</div>
+                    <div className="ux-icon-box" style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#FFFFFF', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', marginBottom: '12px' }}>
+                      <MapPinIcon size={28} color="#DC2626" />
+                    </div>
                     <h4 style={{ margin: '0 0 6px 0', fontSize: '20px', fontWeight: 'bold', color: '#0F172A' }}>
                       {content.clinic.mapLocationName}
                     </h4>
@@ -623,6 +740,7 @@ export default function PatientLandingPage() {
                     </p>
                     <button
                       type="button"
+                      className="ux-btn"
                       onClick={() => setShowInteractiveMap(true)}
                       style={{
                         background: '#FFFFFF',
@@ -653,7 +771,7 @@ export default function PatientLandingPage() {
               </div>
 
               {/* Transit & Parking Guidance Card */}
-              <div style={{ background: '#FFFFFF', borderRadius: '12px', padding: '20px', border: '1px solid #E2E8F0', fontSize: '14px', lineHeight: 1.6, color: '#334155' }}>
+              <div className="ux-card" style={{ background: '#FFFFFF', borderRadius: '12px', padding: '20px', border: '1px solid #E2E8F0', fontSize: '14px', lineHeight: 1.6, color: '#334155' }}>
                 <strong style={{ color: theme.primaryDark }}>Transit &amp; Parking Guidance: </strong>
                 {content.clinic.transitGuidance}
               </div>
@@ -682,14 +800,16 @@ export default function PatientLandingPage() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
           {content.reviews?.map((rev) => (
-            <div key={rev.id} style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 2px 6px rgba(0,0,0,0.02)' }}>
+            <div key={rev.id} className="ux-card" style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 2px 6px rgba(0,0,0,0.02)' }}>
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                   <span style={{ background: '#FEF3C7', color: '#92400E', padding: '3px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '700' }}>
                     {rev.treatment}
                   </span>
-                  <div style={{ color: '#F59E0B', fontSize: '16px' }}>
-                    {'★'.repeat(rev.rating)}
+                  <div style={{ display: 'flex', gap: '2px', color: '#F59E0B' }}>
+                    {[...Array(rev.rating)].map((_, i) => (
+                      <StarIcon key={i} size={15} color="#F59E0B" fill="#F59E0B" />
+                    ))}
                   </div>
                 </div>
                 <p style={{ fontSize: '14px', lineHeight: 1.6, color: '#475569', fontStyle: 'italic', margin: '0 0 16px 0' }}>
@@ -731,6 +851,7 @@ export default function PatientLandingPage() {
               <details
                 key={faq.id}
                 open={idx === 0}
+                className="ux-card"
                 style={{
                   background: '#FFFFFF',
                   borderRadius: '10px',
@@ -739,8 +860,9 @@ export default function PatientLandingPage() {
                   cursor: 'pointer',
                 }}
               >
-                <summary style={{ fontWeight: '700', fontSize: '15px', color: theme.primaryDark, outline: 'none' }}>
-                  {faq.question}
+                <summary style={{ fontWeight: '700', fontSize: '15px', color: theme.primaryDark, outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{faq.question}</span>
+                  <ChevronDownIcon size={18} color="#64748B" />
                 </summary>
                 <p style={{ marginTop: '12px', marginBottom: 0, fontSize: '14px', lineHeight: 1.6, color: '#475569', borderTop: '1px solid #F1F5F9', paddingTop: '10px' }}>
                   {faq.answer}
@@ -755,7 +877,7 @@ export default function PatientLandingPage() {
       {/* 10. IN-CLINIC APPOINTMENT BOOKING FORM                    */}
       {/* ========================================================= */}
       <section id="booking" style={{ padding: '64px 24px', maxWidth: '840px', margin: '0 auto' }}>
-        <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '16px', padding: '36px', boxShadow: '0 10px 30px rgba(0,0,0,0.06)' }}>
+        <div className="ux-card" style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '16px', padding: '36px', boxShadow: '0 10px 30px rgba(0,0,0,0.06)' }}>
           <div style={{ textAlign: 'center', marginBottom: '28px' }}>
             <h3 style={{ margin: '0 0 8px 0', fontSize: '26px', color: theme.primaryDark }}>Request an In-Clinic Appointment</h3>
             <p style={{ margin: 0, fontSize: '14px', color: '#64748B' }}>
@@ -764,9 +886,12 @@ export default function PatientLandingPage() {
           </div>
 
           {submitSuccess && (
-            <div style={{ background: '#DCFCE7', border: '1px solid #86EFAC', color: '#166534', padding: '16px', borderRadius: '8px', marginBottom: '24px', fontSize: '14px' }}>
-              🎉 <strong>Appointment Request Received! (Ref ID: {submittedAptId})</strong><br />
-              Our receptionist Sunita has received your request in the CMS panel and will contact you via WhatsApp shortly to confirm your slot.
+            <div style={{ background: '#DCFCE7', border: '1px solid #86EFAC', color: '#166534', padding: '16px', borderRadius: '8px', marginBottom: '24px', fontSize: '14px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+              <CheckCircleIcon size={20} color="#166534" style={{ marginTop: '2px', flexShrink: 0 }} />
+              <div>
+                <strong>Appointment Request Received! (Ref ID: {submittedAptId})</strong><br />
+                Our receptionist Sunita has received your request in the CMS panel and will contact you via WhatsApp shortly to confirm your slot.
+              </div>
             </div>
           )}
 
@@ -846,6 +971,7 @@ export default function PatientLandingPage() {
             <button
               type="submit"
               disabled={submitting}
+              className="ux-btn"
               style={{
                 background: theme.primary,
                 color: '#FFFFFF',
@@ -857,13 +983,19 @@ export default function PatientLandingPage() {
                 cursor: 'pointer',
                 marginTop: '8px',
                 boxShadow: `0 4px 12px ${theme.primary}40`,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
               }}
             >
-              {submitting ? 'Submitting to Clinic...' : 'Confirm Appointment Request'}
+              <CalendarIcon size={18} color="#FFFFFF" />
+              <span>{submitting ? 'Submitting to Clinic...' : 'Confirm Appointment Request'}</span>
             </button>
 
-            <div style={{ fontSize: '11px', color: '#94A3B8', textAlign: 'center' }}>
-              🔒 DPDP Act 2023 Compliant. Your personal data is encrypted and used solely for consultation scheduling.
+            <div style={{ fontSize: '11px', color: '#94A3B8', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+              <LockIcon size={13} color="#94A3B8" />
+              <span>DPDP Act 2023 Compliant. Your personal data is encrypted and used solely for consultation scheduling.</span>
             </div>
           </form>
         </div>
@@ -906,7 +1038,9 @@ export default function PatientLandingPage() {
             <Link
               href="/cms"
               style={{
-                display: 'inline-block',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
                 background: 'rgba(255,255,255,0.1)',
                 color: '#FFFFFF',
                 padding: '8px 14px',
@@ -915,7 +1049,8 @@ export default function PatientLandingPage() {
                 fontWeight: '600',
               }}
             >
-              🔐 Staff CMS Login &rarr;
+              <KeyIcon size={14} color="#FFFFFF" />
+              <span>Staff CMS Login &rarr;</span>
             </Link>
           </div>
         </div>
@@ -926,26 +1061,9 @@ export default function PatientLandingPage() {
       </footer>
 
       {/* ========================================================= */}
-      {/* 12. MOBILE PERSISTENT STICKY CTA BAR                      */}
+      {/* 12. MOBILE PERSISTENT STICKY CTA BAR (HIDDEN ON DESKTOP!) */}
       {/* ========================================================= */}
-      <aside
-        style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          background: '#FFFFFF',
-          borderTop: '1px solid #E2E8F0',
-          padding: '10px 16px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: '8px',
-          zIndex: 40,
-          boxShadow: '0 -2px 10px rgba(0,0,0,0.08)',
-        }}
-        aria-label="Mobile Emergency Actions"
-      >
+      <aside className="mobile-sticky-cta" aria-label="Mobile Emergency Actions">
         <a
           href={`tel:${content.doctor.phone.replace(/[^0-9+]/g, '')}`}
           style={{
@@ -958,9 +1076,14 @@ export default function PatientLandingPage() {
             textDecoration: 'none',
             fontWeight: '700',
             fontSize: '13px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
           }}
         >
-          📞 Call
+          <PhoneIcon size={16} color="#FFFFFF" />
+          <span>Call</span>
         </a>
         <a
           href={`https://wa.me/${content.doctor.whatsappNumber.replace(/[^0-9]/g, '')}`}
@@ -976,9 +1099,14 @@ export default function PatientLandingPage() {
             textDecoration: 'none',
             fontWeight: '700',
             fontSize: '13px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
           }}
         >
-          💬 WhatsApp
+          <MessageCircleIcon size={16} color="#FFFFFF" />
+          <span>WhatsApp</span>
         </a>
         <a
           href="#booking"
@@ -992,9 +1120,14 @@ export default function PatientLandingPage() {
             textDecoration: 'none',
             fontWeight: '700',
             fontSize: '13px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
           }}
         >
-          📅 Book Slot
+          <CalendarIcon size={16} color="#FFFFFF" />
+          <span>Book Slot</span>
         </a>
       </aside>
 

@@ -1,15 +1,15 @@
 {
   "content": {
-    "theme": "Navy Gold",
+    "theme": "Teal Poster",
     "announcement": "Complimentary 7-day follow-up consultation included with every visit.",
     "doctor": {
       "name": "Dr. Maanvita Kumari",
-      "degree": " ",
+      "degree": "MBBS, MD (General Medicine)",
       "college": "Maulana Azad Medical College, New Delhi",
       "specialty": "Consultant Physician & Family Medicine Specialist",
       "experienceYears": 14,
       "registrationNumber": "DMC/R/28491",
-      "medicalCouncil": "Delhi Medical Council",
+      "medicalCouncil": "Delhi Medical Council (Active & Verified)",
       "languages": "English & Hindi",
       "bio": "Trusted family physician with over 14 years of clinical experience from Maulana Azad Medical College. Committed to evidence-based, compassionate care for adults, seniors, and chronic lifestyle disorders.",
       "consultationFee": 600,
@@ -18,10 +18,10 @@
       "email": "contact@healthconsult.in"
     },
     "clinic": {
-      "name": "HealthConsult Clinic",
+      "name": "HealthConsult Family Clinic",
       "tagline": "Compassionate Clinical Care & Chronic Wellness",
       "taglineQuote": "\"We Nurture Your Health, Every Day\"",
-      "street": ",Sector 18",
+      "street": "Plot 14, Health Plaza, Central Market",
       "area": "Sector 18",
       "city": "Noida",
       "state": "Uttar Pradesh",
@@ -31,15 +31,17 @@
         "saturdayHours": "Saturday: 09:00 AM – 04:00 PM",
         "sundayHours": "Sunday: Closed (Emergency On-Call)"
       },
-      "morningHours": "10:00 AM – 01:30 PM",
-      "eveningHours": "05:30 PM – 08:30 PM",
-      "sundayHours": "Closed (Emergency Hotline Active)",
+      "morningHours": "09:00 AM – 01:30 PM",
+      "eveningHours": "04:30 PM – 08:00 PM",
+      "sundayHours": "Closed (Emergency On-Call)",
       "feePolicy": "₹600 regular consultation. Includes a 7-day complimentary follow-up visit for the same medical issue.",
       "amenities": [
-        "NABH Hygiene Standards",
-        "In-House Pharmacy",
-        "Digital WhatsApp Reports",
-        "Wheelchair Accessible"
+        "In-house Pharmacy Partner",
+        "Home Sample Collection",
+        "Wheelchair Accessible",
+        "AC Waiting Lounge",
+        "Digital Payments Accepted",
+        "Dedicated Car Parking"
       ],
       "transitGuidance": "Located directly in Central Market Sector 18, just 200 meters from Noida Sector 18 Metro Station (Blue Line, Gate 2). Ample multi-level car parking available next to Health Plaza.",
       "mapLocationName": "HealthConsult Clinic Location",
@@ -47,8 +49,8 @@
       "googleMapEmbedUrl": "https://maps.google.com/maps?q=Sector%2018%2C%20Noida&t=&z=15&ie=UTF8&iwloc=&output=embed"
     },
     "hero": {
-      "headline": "Trusted Family Medicine & Chronic Care in Noida",
-      "subtitle": "Dedicated consultations with zero rushed queues. Focused on diabetes, hypertension, seasonal fevers, and personalized adult healthcare.",
+      "headline": "Consult your health with our doctor anywhere, anytime",
+      "subtitle": "We provide expert care with a personal touch. From preventive family wellness to chronic disease management, your health is our sacred commitment.",
       "statConsultations": "25,000+",
       "statRating": "4.9 / 5",
       "statExperience": "14+ Yrs"
@@ -56,25 +58,25 @@
     "whyChooseUs": [
       {
         "id": "wcu-1",
-        "icon": "⏱️",
+        "icon": "clock",
         "title": "Minimal Waiting Time",
         "description": "WhatsApp slot coordination ensures you spend minimal time in the waiting area, receiving prompt doctor attention."
       },
       {
         "id": "wcu-2",
-        "icon": "🩺",
+        "icon": "stethoscope",
         "title": "Evidence-Based Medicine",
         "description": "Rational clinical diagnoses with zero unnecessary lab investigations or heavy over-prescription of antibiotics."
       },
       {
         "id": "wcu-3",
-        "icon": "📲",
+        "icon": "message",
         "title": "Digital Health Records",
         "description": "Clear digital prescriptions delivered instantly to your WhatsApp, accessible whenever you need them."
       },
       {
         "id": "wcu-4",
-        "icon": "🤝",
+        "icon": "userCheck",
         "title": "Dedicated Consultation",
         "description": "Thorough 15+ minute consultation sessions allowing ample time to address your symptoms, queries, and lifestyle concerns."
       }
@@ -82,25 +84,25 @@
     "accreditations": [
       {
         "id": "acc-1",
-        "icon": "🛡️",
+        "icon": "shield",
         "title": "NABH Safety Standards",
         "description": "Sterilized clinic environment & protocols"
       },
       {
         "id": "acc-2",
-        "icon": "💊",
+        "icon": "pill",
         "title": "Transparent Consultation",
         "description": "Complimentary 7-day follow-up included"
       },
       {
         "id": "acc-3",
-        "icon": "⚡",
+        "icon": "zap",
         "title": "Digital WhatsApp Reports",
         "description": "Instant prescription & diagnostic delivery"
       },
       {
         "id": "acc-4",
-        "icon": "🔒",
+        "icon": "lock",
         "title": "DPDP Act 2023 Compliant",
         "description": "100% encrypted & private health records"
       }
@@ -108,39 +110,57 @@
     "services": [
       {
         "id": "srv-1",
-        "title": "Diabetes Management",
-        "description": "Comprehensive blood glucose monitoring, HbA1c review, insulin adjustment, and lifestyle plan.",
-        "icon": "🩺"
+        "title": "General Health Checkup",
+        "description": "Complete physical examination, baseline vital assessments, blood pressure screening, and personalized preventive health roadmaps.",
+        "icon": "stethoscope"
       },
       {
         "id": "srv-2",
-        "title": "Hypertension Care",
-        "description": "BP titration, ECG evaluation, cardiovascular risk assessment, and medication reviews.",
-        "icon": "❤️"
+        "title": "Diabetes & Hypertension",
+        "description": "Careful blood sugar monitoring, HbA1c review, blood pressure stabilization, diet counseling, and long-term kidney & heart protection.",
+        "icon": "heartPulse"
       },
       {
         "id": "srv-3",
-        "title": "Seasonal Fevers & Infections",
-        "description": "Rapid diagnosis and evidence-based protocols for Dengue, Typhoid, Viral flu, and malaria.",
-        "icon": "🌡️"
+        "title": "Fevers & Seasonal Illnesses",
+        "description": "Rapid diagnostic assessment for dengue, malaria, typhoid, viral flu, bronchitis, seasonal allergies, and acute throat infections.",
+        "icon": "thermometer"
       },
       {
         "id": "srv-4",
-        "title": "Thyroid Disorders",
-        "description": "Evaluation and management of Hypo/Hyperthyroidism, TSH balancing, and dietary guidance.",
-        "icon": "⚖️"
+        "title": "Thyroid & Endocrine Care",
+        "description": "Expert clinical evaluation of hypothyroidism, hyperthyroidism, metabolic shifts, chronic fatigue, and hormone stabilization.",
+        "icon": "pill"
       },
       {
         "id": "srv-5",
-        "title": "Geriatric Health Care",
-        "description": "Specialized healthcare for senior citizens focusing on multi-morbidity and mobility wellness.",
-        "icon": "👴"
+        "title": "Geriatric & Elderly Care",
+        "description": "Compassionate healthcare for senior citizens, routine medication interaction reviews, arthritis pain support, and mobility advice.",
+        "icon": "userCheck"
       },
       {
         "id": "srv-6",
-        "title": "Preventive Executive Health",
-        "description": "Comprehensive annual physical examinations, lipid profiles, and early detection screens.",
-        "icon": "🛡️"
+        "title": "Adult Vaccinations",
+        "description": "Annual influenza shots, pneumococcal protection, hepatitis B boosters, tetanus prophylaxis, and adult immunization schedules.",
+        "icon": "syringe"
+      },
+      {
+        "id": "srv-7",
+        "title": "Respiratory & Asthma Care",
+        "description": "Management of chronic wheezing, asthma flare-ups, seasonal allergic rhinitis, smoker's cough, and post-viral lung recovery.",
+        "icon": "activity"
+      },
+      {
+        "id": "srv-8",
+        "title": "Gastrointestinal & Acidity",
+        "description": "Treatment of GERD, acid reflux, peptic ulcers, IBS, chronic constipation, liver sluggishness, and dietary intolerance.",
+        "icon": "microscope"
+      },
+      {
+        "id": "srv-9",
+        "title": "Preventive Lifestyle Medicine",
+        "description": "Evidence-based guidance on weight management, uric acid reduction, cholesterol balance, and cardiac risk factor reduction.",
+        "icon": "shield"
       }
     ],
     "reviews": [
@@ -238,32 +258,31 @@
   },
   "appointments": [
     {
-      "patientName": "Sanjay Malhotra",
-      "phone": "+91 98111 22334",
-      "service": "Preventive Executive Health",
-      "preferredDate": "2026-11-06",
+      "patientName": "Sunil Varma",
+      "phone": "+91 98200 11223",
+      "service": "General Health Checkup",
+      "preferredDate": "2026-11-03",
       "shift": "Morning",
-      "notes": "Slot confirmed for 10:45 AM by Sunita",
+      "notes": "Time slot confirmed with patient",
       "id": "APT-1086",
       "status": "confirmed",
       "createdAt": "Just now"
     },
     {
-      "patientName": "Aarav Mehta",
-      "phone": "+91 99887 76655",
-      "service": "Diabetes Management",
-      "preferredDate": "2026-11-05",
+      "id": "APT-1086",
+      "patientName": "Sanjay Malhotra",
+      "phone": "+91 98111 22334",
+      "service": "Preventive Executive Health",
+      "preferredDate": "2026-11-06",
       "shift": "Morning",
-      "notes": "Called Aarav, confirmed 10:15 AM",
-      "id": "APT-1085",
-      "status": "contacted",
-      "createdAt": "Just now"
+      "status": "confirmed",
+      "notes": "Slot confirmed for 10:45 AM by Sunita",
+      "createdAt": "Today"
     },
     {
       "id": "APT-1081",
       "patientName": "Ramesh Sharma",
       "phone": "+91 98101 23456",
-      "doctor": "Dr. Maanvita Kumari",
       "service": "Diabetes Management",
       "preferredDate": "2026-11-04",
       "shift": "Morning",
@@ -275,7 +294,6 @@
       "id": "APT-1080",
       "patientName": "Pooja Verma",
       "phone": "+91 98712 34567",
-      "doctor": "Dr. Maanvita Kumari",
       "service": "Thyroid Disorders",
       "preferredDate": "2026-11-04",
       "shift": "Evening",
@@ -287,7 +305,6 @@
       "id": "APT-1079",
       "patientName": "Harish Chandra",
       "phone": "+91 99110 56789",
-      "doctor": "Dr. Maanvita Kumari",
       "service": "Hypertension Care",
       "preferredDate": "2026-11-03",
       "shift": "Evening",
