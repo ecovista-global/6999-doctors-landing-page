@@ -23,6 +23,19 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added (docs MINOR - MT-000)
+
+- Reconciled "Practice Growth" as second commercial SKU across brain/ documentation:
+  - `01_PRD.md`: Added Practice Growth table in § 2 beside Basic Presence (single source of truth for pricing: ₹12,999 first year, ₹5,999 renewal); updated § 4 phased scope (multi-page static sites move to P2); added 3 DECISION-NEEDED items to § 11. Basic Presence facts untouched.
+  - `17_DECISIONS.md`: Added proposed ADR-020 (Second SKU, multi-page static export, appointment request enquiry), ADR-021 (₹12,999 GST treatment), ADR-022 (admin dashboard exclusion clarification), ADR-023 (renewal economics at ₹5,999).
+  - `04_DATA_MODEL.md`: Added `plan enum('basic', 'growth')` to `sites` and `subscriptions`; updated `subscriptions.renewal_price_paise` (299900 / 599900); bumped `content-schema` SemVer specification to v1.1.0 (optional `plan` and `pages`).
+  - `07_API_CONTRACT.md`: Added `/v1/payments/order` route, documented plan-aware amounts in paise (`699900` / `1299900`), and added optional appointment request fields to `LeadInput`.
+  - `08_UI_SPEC.md`: Defined multi-page template structure for Practice Growth (up to 5 pages: Home, About, Services, Testimonials, Contact) sharing common Header and sticky CTA bar.
+  - `06_CONTENT_PIPELINE_SPEC.md`: Updated SLA update allowance (1/month for Basic, 3/month for Growth) and renewal sweep pricing per plan.
+  - `11_ANALYTICS_SEO_SPEC.md`: Added per-page canonical tags, 5-page sitemap generation, and per-page JSON-LD specs for Practice Growth.
+  - `14_PRODUCTION_CHECKLIST.md`: Added growth-only launch verification checklist block to Checklist A.
+  - `15_MICROTASKS.md`: Added microtasks MT-059 to MT-066 in standard template; updated total task count to 66 and burndown hours to 116.5 h.
+
 ### Added
 
 - Root monorepo configuration: `pnpm-workspace.yaml`, `package.json`, `turbo.json`, `.gitignore`, `.env.example`, `docker-compose.yml`

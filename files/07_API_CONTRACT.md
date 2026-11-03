@@ -23,6 +23,7 @@ related: [03_ARCHITECTURE.md, 05_DATA_SOURCES.md, 09_ERROR_HANDLING.md, 10_SECUR
 | /v1/sites/{id}/publish | POST | owner/operator | 10/h/site | Header | P1 | v1 |
 | /v1/sites/{id}/rollback | POST | operator | 10/h/site | Header | P1 | v1 |
 | /v1/sites/{id}/events | GET (SSE) | owner/operator | 20/min | n/a | P2 | v1 |
+| /v1/payments/order | POST | tenant_owner | 20/min | Header required | P2 | v1 |
 | /v1/payments/confirm | POST | tenant_owner | 20/min | Header required | P2 | v1 |
 | /v1/webhooks/razorpay | POST | HMAC | none (provider IPs) | By event_id | P2 | v1 |
 | /v1/webhooks/whatsapp | POST/GET | HMAC / verify token | none | By event_id | P2 | v1 |
@@ -34,7 +35,12 @@ P1: passwordless email OTP (6 digits, 10-min expiry, 5 attempts, delivered via R
 
 ## 3. Idempotency
 
-**(SD-001) Idempotency keys.** *Meaning:* `POST /v1/leads` and `POST /v1/payments/confirm` are retried by browsers, flaky 4G and webhooks. *Decision:* required header `Idempotency-Key: <uuid v4>`; stored in Redis `idem:{tenant}:{key}` with request hash and response snapshot, TTL 24 h; DB unique constraint (`leads.idempotency_key`, `payments.idempotency_key`) is the backstop. Replay with same key and same body returns the original status/body plus `X-Idempotent-Replay: true`; same key with different body returns 422 E-1302; in-flight duplicate returns 409 E-1303 with `Retry-After: 2`. Rejected: server-generated dedupe by content hash (false positives for repeat patients). *Sketch:*
+**(SD-001) Idempotency keys.** *Meaning:* `POST /v1/leads`, `POST /v1/payments/order`, and `POST /v1/payments/confirm` are retried by browsers, flaky 4G and webhooks. *Decision:* required header `Idempotency-Key: <uuid v4>`; stored in Redis `idem:{tenant}:{key}` with request hash and response snapshot, TTL 24 h; DB unique constraint (`leads.idempotency_key`, `payments.idempotency_key`) is the backstop. Replay with same key and same body returns the original status/body plus `X-Idempotent-Replay: true`; same key with different body returns 422 E-1302; in-flight duplicate returns 409 E-1303 with `Retry-After: 2`. Rejected: server-generated dedupe by content hash (false positives for repeat patients).
+
+### Payments and plan amounts in paise
+Razorpay orders are created via `POST /v1/payments/order` with integer amounts in paise (canonical pricing facts live in 01_PRD.md § 2):
+- **Basic Presence:** ₹6,999 = `699900` paise (first year); renewal ₹2,999 = `299900` paise.
+- **Practice Growth:** ₹12,999 = `1299900` paise (first year); renewal ₹5,999 = `599900` paise. *Sketch:*
 
 ```ts
 // apps/platform/src/lib/idempotency.ts
@@ -114,5 +120,7 @@ components:
         email: { type: string, format: email }
         message: { type: string, maxLength: 500 }
         consent: { type: boolean, const: true }
+        preferredDate: { type: string, format: date, description: 'Optional preferred appointment date (Practice Growth)' }
+        preferredTime: { type: string, maxLength: 30, description: 'Optional preferred appointment time/slot (Practice Growth)' }
         website: { type: string, maxLength: 0, description: honeypot }
 ```

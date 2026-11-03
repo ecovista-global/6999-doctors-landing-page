@@ -46,9 +46,9 @@ Pre-publish checklist (automated where noted):
 | Item | Rule |
 |---|---|
 | Title/meta/OG | Unique: `{Dr. Name} — {Specialty} in {City}` ≤ 60 chars; description ≤ 155; OG image 1200×630 (auto) |
-| Canonical | `https://{host}/` |
-| sitemap.xml / robots.txt | Generated; robots allows all; previews `noindex` |
-| JSON-LD | Physician + MedicalClinic validated in pipeline |
+| Canonical | `https://{host}/` (Basic Presence); exact per-page canonical for Practice Growth (`/`, `/about/`, `/services/`, `/testimonials/`, `/contact/`) |
+| sitemap.xml / robots.txt | Generated; Basic: root URL only; Practice Growth: all 5 responsive page URLs with `<lastmod>`; robots allows all; previews `noindex` |
+| JSON-LD | Basic: Physician + MedicalClinic validated in pipeline. Practice Growth: per-page structured data (Root: Physician + MedicalClinic; About: Physician credentials; Services: MedicalSpecialty; Testimonials: Review; Contact: MedicalClinic + openingHoursSpecification) |
 | NAP | Name, address, phone identical across page, JSON-LD and GMB |
 | Alt text | Required for every image (validation fails if empty) |
 | Headings | One H1, ordered H2/H3 |

@@ -1,8 +1,8 @@
 ---
-purpose: Implementation queue — 58 microtasks, each ≤ 2 h, executable by an AI agent in one session
+purpose: Implementation queue — 66 microtasks, each ≤ 2 h, executable by an AI agent in one session
 owner: EcoDigiTech founding team
-status: Draft v0.1
-last_updated: 2026-11-02
+status: Draft v0.2
+last_updated: 2026-11-03
 related: [00_MASTER_RULES.md, 03_ARCHITECTURE.md, 04_DATA_MODEL.md, 07_API_CONTRACT.md, 16_CHANGELOG.md]
 ---
 
@@ -23,7 +23,7 @@ Every task is ≤ 2 h and executable in ONE agent session using only this task +
 | M0 Foundations | Repo, CI skeleton, packages | MT-001–008 |
 | M1 Template v1 + manual factory | Reproduce the ₹6,999 offer by hand via CLI | MT-009–020 |
 | M2 Platform core | Auth, tenants, content, pipeline, domains | MT-021–040 |
-| M3 Self-serve (P2) | Signup, Razorpay, wizard, publish, lead inbox | MT-041–050 |
+| M3 Self-serve & Practice Growth (P2) | Signup, Razorpay, wizard, publish, lead inbox, 5-page export | MT-041–050, MT-059–066 |
 | M4 Hardening & P3 prep | Observability, load, chaos, IaC, K8s spec | MT-051–058 |
 
 ## 4. The tasks
@@ -154,6 +154,24 @@ Every task is ≤ 2 h and executable in ONE agent session using only this task +
 
 **MT-058 Helm chart + K8s spec build-out (P3).** reads: 12 § 6 (SD-062/063/075), 03 § SD-081. touches: `infra/helm/doctorsite/*`. steps: (1) chart with deployment/service/hpa/ingress; (2) values per env; (3) external-secrets; (4) helm lint in CI. accept: [ ] `helm template` renders [ ] marked P3, not deployed. depends: MT-018. est: 2 h.
 
+### Practice Growth Add-ons (P2)
+
+**MT-059 Multi-page template routing and shared header/CTA.** reads: 01 § 2, 08 § 1, 17 § ADR-020. touches: `apps/site-template/src/{layout.tsx,routes.ts,components/Header.tsx,components/CtaBar.tsx}`. steps: (1) static route builder generating up to 5 static pages (Home `/`, About `/about/`, Services `/services/`, Testimonials `/testimonials/`, Contact `/contact/`) when `plan=growth`; (2) shared header highlighting active page link; (3) shared sticky CTA bar across all routes; (4) single-page fallback when `plan=basic`. accept: [ ] static build produces 5 distinct HTML files for growth [ ] basic builds single index.html [ ] active route aria-current verified [ ] bundle size within budget. depends: MT-009, MT-010. est: 2 h.
+
+**MT-060 About page static section.** reads: 01 § 2, 08 § 1, 04 § SD-024. touches: `apps/site-template/src/pages/about.tsx`, `sections/AboutDoctor.tsx`. steps: (1) full-width biographical narrative and credentials definition list; (2) medical registration and alma mater callouts; (3) clinic hygiene/standards badges bar; (4) self-referencing canonical tag `https://{host}/about/`. accept: [ ] renders full doctor biography and qualifications [ ] canonical points to /about/ [ ] mobile responsive. depends: MT-059, MT-012. est: 1.5 h.
+
+**MT-061 Testimonials page (consent-based reviews).** reads: 01 § 2, 08 § 1, 10 § 8, 17 § ADR-020. touches: `apps/site-template/src/pages/testimonials.tsx`, `sections/TestimonialsGrid.tsx`. steps: (1) patient reviews grid with verified treatment tags; (2) enforce consent-only display guard (filter reviews lacking verified consent flag); (3) per-page JSON-LD Review schema; (4) canonical tag `https://{host}/testimonials/`. accept: [ ] unconsented reviews suppressed [ ] Review schema validates [ ] canonical points to /testimonials/. depends: MT-059, MT-014. est: 1.5 h.
+
+**MT-062 Appointment-request fields in form.** reads: 01 § 2, 07 § 10, 08 § 1, 17 § ADR-020. touches: `apps/site-template/src/sections/ContactForm.tsx`, `packages/content-schema/src/index.ts`. steps: (1) add optional `preferredDate` (HTML5 date input with min=tomorrow) and `preferredTime` (morning/afternoon/evening radio/select) to form when `plan=growth`; (2) update `LeadInput` schema; (3) forward to existing `POST /v1/leads` pipeline; (4) update outbox payload. accept: [ ] appointment request submits successfully to /v1/leads [ ] fields included in lead notification email/wa [ ] basic plan renders standard contact form without appointment fields. depends: MT-015, MT-059. est: 1.5 h.
+
+**MT-063 Plan-aware Razorpay order.** reads: 01 § 2, 07 § 1, 07 § 3, 17 § ADR-021. touches: `apps/platform/src/app/v1/payments/order/route.ts`, `apps/platform/src/lib/razorpay.ts`. steps: (1) plan validator checking `basic` vs `growth`; (2) order creation setting amount to 699900 paise (basic) or 1299900 paise (growth) per 01 § 2; (3) order notes recording plan and tenant_id; (4) idempotency key support. accept: [ ] basic order creates with 699900 paise [ ] growth order creates with 1299900 paise [ ] invalid plan returns E-2101 [ ] same key returns existing order. depends: MT-041. est: 1.5 h.
+
+**MT-064 Plan-aware SLA tracker.** reads: 01 § 2, 06 § 3, 04 § 2. touches: `apps/platform/src/workers/sla-tracker.ts`, `apps/platform/src/lib/sla.ts`. steps: (1) query subscription plan for active site; (2) count content update requests in current calendar month; (3) enforce quota: 1/month for basic, 3/month for growth; (4) calculate due date (+5 business days) and 80% elapsed warning. accept: [ ] basic 2nd update queued/rejected [ ] growth 4th update queued/rejected [ ] due date and breach warnings calculated correctly. depends: MT-030, MT-037. est: 1.5 h.
+
+**MT-065 Plan-aware renewal sweep.** reads: 01 § 2, 06 § 4, 04 § 2, 17 § ADR-023. touches: `apps/platform/src/workers/renewal-sweep.ts`. steps: (1) join `domains` with `subscriptions.plan`; (2) set invoice/notification renewal amount to 299900 paise (₹2,999) for basic, 599900 paise (₹5,999) for growth; (3) interpolate `{renewal_price}` in en/hi notification templates; (4) test sweep idempotency. accept: [ ] basic renewal invoice generated for ₹2,999 [ ] growth renewal invoice generated for ₹5,999 [ ] notices display matching plan prices. depends: MT-040. est: 1.5 h.
+
+**MT-066 GA4 + Search Console wiring step.** reads: 01 § 2, 11 § 5, 14 § 1. touches: `apps/platform/src/pipeline/seo-setup.ts`, `apps/platform/src/lib/google-search-console.ts`. steps: (1) Search Console DNS TXT verification record generator; (2) 5-page sitemap submission via Search Console API; (3) per-site GA4 stream ID provisioning; (4) post-publish checklist verification step. accept: [ ] DNS TXT entry created [ ] 5-page sitemap verified [ ] growth verification script asserts all 5 URLs indexable. depends: MT-035, MT-036, MT-059. est: 2 h.
+
 ## 5. Burndown table
 
 | Milestone | Tasks | Est. hours | Critical path |
@@ -161,6 +179,6 @@ Every task is ≤ 2 h and executable in ONE agent session using only this task +
 | M0 | 8 | 12.5 | MT-001 → MT-005 |
 | M1 | 12 | 21.0 | MT-009 → MT-011 → MT-018 |
 | M2 | 20 | 37.0 | MT-021 → MT-028 → MT-030 → MT-033 → MT-034 → MT-036 |
-| M3 | 10 | 18.5 | MT-041 → MT-042 → MT-043 → MT-045 → MT-047 |
+| M3 | 18 | 31.5 | MT-041 → MT-042 → MT-043 → MT-045 → MT-047 → MT-059 |
 | M4 | 8 | 14.5 | MT-051 → MT-053 |
-| Total | 58 | 103.5 | — |
+| Total | 66 | 116.5 | — |

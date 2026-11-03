@@ -43,6 +43,16 @@ related: [03_ARCHITECTURE.md, 09_ERROR_HANDLING.md, 10_SECURITY.md, 12_GITHUB_AC
 - [ ] Content-sheet backup committed
 - [ ] Client sign-off message sent (en/hi) and acknowledged
 
+### Practice Growth tier add-on checklist (growth-only block)
+- [ ] Multi-page static export verified (Home `/`, About `/about/`, Services `/services/`, Testimonials `/testimonials/`, Contact `/contact/`)
+- [ ] Per-page self-referencing canonical URLs verified on all 5 routes
+- [ ] Shared navigation header and sticky mobile CTA bar tested across all pages
+- [ ] Appointment REQUEST form tested (preferred date/time enquiry fields forward to `/v1/leads`)
+- [ ] Dedicated Testimonials page reviews verified against written patient consent
+- [ ] Google Search Console property verified via DNS TXT and 5-page sitemap submitted
+- [ ] Google Analytics 4 stream verified receiving live test page views across all 5 pages
+- [ ] Per-page JSON-LD schemas validated without warnings on Schema Markup Validator
+
 ## 2. Checklist B — SaaS release
 
 - [ ] Migrations are expand-only (or contract approved) and applied before deploy

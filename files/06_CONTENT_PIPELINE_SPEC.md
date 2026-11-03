@@ -51,26 +51,26 @@ Rules: per-tenant ordering (concurrency 1 per tenant via `singletonKey = tenant_
 | Approval | Doctor reply (WhatsApp/email) or portal click; operator records approval |
 | Rebuild | Normal pipeline; new immutable version |
 | Verification | Post-publish checks pass; operator confirms |
-| SLA clock | Pauses while awaiting doctor approval; a second request in the same calendar month is queued to next month unless operator waives; breach flagged at 80% elapsed |
+| SLA clock | Pauses while awaiting doctor approval. Monthly update limits: Basic Presence = 1 update/month (2nd request in same month queued to next month unless waived); Practice Growth = up to 3 updates/month (4th request queued to next month unless waived). Breach flagged at 80% elapsed. |
 
 Acceptance: 95% of updates live within the SLA due date.
 
 ## 4. Domain lifecycle & renewals
 
-The ₹2,999 renewal is the revenue backbone. Daily sweep (06:00 IST, See 12 § SD-041) scans `domains.expires_on`:
+The domain and maintenance renewal (₹2,999/year for Basic Presence, ₹5,999/year for Practice Growth; canonical prices in 01_PRD.md § 2) is the revenue backbone. Daily sweep (06:00 IST, See 12 § SD-041) scans `domains.expires_on` and looks up `subscriptions.plan`:
 
 | Days to expiry | Action |
 |---|---|
 | 60 | Notify doctor (en/hi) and operator; start auto-renew intent |
-| 30 | Second notice; invoice created |
+| 30 | Second notice; invoice created with plan renewal price (₹2,999 or ₹5,999) |
 | 7 | Third notice; operator calls |
 | 0 | Grace period (registrar-dependent, typically 30 days, estimate): site stays up if registrar allows; daily notice |
 | Grace end | Suspend site (static page "temporarily unavailable"), keep content |
 
-Auto-renew policy: renew at 30 days if payment captured; if payment fails twice, switch to manual follow-up. Client message templates (en/hi):
+Auto-renew policy: renew at 30 days if payment captured; if payment fails twice, switch to manual follow-up. Client message templates (en/hi, dynamically interpolated with `{renewal_price}` from subscription):
 
-- en: "Your domain {host} expires on {date}. Renew for ₹2,999/year to keep your website live: {link}"
-- hi: "आपका डोमेन {host} {date} को समाप्त हो रहा है। वेबसाइट चालू रखने के लिए ₹2,999/वर्ष में नवीनीकरण करें: {link}"
+- en: "Your domain {host} expires on {date}. Renew for {renewal_price}/year to keep your website live: {link}"
+- hi: "आपका डोमेन {host} {date} को समाप्त हो रहा है। वेबसाइट चालू रखने के लिए {renewal_price}/वर्ष में नवीनीकरण करें: {link}"
 
 Failure runbook: expired domain = top incident class (Sev-1 if live site down): confirm in registrar, renew immediately at operator's expense, restore DNS, verify, send client note, run postmortem (14 § 4).
 

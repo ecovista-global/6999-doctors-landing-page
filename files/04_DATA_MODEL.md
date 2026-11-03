@@ -34,12 +34,12 @@ erDiagram
 |---|---|---|---|---|
 | tenants | One paying clinic | id uuid pk, slug text unique, name, status (`draft/active/suspended/offboarded`), created_at timestamptz | Platform | Until offboarding + 90 d |
 | users | Logins | id, tenant_id, email citext unique, role enum(`superadmin,operator,tenant_owner,tenant_staff`), last_login_at | Platform | With tenant |
-| sites | One site per tenant | id, tenant_id unique, live_version int, schema_version text, theme enum(`green,teal`), status | Pipeline | With tenant |
+| sites | One site per tenant | id, tenant_id unique, plan enum(`basic,growth`) default `basic`, live_version int, schema_version text, theme enum(`green,teal`), status | Pipeline | With tenant |
 | domains | Hostnames | id, site_id, host text unique, kind (`registered/byo`), cf_hostname_id, ssl_status, expires_on date | Pipeline | With tenant |
 | content_sheets | Versioned content | id, site_id, version int, data jsonb, schema_version, created_by, created_at, `unique(site_id, version)` | Wizard/operator | All versions 12 months; live + 5 prior forever |
 | leads | Patient enquiries | id, tenant_id, created_at, channel enum(`form,call,whatsapp`), name_enc bytea, phone_enc bytea, email_enc bytea, message_enc bytea, consent_at, idempotency_key | Lead API | 24 months (DECISION-NEEDED) |
 | lead_events | Delivery trail | id, lead_id, kind (`received,email_sent,wa_sent,failed`), at timestamptz default now() | Notifier | With lead |
-| subscriptions | Plan state | id, tenant_id, plan, status, current_period_end date, renewal_price_paise int | Billing | 8 years (tax) |
+| subscriptions | Plan state | id, tenant_id, plan enum(`basic,growth`), status, current_period_end date, renewal_price_paise int (299900 for basic, 599900 for growth; See 01_PRD.md § 2) | Billing | 8 years (tax) |
 | payments | Money records | id, subscription_id, razorpay_payment_id unique, amount_paise int, gst_paise int, status, idempotency_key unique | Billing | 8 years |
 | webhook_events | Inbound webhooks | id, provider, event_id, signature_ok bool, payload jsonb, received_at, processed_at, `unique(provider,event_id)` | Webhook route | 90 days |
 | outbox_events | Reliable events | id, tenant_id, type, payload jsonb, created_at, dispatched_at | Dispatcher | 30 days after dispatch |
@@ -92,6 +92,8 @@ Rejected: indexing every column (write cost). *Sketch (scan vs seek):* `EXPLAIN 
 |---|---|---|
 | 1.x | 1.x | Compatible |
 | 1.x | 2.x | Blocked until migrator runs |
+
+v1.1.0 MINOR bump (Practice Growth support): introduces optional `plan` (`basic` | `growth`, defaults to `basic`) and optional `pages` structure (up to 5 pages: home, about, services, testimonials, contact; appointment request preferences). Backward compatible with v1.0.0 sheets.
 
 *Failure:* build fails for old sheets; reveals as E-2101 in validation job. *Verify:* 13 § 3.
 

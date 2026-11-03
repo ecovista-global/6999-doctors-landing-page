@@ -18,6 +18,7 @@ The gap is delivery cost: agencies spend days per site, which makes a ₹6,999 o
 
 ## 2. Immutable commercial facts
 
+### Basic Presence ("Basic Presence" — Phase 1 offer)
 | Fact | Value |
 |---|---|
 | Brand | EcoDigiTech — an Indian digital-services company |
@@ -28,6 +29,18 @@ The gap is delivery cost: agencies spend days per site, which makes a ₹6,999 o
 | Service SLA | 1 content update per month; 7-day window to fix reported vulnerabilities |
 | Hard exclusions | No custom backend, no database, no appointment-booking panel, no advanced/enterprise email, no bundled third-party paid subscriptions |
 | Architecture rule | Client site = static single page, no backend, no database. All intelligence lives in the control plane. |
+| Legal | DPDP Act 2023 governs patient-lead personal data; 18% GST applies to services |
+
+### Practice Growth ("Practice Growth" — Badge "Popular")
+| Fact | Value |
+|---|---|
+| Target | "For doctors building their practice", badge "Popular" |
+| Price | ₹12,999 first year (includes standard domain for year 1 + 1 year managed hosting) |
+| Renewal | ₹5,999/year from year 2 (domain, hosting, routine technical checks, defined maintenance) |
+| Website development | Up to 5 responsive pages (Home, About, Services, Testimonials, Contact); detailed treatment and specialization sections; appointment REQUEST form with date and time preference; email + WhatsApp appointment enquiries; Google Maps, FAQs, clinic timings; Analytics and Search Console setup; basic technical and local SEO setup |
+| Domain, hosting, tech | Standard domain for year 1; one year managed hosting; SSL/HTTPS, DNS, deployment; monthly availability checks and backups; up to 3 content updates per month; form testing, security checks, 7-day bug-fix window |
+| Excludes | Custom backend, admin dashboard, managed booking calendar, premium email subscriptions, paid API services |
+| Architecture rule | Client site = statically generated (up to 5 pages), NO backend, NO database. The only network call is lead/appointment-request POST to control plane (POST /v1/leads). All intelligence lives in control plane. |
 | Legal | DPDP Act 2023 governs patient-lead personal data; 18% GST applies to services |
 
 ## 3. Personas
@@ -46,11 +59,11 @@ Derived from two reference designs supplied by the founders: a clean medical lan
 
 | Phase | In scope | Explicitly out of scope |
 |---|---|---|
-| P1 Agency factory | Operator admin; one site template; automated pipeline (validate, build, publish, verify); email-OTP login for operators; lead forwarding by email + wa.me links; renewals sweep; monthly update workflow | Self-signup; online payment; booking panel; client-site backend/DB; enterprise email |
-| P2 Self-serve (Q1 2027) | Doctor signup, Razorpay payment, content wizard, preview, auto-publish to custom domain, lead inbox, WhatsApp Cloud API notifications, Google sign-in | Booking panel; multi-page; custom backend/DB on client sites |
-| P3 Scale (roadmap only) | Appointment-booking panel; multi-page sites; vernacular AI content assist; marketplace/enterprise tier; Kubernetes deployment | Not committed; every item labeled P3 wherever it appears |
+| P1 Agency factory | Operator admin; one site template (Basic Presence, single-page); automated pipeline (validate, build, publish, verify); email-OTP login for operators; lead forwarding by email + wa.me links; renewals sweep; monthly update workflow | Self-signup; online payment; booking panel; client-site backend/DB; enterprise email; multi-page sites |
+| P2 Self-serve (Q1 2027) | Doctor signup, Razorpay payment, content wizard, preview, auto-publish to custom domain, lead inbox, WhatsApp Cloud API notifications, Google sign-in; Practice Growth plan shipping multi-page static export (up to 5 static pages: Home, About, Services, Testimonials, Contact) and appointment request form (enquiry with preferred date/time) | Booking panel; managed booking calendar; custom backend/DB on client sites; client-site admin dashboard |
+| P3 Scale (roadmap only) | Appointment-booking panel; managed booking calendar; vernacular AI content assist; marketplace/enterprise tier; Kubernetes deployment | Not committed; every item labeled P3 wherever it appears |
 
-Exclusions apply to every phase; the booking panel is P3. Any "Book" button on a client site is a wa.me/call link, never a booking system.
+Exclusions apply to every phase; the booking panel is P3. Any "Book" or "Appointment Request" on a client site is either a wa.me/call link or an appointment request enquiry (same POST /v1/leads with preferred date/time), never a managed booking calendar.
 
 ## 5. Pricing evolution
 
@@ -159,4 +172,9 @@ Finding: the 70% margin target is met only in P2 at scale; renewal margin is thi
 
 ## 11. Open questions
 
-DECISION-NEEDED (see sections 5, 8): P2 pricing; GST-inclusive reading of ₹6,999; renewal price. Each resolves into an ADR.
+DECISION-NEEDED items (each resolves into a proposed ADR in 17_DECISIONS.md):
+1. **P2 pricing:** Keep ₹6,999 / ₹2,999 at launch, review renewal after 6 months (See 17_DECISIONS.md ADR-015).
+2. **GST-inclusive reading of ₹6,999:** Treat as inclusive until founders decide; section 8 uses conservative reading (See 17_DECISIONS.md ADR-015).
+3. **GST-inclusive reading of ₹12,999 (Practice Growth):** DECISION-NEEDED: is ₹12,999 GST-inclusive? Recommendation: same reading as ₹6,999 (treat as inclusive until decided; net ₹11,016.10 after 18% GST). Resolves in proposed ADR-021.
+4. **Wording "excludes admin dashboard" vs P2 self-serve portal:** DECISION-NEEDED: Practice Growth excludes "admin dashboard", but P2 offers a doctor self-serve portal. Recommendation: the portal is the control plane (`apps/platform`), not a client-site admin panel; state this distinction explicitly in client terms. Resolves in proposed ADR-022.
+5. **Renewal margin at ₹5,999 vs hosting cost:** DECISION-NEEDED: assess renewal margin at ₹5,999/year. Recommendation: with standard domain renewal (~₹900) and static hosting share (~₹324–₹924), ₹5,999 provides healthy gross margin (>75%) covering up to 3 maintenance updates/month. Resolves in proposed ADR-023.

@@ -22,8 +22,17 @@ Visual direction (ADR-013), taken from the two founder-supplied reference images
 | 6 | Clinic info + map | Find the clinic | address, hours[], phone, Maps embed (click-to-load facade) | Map `title`; hours as table |
 | 7 | Reviews | Social proof | reviews[] (name initial, text, source) max 6, only genuine consent-obtained | No star-rating schema unless verified |
 | 8 | FAQ accordion | Answer objections | faq[] max 8 | `<details>/<summary>`, zero JS |
-| 9 | Contact form | Lead capture | name, phone, message, consent checkbox | Labels, inline errors, `aria-live` |
+| 9 | Contact form | Lead capture | name, phone, message, consent checkbox; Growth plan adds optional preferred date/time | Labels, inline errors, `aria-live` |
 | 10 | Footer | NAP + legal | name, address, phone, privacy notice, "Website by EcoDigiTech" | NAP identical to JSON-LD |
+
+### Plan-aware template structure
+- **Basic Presence (Single Page):** Sections 1–10 deployed on a single responsive page with smooth in-page anchor navigation (`#services`, `#credentials`, `#clinic`, `#reviews`, `#faq`, `#contact`).
+- **Practice Growth (Up to 5 Pages):** Statically exported multi-page site sharing common Header (with active route indicator), Sticky mobile CTA bar, and Footer:
+  1. **Home (`/`):** Hero (3), Credentials summary (4), Specialties preview (5), Clinic summary (6), Featured reviews (7), FAQ (8), and appointment enquiry CTA.
+  2. **About (`/about/`):** Detailed doctor biography, medical registration credentials (4), degrees, clinical experience, and clinic accreditations/standards.
+  3. **Services (`/services/`):** Comprehensive breakdown of clinical specialties and treatments with symptoms treated and guidelines.
+  4. **Testimonials (`/testimonials/`):** Dedicated patient reviews showcase (consent-based only, treatment tags).
+  5. **Contact (`/contact/`):** Full clinic information, consultation hours, click-to-load Maps facade (6), direct clinic hotlines, and Appointment REQUEST form (9) with preferred date and time preferences.
 
 ## 2. Component standards
 
