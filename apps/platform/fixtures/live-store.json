@@ -1,0 +1,142 @@
+{
+  "content": {
+    "theme": "Green Trust",
+    "announcement": "Complimentary 7-day follow-up consultation included with every visit.",
+    "doctor": {
+      "name": "Dr. Maanvita Kumari",
+      "degree": "MBBS, MD (General Medicine)",
+      "specialty": "Consultant Physician & Family Medicine Specialist",
+      "experienceYears": 14,
+      "registrationNumber": "DMC/R/28491",
+      "medicalCouncil": "Delhi Medical Council",
+      "bio": "Trusted family physician with over 14 years of clinical experience from Maulana Azad Medical College. Committed to evidence-based, compassionate care for adults, seniors, and chronic lifestyle disorders.",
+      "consultationFee": 600,
+      "phone": "+91 98765 43210",
+      "whatsappNumber": "+91 98765 43210",
+      "email": "contact@healthconsult.in"
+    },
+    "clinic": {
+      "name": "HealthConsult Clinic",
+      "tagline": "Compassionate Clinical Care & Chronic Wellness",
+      "street": "Plot 14, Health Plaza, Central Market",
+      "area": "Sector 18",
+      "city": "Noida",
+      "state": "Uttar Pradesh",
+      "pincode": "201301",
+      "morningHours": "10:00 AM – 01:30 PM",
+      "eveningHours": "05:30 PM – 08:30 PM",
+      "sundayHours": "Closed (Emergency Hotline Active)",
+      "amenities": [
+        "NABH Hygiene Standards",
+        "In-House Pharmacy",
+        "Digital WhatsApp Reports",
+        "Wheelchair Accessible"
+      ]
+    },
+    "hero": {
+      "headline": "Trusted Family Medicine & Chronic Care in Noida",
+      "subtitle": "Dedicated consultations with zero rushed queues. Focused on diabetes, hypertension, seasonal fevers, and personalized adult healthcare.",
+      "statConsultations": "25,000+",
+      "statRating": "4.9 / 5",
+      "statExperience": "14+ Yrs"
+    },
+    "services": [
+      {
+        "id": "srv-1",
+        "title": "Diabetes Management",
+        "description": "Comprehensive blood glucose monitoring, HbA1c review, insulin adjustment, and lifestyle plan.",
+        "icon": "🩺"
+      },
+      {
+        "id": "srv-2",
+        "title": "Hypertension Care",
+        "description": "BP titration, ECG evaluation, cardiovascular risk assessment, and medication reviews.",
+        "icon": "❤️"
+      },
+      {
+        "id": "srv-3",
+        "title": "Seasonal Fevers & Infections",
+        "description": "Rapid diagnosis and evidence-based protocols for Dengue, Typhoid, Viral flu, and malaria.",
+        "icon": "🌡️"
+      },
+      {
+        "id": "srv-4",
+        "title": "Thyroid Disorders",
+        "description": "Evaluation and management of Hypo/Hyperthyroidism, TSH balancing, and dietary guidance.",
+        "icon": "⚖️"
+      },
+      {
+        "id": "srv-5",
+        "title": "Geriatric Health Care",
+        "description": "Specialized healthcare for senior citizens focusing on multi-morbidity and mobility wellness.",
+        "icon": "👴"
+      },
+      {
+        "id": "srv-6",
+        "title": "Preventive Executive Health",
+        "description": "Comprehensive annual physical examinations, lipid profiles, and early detection screens.",
+        "icon": "🛡️"
+      }
+    ]
+  },
+  "appointments": [
+    {
+      "patientName": "Sanjay Malhotra",
+      "phone": "+91 98111 22334",
+      "service": "Preventive Executive Health",
+      "preferredDate": "2026-11-06",
+      "shift": "Morning",
+      "notes": "Slot confirmed for 10:45 AM by Sunita",
+      "id": "APT-1086",
+      "status": "confirmed",
+      "createdAt": "Just now"
+    },
+    {
+      "patientName": "Aarav Mehta",
+      "phone": "+91 99887 76655",
+      "service": "Diabetes Management",
+      "preferredDate": "2026-11-05",
+      "shift": "Morning",
+      "notes": "Called Aarav, confirmed 10:15 AM",
+      "id": "APT-1085",
+      "status": "contacted",
+      "createdAt": "Just now"
+    },
+    {
+      "id": "APT-1081",
+      "patientName": "Ramesh Sharma",
+      "phone": "+91 98101 23456",
+      "doctor": "Dr. Maanvita Kumari",
+      "service": "Diabetes Management",
+      "preferredDate": "2026-11-04",
+      "shift": "Morning",
+      "status": "new",
+      "notes": "Fasting reports ready, prefers 10:30 AM slot",
+      "createdAt": "15 mins ago"
+    },
+    {
+      "id": "APT-1080",
+      "patientName": "Pooja Verma",
+      "phone": "+91 98712 34567",
+      "doctor": "Dr. Maanvita Kumari",
+      "service": "Thyroid Disorders",
+      "preferredDate": "2026-11-04",
+      "shift": "Evening",
+      "status": "contacted",
+      "notes": "WhatsApp confirmation sent by front desk",
+      "createdAt": "45 mins ago"
+    },
+    {
+      "id": "APT-1079",
+      "patientName": "Harish Chandra",
+      "phone": "+91 99110 56789",
+      "doctor": "Dr. Maanvita Kumari",
+      "service": "Hypertension Care",
+      "preferredDate": "2026-11-03",
+      "shift": "Evening",
+      "status": "confirmed",
+      "notes": "Confirmed 6:15 PM slot",
+      "createdAt": "2 hours ago"
+    }
+  ]
+}
