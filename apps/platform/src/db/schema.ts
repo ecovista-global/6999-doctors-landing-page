@@ -19,6 +19,13 @@ const bytea = customType<{ data: Buffer; driverData: Buffer }>({
   },
 });
 
+// Custom citext type for case-insensitive email per 04 § 2
+export const citext = customType<{ data: string }>({
+  dataType() {
+    return 'citext';
+  },
+});
+
 // 1. Tenants Table: Represents one paying clinic/doctor
 export const tenants = pgTable(
   'tenants',
@@ -38,7 +45,7 @@ export const tenants = pgTable(
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
   tenantId: uuid('tenant_id').references(() => tenants.id, { onDelete: 'cascade' }),
-  email: text('email').notNull().unique(),
+  email: citext('email').notNull().unique(),
   role: text('role', { enum: ['superadmin', 'operator', 'tenant_owner', 'tenant_staff'] }).notNull().default('tenant_owner'),
   lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
@@ -48,6 +55,7 @@ export const users = pgTable('users', {
 export const sites = pgTable('sites', {
   id: uuid('id').defaultRandom().primaryKey(),
   tenantId: uuid('tenant_id').notNull().unique().references(() => tenants.id, { onDelete: 'cascade' }),
+  plan: text('plan', { enum: ['basic', 'growth'] }).notNull().default('basic'),
   liveVersion: integer('live_version').default(0).notNull(),
   headVersion: integer('head_version').default(0).notNull(),
   schemaVersion: text('schema_version').notNull().default('1.0.0'),
@@ -120,14 +128,14 @@ export const leadEvents = pgTable('lead_events', {
   at: timestamp('at', { withTimezone: true }).defaultNow().notNull(),
 });
 
-// 8. Subscriptions Table: Pricing plans (₹6,999 year 1 / ₹2,999 renewal)
+// 8. Subscriptions Table: Pricing plans (₹6,999 year 1 / ₹2,999 renewal for basic, ₹12,999 / ₹5,999 for growth)
 export const subscriptions = pgTable('subscriptions', {
   id: uuid('id').defaultRandom().primaryKey(),
   tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
-  plan: text('plan').notNull().default('basic_presence'),
+  plan: text('plan', { enum: ['basic', 'growth'] }).notNull().default('basic'),
   status: text('status', { enum: ['active', 'past_due', 'canceled'] }).notNull().default('active'),
   currentPeriodEnd: date('current_period_end').notNull(),
-  renewalPricePaise: integer('renewal_price_paise').notNull().default(299900), // ₹2,999 in paise
+  renewalPricePaise: integer('renewal_price_paise').notNull().default(299900), // ₹2,999 for basic, ₹5,999 for growth
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
