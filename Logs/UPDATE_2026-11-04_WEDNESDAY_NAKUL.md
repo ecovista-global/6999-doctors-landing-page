@@ -68,6 +68,16 @@ Today's engineering effort delivered 8 high-conversion, clinical-grade features 
   * `★ Set as Nav Logo` &rarr; updates `content.clinic.logoUrl`.
 * **Default Vector Clinical Assets:** Provided authentic SVG assets for Dr. Maanvita's portrait (`/assets/dr_maanvita_portrait.svg`), the Noida clinic facade (`/assets/noida_clinic_facade.svg`), and the clinic branding logo (`/assets/stethoscope_branding.svg`).
 
+### 2.5 Per-Card Photo Upload & Replacement Feature (Media Library & Block Editor)
+* **Direct Per-Card Upload & Replacement in Media Library (`activeTab === 'media'`):**
+  * Added dedicated `replaceFileInputRef` targeting specific asset replacement.
+  * Added interactive click-to-replace overlay on each card thumbnail (`📷 Click to Replace`).
+  * Placed prominent, high-contrast primary button `[ 📷 Upload / Replace This Photo ]` on each asset card (`Dr. Maanvita Portrait (Hero)`, `HealthConsult Noida Clinic Facade`, `Stethoscope Emerald Logo`).
+  * Instant auto-assignment: uploading a replacement for an asset automatically syncs to `content.doctor.photoUrl` or `content.clinic.photoUrl` if active, immediately displaying on the patient landing page without extra manual clicks.
+* **Direct Photo Upload in Site Block Editor (`activeTab === 'editor'`):**
+  * `editorSection === 'doctor'`: Added Doctor Portrait photo upload box with current thumbnail preview, `[ Upload Doctor Photo ]` file browser button, and direct link to Media Library.
+  * `editorSection === 'clinic'`: Added Clinic Facade photo upload box with current thumbnail preview, `[ Upload Clinic Photo ]` file browser button, and direct link to Media Library.
+
 ---
 
 ## 3. Verification & Testing
@@ -84,7 +94,8 @@ Today's engineering effort delivered 8 high-conversion, clinical-grade features 
    * `GET /api/content` &rarr; Returns availability, next slot, and serving token.
    * `GET /api/appointments` &rarr; Returns full appointment list with OPD stages and tokens.
    * `POST /api/appointments` &rarr; Successfully created walk-in patient with Token `#08`.
+   * `POST /api/upload` &rarr; Successfully uploaded image file, saved to `public/uploads`, returned Data URI and metadata.
    * `PATCH /api/appointments/APT-1089` &rarr; Successfully transitioned stage from `waiting` &rarr; `in_consultation` &rarr; `done` with `googleReviewSent: true`.
 4. **Mirroring:**
-   Mirrored all modified files to sibling workspace `/home/nakul/Documents/EcoDigitech`.
+   Mirrored all modified files and logs to sibling workspace `/home/nakul/Documents/EcoDigitech`.
 

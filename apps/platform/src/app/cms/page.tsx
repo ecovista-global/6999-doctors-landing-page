@@ -184,6 +184,10 @@ export default function CmsPanelPage() {
 
   // Media Library State
   const mediaFileInputRef = useRef<HTMLInputElement>(null);
+  const replaceFileInputRef = useRef<HTMLInputElement>(null);
+  const doctorPhotoInputRef = useRef<HTMLInputElement>(null);
+  const clinicPhotoInputRef = useRef<HTMLInputElement>(null);
+  const [replacingMediaId, setReplacingMediaId] = useState<string | null>(null);
   const [isDraggingMedia, setIsDraggingMedia] = useState(false);
   const [uploadingMedia, setUploadingMedia] = useState(false);
   const [mediaCategoryFilter, setMediaCategoryFilter] = useState<'all' | 'doctor' | 'clinic' | 'logo'>('all');
@@ -727,6 +731,202 @@ export default function CmsPanelPage() {
     setContent(updated);
     await handlePublish(updated);
     showToast('Asset removed from Media Library');
+  };
+
+  const handleTriggerReplaceMedia = (mediaId: string) => {
+    setReplacingMediaId(mediaId);
+    replaceFileInputRef.current?.click();
+  };
+
+  const handleReplaceMediaFile = async (file: File) => {
+    if (!content || !replacingMediaId) return;
+    setUploadingMedia(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      let newUrl = '';
+      let fileSize = `${Math.round(file.size / 1024)} KB`;
+      let fileType = file.type || 'image/jpeg';
+
+      if (res.ok) {
+        const data = await res.json();
+        newUrl = data.asset.url;
+        fileSize = data.asset.fileSize;
+        fileType = data.asset.fileType;
+      } else {
+        newUrl = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target?.result as string);
+          reader.readAsDataURL(file);
+        });
+      }
+
+      const targetItem = (content.media || []).find((m) => m.id === replacingMediaId);
+      const updatedMedia = (content.media || []).map((m) => {
+        if (m.id === replacingMediaId) {
+          return {
+            ...m,
+            url: newUrl,
+            fileName: file.name,
+            fileSize,
+            fileType,
+            uploadedAt: 'Updated just now',
+          };
+        }
+        return m;
+      });
+
+      const updatedDoctor = { ...content.doctor };
+      const updatedClinic = { ...content.clinic };
+
+      if (targetItem?.assignedTo === 'hero_doctor_portrait' || content.doctor.photoUrl === targetItem?.url || targetItem?.fileName.includes('portrait')) {
+        updatedDoctor.photoUrl = newUrl;
+      }
+      if (targetItem?.assignedTo === 'clinic_facade' || content.clinic.photoUrl === targetItem?.url || targetItem?.fileName.includes('facade') || targetItem?.fileName.includes('clinic')) {
+        updatedClinic.photoUrl = newUrl;
+      }
+      if (targetItem?.assignedTo === 'nav_logo' || content.clinic.logoUrl === targetItem?.url) {
+        updatedClinic.logoUrl = newUrl;
+      }
+
+      const updated = {
+        ...content,
+        doctor: updatedDoctor,
+        clinic: updatedClinic,
+        media: updatedMedia,
+      };
+
+      setContent(updated);
+      await handlePublish(updated);
+      showToast(`Updated photo for "${targetItem?.title || file.name}". Live site updated!`);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to replace photo');
+    } finally {
+      setUploadingMedia(false);
+      setReplacingMediaId(null);
+    }
+  };
+
+  const handleUploadDoctorPhotoDirect = async (file: File) => {
+    if (!content) return;
+    setUploadingMedia(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      let newUrl = '';
+      let fileSize = `${Math.round(file.size / 1024)} KB`;
+      let fileType = file.type || 'image/jpeg';
+
+      if (res.ok) {
+        const data = await res.json();
+        newUrl = data.asset.url;
+        fileSize = data.asset.fileSize;
+        fileType = data.asset.fileType;
+      } else {
+        newUrl = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target?.result as string);
+          reader.readAsDataURL(file);
+        });
+      }
+
+      const newAsset = {
+        id: `med-${Date.now()}`,
+        title: `Doctor Portrait (${file.name})`,
+        fileName: file.name,
+        fileType,
+        fileSize,
+        url: newUrl,
+        assignedTo: 'hero_doctor_portrait' as const,
+        uploadedAt: 'Just now',
+      };
+
+      const updatedMedia = [
+        newAsset,
+        ...(content.media || []).map((m) => ({
+          ...m,
+          assignedTo: m.assignedTo === 'hero_doctor_portrait' ? ('unassigned' as const) : m.assignedTo,
+        })),
+      ];
+
+      const updated = {
+        ...content,
+        doctor: { ...content.doctor, photoUrl: newUrl },
+        media: updatedMedia,
+      };
+
+      setContent(updated);
+      await handlePublish(updated);
+      showToast('Doctor portrait uploaded and live on site!');
+    } catch (err) {
+      console.error(err);
+      alert('Error uploading doctor portrait');
+    } finally {
+      setUploadingMedia(false);
+    }
+  };
+
+  const handleUploadClinicPhotoDirect = async (file: File) => {
+    if (!content) return;
+    setUploadingMedia(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      let newUrl = '';
+      let fileSize = `${Math.round(file.size / 1024)} KB`;
+      let fileType = file.type || 'image/jpeg';
+
+      if (res.ok) {
+        const data = await res.json();
+        newUrl = data.asset.url;
+        fileSize = data.asset.fileSize;
+        fileType = data.asset.fileType;
+      } else {
+        newUrl = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target?.result as string);
+          reader.readAsDataURL(file);
+        });
+      }
+
+      const newAsset = {
+        id: `med-${Date.now()}`,
+        title: `Clinic Facade (${file.name})`,
+        fileName: file.name,
+        fileType,
+        fileSize,
+        url: newUrl,
+        assignedTo: 'clinic_facade' as const,
+        uploadedAt: 'Just now',
+      };
+
+      const updatedMedia = [
+        newAsset,
+        ...(content.media || []).map((m) => ({
+          ...m,
+          assignedTo: m.assignedTo === 'clinic_facade' ? ('unassigned' as const) : m.assignedTo,
+        })),
+      ];
+
+      const updated = {
+        ...content,
+        clinic: { ...content.clinic, photoUrl: newUrl },
+        media: updatedMedia,
+      };
+
+      setContent(updated);
+      await handlePublish(updated);
+      showToast('Clinic photo uploaded and live on site!');
+    } catch (err) {
+      console.error(err);
+      alert('Error uploading clinic photo');
+    } finally {
+      setUploadingMedia(false);
+    }
   };
 
   // 6. Direct Theme Switcher with Instant Publish
@@ -2963,6 +3163,123 @@ export default function CmsPanelPage() {
                         <BuildingIcon size={18} color="#0F766E" />
                         <span>Clinic Address, Schedule &amp; Map Facade</span>
                       </h3>
+
+                      {/* Clinic Facade Photo Upload Card */}
+                      <input
+                        ref={clinicPhotoInputRef}
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            handleUploadClinicPhotoDirect(file);
+                            e.target.value = '';
+                          }
+                        }}
+                      />
+
+                      <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '14px', marginBottom: '16px' }}>
+                        <div style={{ fontSize: '12px', fontWeight: '800', color: '#0F766E', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <ImageIcon size={14} color="#0F766E" />
+                          <span>Clinic Facade &amp; Premises Photo</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap' }}>
+                          <div
+                            onClick={() => clinicPhotoInputRef.current?.click()}
+                            title="Click to upload/change photo"
+                            style={{
+                              width: '120px',
+                              height: '80px',
+                              borderRadius: '8px',
+                              border: '2px solid #0F766E',
+                              overflow: 'hidden',
+                              background: '#E2E8F0',
+                              flexShrink: 0,
+                              cursor: 'pointer',
+                              position: 'relative',
+                            }}
+                          >
+                            <img
+                              src={content.clinic.photoUrl || '/assets/noida_clinic_facade.svg'}
+                              alt="Clinic Facade"
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                            <div
+                              style={{
+                                position: 'absolute',
+                                inset: 0,
+                                background: 'rgba(0,0,0,0.3)',
+                                opacity: 0,
+                                transition: 'opacity 0.2s',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: '#FFF',
+                                fontSize: '10px',
+                                fontWeight: '700',
+                              }}
+                              onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
+                              onMouseLeave={(e) => (e.currentTarget.style.opacity = '0')}
+                            >
+                              Change
+                            </div>
+                          </div>
+
+                          <div style={{ flex: 1, minWidth: '200px' }}>
+                            <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                              <button
+                                type="button"
+                                onClick={() => clinicPhotoInputRef.current?.click()}
+                                className="ux-btn"
+                                disabled={uploadingMedia}
+                                style={{
+                                  background: '#0F766E',
+                                  color: '#FFF',
+                                  border: 'none',
+                                  padding: '7px 14px',
+                                  borderRadius: '6px',
+                                  fontSize: '12px',
+                                  fontWeight: '700',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  boxShadow: '0 2px 4px rgba(15,118,110,0.2)',
+                                }}
+                              >
+                                <UploadIcon size={14} color="#FFF" />
+                                <span>{uploadingMedia ? 'Uploading...' : 'Upload Clinic Photo'}</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => setActiveTab('media')}
+                                className="ux-btn"
+                                style={{
+                                  background: '#FFFFFF',
+                                  color: '#475569',
+                                  border: '1px solid #CBD5E1',
+                                  padding: '7px 12px',
+                                  borderRadius: '6px',
+                                  fontSize: '12px',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                }}
+                              >
+                                <ImageIcon size={14} color="#475569" />
+                                <span>Browse Media Library</span>
+                              </button>
+                            </div>
+                            <div style={{ fontSize: '11px', color: '#64748B' }}>
+                              Appears alongside the clinic address &amp; Google Map embed for easy patient arrival.
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         <div>
                           <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '4px' }}>Tagline Quote</label>
@@ -3082,6 +3399,123 @@ export default function CmsPanelPage() {
                         <UserCheckIcon size={18} color="#0F766E" />
                         <span>Doctor Credentials, Fee &amp; Bio</span>
                       </h3>
+
+                      {/* Doctor Portrait Upload Card */}
+                      <input
+                        ref={doctorPhotoInputRef}
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            handleUploadDoctorPhotoDirect(file);
+                            e.target.value = '';
+                          }
+                        }}
+                      />
+
+                      <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '14px', marginBottom: '16px' }}>
+                        <div style={{ fontSize: '12px', fontWeight: '800', color: '#0F766E', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <ImageIcon size={14} color="#0F766E" />
+                          <span>Doctor Hero Portrait Photo</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap' }}>
+                          <div
+                            onClick={() => doctorPhotoInputRef.current?.click()}
+                            title="Click to upload/change photo"
+                            style={{
+                              width: '84px',
+                              height: '84px',
+                              borderRadius: '10px',
+                              border: '2px solid #0F766E',
+                              overflow: 'hidden',
+                              background: '#E2E8F0',
+                              flexShrink: 0,
+                              cursor: 'pointer',
+                              position: 'relative',
+                            }}
+                          >
+                            <img
+                              src={content.doctor.photoUrl || '/assets/dr_maanvita_portrait.svg'}
+                              alt="Doctor Portrait"
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                            <div
+                              style={{
+                                position: 'absolute',
+                                inset: 0,
+                                background: 'rgba(0,0,0,0.3)',
+                                opacity: 0,
+                                transition: 'opacity 0.2s',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: '#FFF',
+                                fontSize: '10px',
+                                fontWeight: '700',
+                              }}
+                              onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
+                              onMouseLeave={(e) => (e.currentTarget.style.opacity = '0')}
+                            >
+                              Change
+                            </div>
+                          </div>
+
+                          <div style={{ flex: 1, minWidth: '200px' }}>
+                            <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                              <button
+                                type="button"
+                                onClick={() => doctorPhotoInputRef.current?.click()}
+                                className="ux-btn"
+                                disabled={uploadingMedia}
+                                style={{
+                                  background: '#0F766E',
+                                  color: '#FFF',
+                                  border: 'none',
+                                  padding: '7px 14px',
+                                  borderRadius: '6px',
+                                  fontSize: '12px',
+                                  fontWeight: '700',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  boxShadow: '0 2px 4px rgba(15,118,110,0.2)',
+                                }}
+                              >
+                                <UploadIcon size={14} color="#FFF" />
+                                <span>{uploadingMedia ? 'Uploading...' : 'Upload Doctor Photo'}</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => setActiveTab('media')}
+                                className="ux-btn"
+                                style={{
+                                  background: '#FFFFFF',
+                                  color: '#475569',
+                                  border: '1px solid #CBD5E1',
+                                  padding: '7px 12px',
+                                  borderRadius: '6px',
+                                  fontSize: '12px',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                }}
+                              >
+                                <ImageIcon size={14} color="#475569" />
+                                <span>Browse Media Library</span>
+                              </button>
+                            </div>
+                            <div style={{ fontSize: '11px', color: '#64748B' }}>
+                              Shows on hero card and doctor credentials. Recommended: 800×800 square or 4:5 portrait.
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         <div>
                           <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '4px' }}>Doctor Name</label>
@@ -3913,6 +4347,21 @@ export default function CmsPanelPage() {
                 }}
               />
 
+              {/* Hidden Real File Input for Specific Asset Replacement */}
+              <input
+                ref={replaceFileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    handleReplaceMediaFile(file);
+                    e.target.value = '';
+                  }
+                }}
+              />
+
               {/* Clickable & Draggable Upload Dropzone */}
               <div
                 onClick={() => mediaFileInputRef.current?.click()}
@@ -4039,13 +4488,52 @@ export default function CmsPanelPage() {
                         }}
                       >
                         <div>
-                          {/* Real Image Thumbnail */}
-                          <div style={{ height: '160px', width: '100%', background: '#F1F5F9', borderRadius: '8px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px', position: 'relative' }}>
+                          {/* Real Image Thumbnail with Click-to-Replace */}
+                          <div
+                            onClick={() => handleTriggerReplaceMedia(item.id)}
+                            title="Click to upload/replace this photo from your computer"
+                            style={{
+                              height: '160px',
+                              width: '100%',
+                              background: '#F1F5F9',
+                              borderRadius: '8px',
+                              overflow: 'hidden',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              marginBottom: '10px',
+                              position: 'relative',
+                              cursor: 'pointer',
+                              border: '1px solid #E2E8F0',
+                            }}
+                          >
                             <img
                               src={item.url}
                               alt={item.title}
                               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />
+                            {/* Hover / Quick Action Overlay */}
+                            <div
+                              style={{
+                                position: 'absolute',
+                                bottom: '8px',
+                                right: '8px',
+                                background: 'rgba(15, 23, 42, 0.78)',
+                                color: '#FFFFFF',
+                                fontSize: '10px',
+                                fontWeight: '700',
+                                padding: '4px 8px',
+                                borderRadius: '6px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                backdropFilter: 'blur(2px)',
+                              }}
+                            >
+                              <UploadIcon size={11} color="#FFFFFF" />
+                              <span>Click to Replace</span>
+                            </div>
+
                             {/* Active Assignment Badge */}
                             {isDoctorPortrait && (
                               <span style={{ position: 'absolute', top: '8px', right: '8px', background: '#0F766E', color: '#FFF', fontSize: '10px', fontWeight: '800', padding: '3px 8px', borderRadius: '999px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
@@ -4077,6 +4565,36 @@ export default function CmsPanelPage() {
 
                         {/* 1-Click Assignment & Management Actions */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', paddingTop: '10px', borderTop: '1px solid #F1F5F9' }}>
+                          {/* Primary Replace/Upload Photo Button for this Card */}
+                          <button
+                            type="button"
+                            onClick={() => handleTriggerReplaceMedia(item.id)}
+                            className="ux-btn"
+                            disabled={uploadingMedia && replacingMediaId === item.id}
+                            style={{
+                              width: '100%',
+                              background: '#0F766E',
+                              color: '#FFFFFF',
+                              border: 'none',
+                              padding: '8px 10px',
+                              borderRadius: '6px',
+                              fontSize: '11px',
+                              fontWeight: '700',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '6px',
+                              boxShadow: '0 2px 5px rgba(15,118,110,0.25)',
+                              marginBottom: '2px',
+                            }}
+                          >
+                            <UploadIcon size={13} color="#FFFFFF" />
+                            <span>
+                              {uploadingMedia && replacingMediaId === item.id ? 'Uploading...' : 'Upload / Replace This Photo'}
+                            </span>
+                          </button>
+
                           <button
                             onClick={() => handleSetDoctorPhoto(item.url)}
                             className="ux-btn"

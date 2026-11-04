@@ -312,6 +312,17 @@
     ],
     "media": [
       {
+        "id": "med-1793802747785",
+        "title": "5f882cec-8453-4367-a5ff-4eafa60b6ec6",
+        "fileName": "1793802747784_5f882cec-8453-4367-a5ff-4eafa60b6ec6.jpeg",
+        "fileType": "image/jpeg",
+        "fileSize": "112 KB",
+        "url": "/uploads/1793802747784_5f882cec-8453-4367-a5ff-4eafa60b6ec6.jpeg",
+        "diskUrl": "/uploads/1793802747784_5f882cec-8453-4367-a5ff-4eafa60b6ec6.jpeg",
+        "assignedTo": "clinic_facade",
+        "uploadedAt": "Just now"
+      },
+      {
         "id": "med-1",
         "title": "Dr. Maanvita Portrait (Hero)",
         "fileName": "dr_maanvita_portrait.svg",
@@ -330,7 +341,7 @@
         "fileSize": "68 KB",
         "url": "/assets/noida_clinic_facade.svg",
         "diskUrl": "/assets/noida_clinic_facade.svg",
-        "assignedTo": "clinic_facade",
+        "assignedTo": "unassigned",
         "uploadedAt": "Active Clinic Asset"
       },
       {
@@ -349,6 +360,7 @@
   "appointments": [
     {
       "id": "APT-1090",
+      "tokenNumber": 1,
       "patientName": "Nakul ",
       "phone": "7307436493",
       "doctor": "Dr. Maanvita Kumari",
@@ -358,7 +370,9 @@
       "status": "completed",
       "opdStage": "done",
       "notes": "Slot time: 07:00 PM. needed blood test ",
-      "createdAt": "Just now"
+      "createdAt": "Just now",
+      "whatsappConfirmationSent": false,
+      "googleReviewSent": false
     },
     {
       "id": "APT-1089",
