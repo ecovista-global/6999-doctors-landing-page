@@ -3,48 +3,109 @@
 **Engineer:** Nakul Sukhwani (<nakulsukhwani.in@gmail.com>)  
 **Repository:** `6999-doctors-landing-page` (`/home/nakul/Documents/EcoDigitech 12999`)  
 **Branch:** `dr-12999`  
-**Status:** Successfully implemented and tested all 8 requested clinical workflow and conversion features across the patient landing page (`http://localhost:3000/`) and the CMS control plane (`http://localhost:3000/cms`). Verified zero TypeScript compiler errors, tested end-to-end via REST APIs, and mirrored changes to sibling workspace.
+**Status:** Successfully implemented, tested, and verified all 8 requested clinical workflow and conversion features, full asset photo upload and per-card replacement pipeline, two-way live OPD queue integration, zero TypeScript compiler errors, and mirrored to sibling workspace.
 
 ---
 
 ## 1. Executive Summary
 
-Today's engineering effort delivered 8 high-conversion, clinical-grade features bridging the patient portal (`http://localhost:3000/`) and the doctor/receptionist CMS control plane (`http://localhost:3000/cms`):
+Today's engineering effort delivered high-conversion, clinical-grade features bridging the patient portal (`http://localhost:3000/`) and the doctor/receptionist CMS control plane (`http://localhost:3000/cms`):
 
-1. **Live "Next Available: Today 5:30 PM" Chip & Interactive Slot Picker:**
-   Published from CMS to the live store; displays a real-time availability beacon on the hero section and provides interactive slot chips in the booking form that auto-fill the patient consultation request without complex backend latency.
-2. **Today's OPD Board for Receptionist Sunita:**
-   A dedicated clinical operations screen with a 3-column Kanban board (`Waiting`, `In Consultation`, `Done`), a 10-second front-desk walk-in registration bar with automatic sequential token generation, and 1-tap Call and WhatsApp outreach triggers.
+1. **Live "Next Available: Today 5:30 PM" Beacon Chip & Interactive Slot Picker:**
+   * Published directly from CMS availability settings to `fixtures/live-store.json`.
+   * Displays an animated emerald radar beacon on the patient hero section indicating immediate consultation availability.
+   * Provides 1-tap interactive time chips (`05:30 PM`, `06:00 PM`, `07:00 PM`, `10:00 AM`) in the `#booking` form that auto-fill consultation preferences.
+2. **Today's OPD Board for Front-Desk / Receptionist Sunita:**
+   * A dedicated clinical operations command center (`activeTab === 'opd_board'`) with a 3-column Kanban board (`Waiting`, `In Consultation`, `Done`).
+   * Includes a 10-second front-desk walk-in registration bar with automatic sequential token generation (`#01`, `#02`, `#03`...).
+   * Direct 1-tap Call and WhatsApp outreach triggers for instant communication with waiting patients.
 3. **WhatsApp Confirm, Remind and Reply Workflows:**
-   1-tap WhatsApp booking confirmation with prefilled Indian clinic details and reply shortcuts (`1 to Confirm, 2 to Reschedule, 3 to Cancel`), plus a 2-hour pre-visit arrival reminder trigger.
-4. **Token Number & "Running Late" Emergency Broadcast:**
-   Sequential token allocation (`#01`, `#02`...), live "Currently Serving Token #XX" indicator, and 1-tap doctor delay broadcasts (`On Time`, `+15m`, `+20m`, `+30m`) instantly pushing emergency alert banners to the patient site.
+   * 1-tap WhatsApp booking confirmation prefilled with Indian clinic details, doctor credentials, and numeric reply shortcuts (`1 to Confirm, 2 to Reschedule, 3 to Cancel`).
+   * Automated 2-hour pre-visit arrival reminder trigger with transit advice.
+4. **Token Number & "Doctor Running Late" Emergency Broadcast:**
+   * Sequential token allocation for every confirmed or walk-in appointment.
+   * Live "Currently Serving Token #XX" indicator visible both in the CMS and on the live patient portal.
+   * 1-tap doctor delay broadcast buttons (`On Time`, `+15m`, `+20m`, `+30m`) that instantly push an alert banner across the top of the patient landing page.
 5. **Post-Visit Google Review Dispatch (Compliant Non-Gating):**
-   1-tap WhatsApp trigger sending the verified clinic review link (`https://g.page/r/healthconsult-noida/review`) to all completed consultations without sentiment filtering, complying strictly with Google's non-gating review policies.
+   * 1-tap WhatsApp trigger dispatching the verified clinic Google Review link (`https://g.page/r/healthconsult-noida/review`) to all completed consultations.
+   * Sent universally to every patient without sentiment filtering, complying strictly with Google's non-gating review guidelines.
 6. **Direct In-Context Live Preview Quick Editor:**
-   An interactive in-context editing bar placed directly above the live preview iframe in the Block Editor tab, enabling instant modification of Hero Headline, Doctor Specialty, Consultation Fee, and Next Available Slot with automatic live iframe reload.
+   * An interactive in-context editing bar placed directly above the live preview iframe in the Block Editor tab (`activeTab === 'editor'`).
+   * Enables immediate modification of Hero Headline, Doctor Specialty, Consultation Fee, and Next Available Slot with automatic live iframe reload.
 7. **Plain-Language Weekly WhatsApp Summary for Dr. Maanvita:**
-   An automated practice performance digest generator (calculating total appointments, completed visits, walk-in counts, no-shows, busiest OPD shift, top requested service, and Google reviews sent) with 1-tap delivery directly to Dr. Maanvita's WhatsApp (`+91 98710 23456`).
-8. **Printable Appointment Slip (PDF) with .ics Calendar & Google Maps Transit:**
-   Downloadable and printable clinic OPD slip featuring clinic address, Delhi Medical Council registration number, token badge, consultation fee policy, 1-click `window.print()` formatting, RFC 5545 client-side `.ics` export, and direct Google Maps routing.
+   * An automated practice performance digest generator calculating total appointments, completed visits, walk-in counts, no-shows, busiest OPD shift, top requested service, and Google reviews sent.
+   * 1-tap delivery directly to Dr. Maanvita's WhatsApp (`+91 98710 23456`).
+8. **Printable Appointment Slip (PDF) with RFC 5545 .ics Calendar & Google Maps Transit:**
+   * Downloadable and printable clinic OPD slip featuring clinic address, Delhi Medical Council registration number, token badge, consultation fee policy, 1-click `window.print()` formatting, RFC 5545 client-side `.ics` export, and direct Google Maps routing.
+9. **Media Library Photo Upload & Per-Card Replacement Pipeline:**
+   * Functional upload API endpoint (`POST /api/upload`) supporting `multipart/form-data` and JSON base64 payloads.
+   * Persistent asset storage in `apps/platform/public/uploads` with zero-latency Data URI previews.
+   * Authentic vector SVG assets for Dr. Maanvita's portrait (`/assets/dr_maanvita_portrait.svg`), Noida clinic facade (`/assets/noida_clinic_facade.svg`), and clinic branding logo (`/assets/stethoscope_branding.svg`).
+   * Per-card `[ 📷 Upload / Replace This Photo ]` action buttons and clickable thumbnail overlays across all media library cards.
+   * Dedicated Doctor Portrait and Clinic Facade upload cards directly within the Site Block Editor.
 
 ---
 
 ## 2. Technical Implementation Details
 
 ### 2.1 Data Layer & Store Extensions (`apps/platform/src/lib/contentStore.ts`)
-* **`DoctorAvailability` Interface:** Added fields for `nextAvailableSlot: string`, `isAcceptingToday: boolean`, `runningLateMinutes: number`, `runningLateReason: string`, `currentServingToken: number`, and `todaySlots: SlotItem[]`.
-* **`AppointmentRecord` Interface:** Enhanced with `tokenNumber: number`, `opdStage: 'waiting' | 'in_consultation' | 'done'`, `whatsappConfirmationSent?: boolean`, and `googleReviewSent?: boolean`.
+* **`DoctorAvailability` Interface:**
+  ```typescript
+  export interface DoctorAvailability {
+    nextAvailableSlot: string;
+    isAcceptingToday: boolean;
+    runningLateMinutes: number;
+    runningLateReason: string;
+    currentServingToken: number;
+    todaySlots: SlotItem[];
+  }
+  ```
+* **`AppointmentRecord` Interface:**
+  ```typescript
+  export interface AppointmentRecord {
+    id: string;
+    tokenNumber?: number;
+    patientName: string;
+    phone: string;
+    doctor: string;
+    service: string;
+    preferredDate: string;
+    shift: 'Morning' | 'Evening';
+    status: 'new' | 'contacted' | 'confirmed' | 'cancelled' | 'completed';
+    opdStage: 'waiting' | 'in_consultation' | 'done';
+    notes?: string;
+    createdAt: string;
+    whatsappConfirmationSent?: boolean;
+    googleReviewSent?: boolean;
+  }
+  ```
+* **`MediaItem` Interface:**
+  ```typescript
+  export interface MediaItem {
+    id: string;
+    title: string;
+    fileName: string;
+    fileType: string;
+    fileSize: string;
+    url: string;
+    diskUrl?: string;
+    assignedTo?: 'hero_doctor_portrait' | 'clinic_facade' | 'nav_logo' | 'unassigned';
+    uploadedAt: string;
+  }
+  ```
 * **API Endpoints:**
-  * `apps/platform/src/app/api/appointments/route.ts`: Updated to accept and assign sequential `tokenNumber`, `opdStage`, and `status`.
-  * `apps/platform/src/app/api/appointments/[id]/route.ts`: Extended `PATCH` handler to support `opdStage`, `status`, `notes`, `whatsappConfirmationSent`, and `googleReviewSent`.
+  * `apps/platform/src/app/api/upload/route.ts`: Built multipart and base64 upload parser saving to `public/uploads`.
+  * `apps/platform/src/app/api/appointments/route.ts`: Auto-allocates sequential token numbers and `opdStage`.
+  * `apps/platform/src/app/api/appointments/[id]/route.ts`: Supports `opdStage` transitions (`waiting` &rarr; `in_consultation` &rarr; `done`), `whatsappConfirmationSent`, and `googleReviewSent`.
 
 ### 2.2 Patient-Facing Landing Page (`apps/platform/src/app/page.tsx`)
-* **Radar Beacon Chip:** Added "Next Available: Today 5:30 PM" chip in hero banner with pulsing CSS radar effect.
-* **Emergency Delay Banner:** Dynamic top alert shown whenever `content.availability.runningLateMinutes > 0`, informing patients of current doctor cabin status.
-* **Currently Serving Token Indicator:** Live indicator displaying `#03` currently inside Dr. Maanvita's cabin.
-* **Interactive Slot Picker:** Quick time chips (`05:30 PM`, `06:00 PM`, `07:00 PM`, `10:00 AM`) in the `#booking` form that auto-fill consultation preferences.
-* **Appointment Slip Card:** Post-submission interactive card with bold Token badge, 1-click printable slip (`window.print()`), `.ics` calendar invitation generator, and Google Maps directions link.
+* **Radar Beacon Chip:** Dynamic "Next Available: Today 5:30 PM" chip in hero banner with pulsing CSS radar effect.
+* **Emergency Delay Banner:** Top alert displayed whenever `content.availability.runningLateMinutes > 0`.
+* **Currently Serving Token Indicator:** Live indicator displaying `#03` / `#10` currently inside Dr. Maanvita's cabin.
+* **Interactive Slot Picker:** Quick time chips (`05:30 PM`, `06:00 PM`, `07:00 PM`, `10:00 AM`) in `#booking` form that auto-fill consultation preferences.
+* **Doctor Portrait Integration:** Renders uploaded doctor photo (`content.doctor.photoUrl`), falling back to vector avatar.
+* **Clinic Facade Integration:** Clinic timings and map section renders uploaded clinic photo backdrop.
+* **Appointment Slip Card:** Post-submission card with bold Token badge, 1-click printable slip (`window.print()`), `.ics` calendar invitation generator, and Google Maps directions link.
 
 ### 2.3 CMS Control Plane (`apps/platform/src/app/cms/page.tsx`)
 * **Sidebar Integration:** Added `opd_board` ("Today's OPD Board") under `CLINICAL OPERATIONS` with a live badge displaying waiting patient count.
@@ -58,25 +119,16 @@ Today's engineering effort delivered 8 high-conversion, clinical-grade features 
 * **Printable Clinic Appointment Slip Modal:** Authentic Indian clinical OPD slip with DMC registration details, QR transit guidance, and 1-tap print/WhatsApp share.
 * **Doctor Weekly Digest Modal:** Computes live practice metrics and delivers a clean WhatsApp message to Dr. Maanvita's mobile.
 
-### 2.4 Functional Media Library & Asset Pipeline (`activeTab === 'media'`)
-* **Interactive Drag-and-Drop & File Picker Dropzone:** Replaced the non-interactive mock div with a functional file upload dropzone backed by a hidden `<input type="file">`, supporting JPG, PNG, WebP, and SVG files.
-* **Upload API (`/api/upload`):** Developed a Next.js server endpoint handling both `multipart/form-data` uploads and JSON base64 payloads, saving physical files to `apps/platform/public/uploads` and generating immediate Data URIs.
-* **Real Thumbnail Preview:** Replaced placeholder colored SVG icons with real image thumbnails (`<img src={item.url} />`).
-* **1-Click Live Site Asset Assignment:** Each uploaded image card includes 1-tap triggers:
-  * `★ Set as Doctor Portrait` &rarr; updates `content.doctor.photoUrl`, instantly displaying the doctor's portrait on `http://localhost:3000/` and in the CMS header.
-  * `★ Set as Clinic Photo` &rarr; updates `content.clinic.photoUrl`, updating the clinic section.
-  * `★ Set as Nav Logo` &rarr; updates `content.clinic.logoUrl`.
-* **Default Vector Clinical Assets:** Provided authentic SVG assets for Dr. Maanvita's portrait (`/assets/dr_maanvita_portrait.svg`), the Noida clinic facade (`/assets/noida_clinic_facade.svg`), and the clinic branding logo (`/assets/stethoscope_branding.svg`).
-
-### 2.5 Per-Card Photo Upload & Replacement Feature (Media Library & Block Editor)
-* **Direct Per-Card Upload & Replacement in Media Library (`activeTab === 'media'`):**
+### 2.4 Media Library & Photo Upload Workflows (`activeTab === 'media'` & `activeTab === 'editor'`)
+* **Interactive Drag-and-Drop & Dropzone:** Supports JPG, PNG, WebP, and SVG files.
+* **Per-Card Photo Upload & Replacement:**
   * Added dedicated `replaceFileInputRef` targeting specific asset replacement.
   * Added interactive click-to-replace overlay on each card thumbnail (`📷 Click to Replace`).
-  * Placed prominent, high-contrast primary button `[ 📷 Upload / Replace This Photo ]` on each asset card (`Dr. Maanvita Portrait (Hero)`, `HealthConsult Noida Clinic Facade`, `Stethoscope Emerald Logo`).
-  * Instant auto-assignment: uploading a replacement for an asset automatically syncs to `content.doctor.photoUrl` or `content.clinic.photoUrl` if active, immediately displaying on the patient landing page without extra manual clicks.
+  * Placed prominent primary button `[ 📷 Upload / Replace This Photo ]` on each asset card (`Dr. Maanvita Portrait (Hero)`, `HealthConsult Noida Clinic Facade`, `Stethoscope Emerald Logo`).
+  * Automatic assignment propagation: replacing an assigned asset immediately updates `content.doctor.photoUrl` or `content.clinic.photoUrl`.
 * **Direct Photo Upload in Site Block Editor (`activeTab === 'editor'`):**
-  * `editorSection === 'doctor'`: Added Doctor Portrait photo upload box with current thumbnail preview, `[ Upload Doctor Photo ]` file browser button, and direct link to Media Library.
-  * `editorSection === 'clinic'`: Added Clinic Facade photo upload box with current thumbnail preview, `[ Upload Clinic Photo ]` file browser button, and direct link to Media Library.
+  * `editorSection === 'doctor'`: Added Doctor Portrait photo upload box with thumbnail preview, `[ Upload Doctor Photo ]` file browser button, and direct link to Media Library.
+  * `editorSection === 'clinic'`: Added Clinic Facade photo upload box with thumbnail preview, `[ Upload Clinic Photo ]` file browser button, and direct link to Media Library.
 
 ---
 
@@ -84,18 +136,30 @@ Today's engineering effort delivered 8 high-conversion, clinical-grade features 
 
 1. **TypeScript Type Check:**
    ```bash
-   cd apps/platform && pnpm tsc --noEmit
+   pnpm --filter @ecodigitech/platform exec tsc --noEmit
    # Exit code: 0 (Zero errors)
    ```
 2. **HTTP Service Tests:**
    * `http://localhost:3000/` &rarr; `HTTP 200 OK`
    * `http://localhost:3000/cms` &rarr; `HTTP 200 OK`
+   * `http://127.0.0.1:4173/` &rarr; `HTTP 200 OK`
 3. **API Route Tests:**
    * `GET /api/content` &rarr; Returns availability, next slot, and serving token.
    * `GET /api/appointments` &rarr; Returns full appointment list with OPD stages and tokens.
    * `POST /api/appointments` &rarr; Successfully created walk-in patient with Token `#08`.
    * `POST /api/upload` &rarr; Successfully uploaded image file, saved to `public/uploads`, returned Data URI and metadata.
    * `PATCH /api/appointments/APT-1089` &rarr; Successfully transitioned stage from `waiting` &rarr; `in_consultation` &rarr; `done` with `googleReviewSent: true`.
-4. **Mirroring:**
+4. **Live User Booking Verification:**
+   * Appointment `APT-1090`: Patient Nakul, 7307436493, status completed (`opdStage: done`).
+   * Appointment `APT-1091`: Patient Nakul, 7307436493, status confirmed (`opdStage: in_consultation`), current serving token `#10`.
+5. **Mirroring:**
    Mirrored all modified files and logs to sibling workspace `/home/nakul/Documents/EcoDigitech`.
 
+---
+
+## 4. Git Repository & Branching History
+
+* **Active Repository:** `6999-doctors-landing-page` (`/home/nakul/Documents/EcoDigitech 12999`)
+* **Target Branch:** `dr-12999`
+* **Remote:** `git@github.com:ecovista-global/6999-doctors-landing-page.git`
+* **Strict Constraint Followed:** Pushed exclusively to `dr-12999`; never pushed to `main`.

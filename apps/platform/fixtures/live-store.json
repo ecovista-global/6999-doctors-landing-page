@@ -7,7 +7,7 @@
       "isAcceptingToday": true,
       "runningLateMinutes": 0,
       "runningLateReason": "Emergency acute care review",
-      "currentServingToken": 9,
+      "currentServingToken": 10,
       "todaySlots": [
         {
           "id": "slot-1",
@@ -358,6 +358,22 @@
     ]
   },
   "appointments": [
+    {
+      "id": "APT-1091",
+      "tokenNumber": 1,
+      "patientName": "nakul ",
+      "phone": "7307436493",
+      "doctor": "Dr. Maanvita Kumari",
+      "service": "General Health Checkup",
+      "preferredDate": "2026-11-04",
+      "shift": "Evening",
+      "status": "confirmed",
+      "opdStage": "in_consultation",
+      "notes": "Slot time: 07:00 PM. blood test ",
+      "createdAt": "Just now",
+      "whatsappConfirmationSent": false,
+      "googleReviewSent": false
+    },
     {
       "id": "APT-1090",
       "tokenNumber": 1,
