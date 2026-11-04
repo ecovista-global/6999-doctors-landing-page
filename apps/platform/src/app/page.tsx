@@ -31,6 +31,12 @@ import {
   ChevronDownIcon,
   ExternalLinkIcon,
   LockIcon as KeyIcon,
+  MenuIcon,
+  XIcon,
+  PrinterIcon,
+  AlertCircleIcon,
+  Share2Icon,
+  CopyIcon,
 } from '@/components/Icons';
 
 const DEFAULT_PALETTE = { primary: '#0F766E', primaryDark: '#115E59', accent: '#047857', bg: '#F0FDF4', text: '#0F172A' };
@@ -65,6 +71,7 @@ export default function PatientLandingPage() {
   const [content, setContent] = useState<DoctorContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [showInteractiveMap, setShowInteractiveMap] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Appointment Form State
   const [formData, setFormData] = useState({
@@ -75,9 +82,19 @@ export default function PatientLandingPage() {
     shift: 'Morning' as 'Morning' | 'Afternoon' | 'Evening',
     notes: '',
   });
+  const [selectedSlotTime, setSelectedSlotTime] = useState<string | null>('05:30 PM');
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submittedAptId, setSubmittedAptId] = useState('');
+  const [confirmedToken, setConfirmedToken] = useState<number>(8);
+  const [confirmedDetails, setConfirmedDetails] = useState<{
+    patientName: string;
+    phone: string;
+    service: string;
+    shift: string;
+    date: string;
+    time: string;
+  } | null>(null);
 
   // Fetch live content from CMS API
   const fetchContent = async () => {
@@ -111,6 +128,35 @@ export default function PatientLandingPage() {
     };
   }, []);
 
+  const downloadIcsCalendar = () => {
+    if (!content || !confirmedDetails) return;
+    const dateFormatted = ((confirmedDetails.date || new Date().toISOString().split('T')[0]) ?? '').replace(/-/g, '');
+    const icsString = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//DoctorSite Pro//Clinic Appointment Slip//EN',
+      'CALSCALE:GREGORIAN',
+      'METHOD:PUBLISH',
+      'BEGIN:VEVENT',
+      `SUMMARY:Medical Consultation with ${content.doctor.name} (Token #${confirmedToken})`,
+      `DESCRIPTION:In-clinic consultation at ${content.clinic.name}. Patient: ${confirmedDetails.patientName}. Service: ${confirmedDetails.service}. Address: ${content.clinic.street}, ${content.clinic.area}, ${content.clinic.city}`,
+      `LOCATION:${content.clinic.street}, ${content.clinic.area}, ${content.clinic.city}`,
+      `DTSTART:${dateFormatted}T120000Z`,
+      `DTEND:${dateFormatted}T123000Z`,
+      'STATUS:CONFIRMED',
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\r\n');
+
+    const blob = new Blob([icsString], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `appointment-token-${confirmedToken}.ics`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleBookAppointment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.patientName || !formData.phone) {
@@ -122,21 +168,25 @@ export default function PatientLandingPage() {
       const res = await fetch('/api/appointments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          notes: selectedSlotTime ? `Slot time: ${selectedSlotTime}. ${formData.notes}` : formData.notes,
+        }),
       });
       if (res.ok) {
         const data = await res.json();
-        setSubmittedAptId(data.appointment?.id || 'APT-CONFIRMED');
-        setSubmitSuccess(true);
-        setFormData({
-          patientName: '',
-          phone: '',
-          service: content?.services[0]?.title || 'General Health Checkup',
-          preferredDate: '',
-          shift: 'Morning',
-          notes: '',
+        const apt = data.appointment;
+        setSubmittedAptId(apt?.id || 'APT-CONFIRMED');
+        setConfirmedToken(apt?.tokenNumber || (content?.availability?.currentServingToken ? content.availability.currentServingToken + 4 : 8));
+        setConfirmedDetails({
+          patientName: formData.patientName,
+          phone: formData.phone,
+          service: formData.service,
+          shift: formData.shift,
+          date: formData.preferredDate || (new Date().toISOString().split('T')[0] ?? ''),
+          time: selectedSlotTime || (formData.shift === 'Morning' ? '10:30 AM' : '05:30 PM'),
         });
-        setTimeout(() => setSubmitSuccess(false), 8000);
+        setSubmitSuccess(true);
       } else {
         alert('Failed to submit appointment request.');
       }
@@ -243,7 +293,8 @@ export default function PatientLandingPage() {
           </div>
         </div>
 
-        <nav style={{ display: 'flex', gap: '20px', alignItems: 'center', fontSize: '14px', fontWeight: '600' }}>
+        {/* Desktop Navigation */}
+        <nav className="desktop-nav" style={{ fontSize: '14px', fontWeight: '600' }}>
           <a href="#about" className="nav-link" style={{ color: '#334155' }}>Credentials</a>
           <a href="#features" className="nav-link" style={{ color: '#334155' }}>Why Choose Us</a>
           <a href="#services" className="nav-link" style={{ color: '#334155' }}>Services</a>
@@ -270,7 +321,98 @@ export default function PatientLandingPage() {
             <span>Call Clinic</span>
           </a>
         </nav>
+
+        {/* Mobile Hamburger Toggle Button */}
+        <div className="mobile-nav-toggle" style={{ alignItems: 'center', gap: '8px' }}>
+          <a
+            href={`tel:${content.doctor.phone.replace(/[^0-9+]/g, '')}`}
+            className="ux-btn"
+            style={{
+              background: theme.primary,
+              color: '#FFFFFF',
+              padding: '6px 12px',
+              borderRadius: '6px',
+              textDecoration: 'none',
+              fontSize: '12px',
+              fontWeight: '700',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+            }}
+          >
+            <PhoneIcon size={14} color="#FFFFFF" />
+            <span>Call</span>
+          </a>
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle Navigation Menu"
+            style={{
+              background: '#F1F5F9',
+              border: '1px solid #CBD5E1',
+              borderRadius: '8px',
+              padding: '8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#0F172A',
+            }}
+          >
+            {mobileMenuOpen ? <XIcon size={20} color="#0F172A" /> : <MenuIcon size={20} color="#0F172A" />}
+          </button>
+        </div>
       </header>
+
+      {/* Mobile Drawer Dropdown */}
+      {mobileMenuOpen && (
+        <div
+          style={{
+            position: 'sticky',
+            top: '71px',
+            zIndex: 49,
+            background: '#FFFFFF',
+            borderBottom: '2px solid #E2E8F0',
+            padding: '16px 24px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+            boxShadow: '0 10px 20px rgba(0,0,0,0.08)',
+          }}
+        >
+          <a href="#about" onClick={() => setMobileMenuOpen(false)} style={{ color: '#334155', fontWeight: '600', textDecoration: 'none', padding: '6px 0' }}>Credentials</a>
+          <a href="#features" onClick={() => setMobileMenuOpen(false)} style={{ color: '#334155', fontWeight: '600', textDecoration: 'none', padding: '6px 0' }}>Why Choose Us</a>
+          <a href="#services" onClick={() => setMobileMenuOpen(false)} style={{ color: '#334155', fontWeight: '600', textDecoration: 'none', padding: '6px 0' }}>Services</a>
+          <a href="#clinic" onClick={() => setMobileMenuOpen(false)} style={{ color: '#334155', fontWeight: '600', textDecoration: 'none', padding: '6px 0' }}>Clinic &amp; Timings</a>
+          <a href="#reviews" onClick={() => setMobileMenuOpen(false)} style={{ color: '#334155', fontWeight: '600', textDecoration: 'none', padding: '6px 0' }}>Reviews</a>
+          <a href="#faq" onClick={() => setMobileMenuOpen(false)} style={{ color: '#334155', fontWeight: '600', textDecoration: 'none', padding: '6px 0' }}>FAQ</a>
+          <a href="#booking" onClick={() => setMobileMenuOpen(false)} style={{ color: theme.primary, fontWeight: '700', textDecoration: 'none', padding: '6px 0' }}>Book Consultation Slot</a>
+        </div>
+      )}
+
+      {/* Live Doctor Running Late Broadcast Banner */}
+      {content.availability && content.availability.runningLateMinutes > 0 && (
+        <div
+          style={{
+            background: '#FEF3C7',
+            borderBottom: '2px solid #F59E0B',
+            color: '#92400E',
+            padding: '12px 24px',
+            fontSize: '14px',
+            fontWeight: '600',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '10px',
+            textAlign: 'center',
+          }}
+        >
+          <AlertCircleIcon size={20} color="#D97706" />
+          <span>
+            <strong>Live OPD Notice:</strong> {content.doctor.name} is running ~{content.availability.runningLateMinutes} mins behind schedule ({content.availability.runningLateReason || 'due to emergency clinical care'}). Currently serving <strong>Token #{content.availability.currentServingToken}</strong>. All waiting tokens adjusted.
+          </span>
+        </div>
+      )}
 
       {/* ========================================================= */}
       {/* 3. HERO SECTION (SPLIT CUTOUT LAYOUT WITH POSTER STRIP)   */}
@@ -278,9 +420,39 @@ export default function PatientLandingPage() {
       <section style={{ background: `linear-gradient(180deg, ${theme.bg} 0%, #FFFFFF 100%)`, padding: '64px 24px', borderBottom: '1px solid #E2E8F0' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '48px', alignItems: 'center' }}>
           <div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: `${theme.primary}15`, color: theme.primary, padding: '4px 12px', borderRadius: '999px', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '16px' }}>
-              <CheckCircleIcon size={14} color={theme.primary} />
-              <span>DMC Registered &bull; {content.doctor.registrationNumber} &bull; {content.hero.statExperience} Practice</span>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: `${theme.primary}15`, color: theme.primary, padding: '4px 12px', borderRadius: '999px', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                <CheckCircleIcon size={14} color={theme.primary} />
+                <span>DMC Registered &bull; {content.doctor.registrationNumber} &bull; {content.hero.statExperience} Practice</span>
+              </div>
+
+              {/* LIVE "NEXT AVAILABLE" CHIP */}
+              <a
+                href="#booking"
+                className="ux-btn"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: '#DCFCE7',
+                  border: '1px solid #86EFAC',
+                  color: '#15803D',
+                  padding: '4px 14px',
+                  borderRadius: '999px',
+                  fontSize: '12px',
+                  fontWeight: '800',
+                  textDecoration: 'none',
+                }}
+              >
+                <span className="pulse-beacon" style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22C55E', display: 'inline-block' }} />
+                <span>Next available: {content.availability?.nextAvailableSlot || 'Today 5:30 PM'}</span>
+                <span style={{ fontSize: '10px', background: '#BBF7D0', padding: '1px 6px', borderRadius: '4px', textTransform: 'uppercase' }}>Pick Slot &darr;</span>
+              </a>
+
+              {/* CURRENT SERVING TOKEN PILL */}
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#F8FAFC', border: '1px solid #E2E8F0', color: '#475569', padding: '4px 10px', borderRadius: '999px', fontSize: '11px', fontWeight: '600' }}>
+                <span>Currently Serving Token #{content.availability?.currentServingToken || 3}</span>
+              </div>
             </div>
             
             <h1 style={{ fontSize: '42px', lineHeight: 1.2, fontWeight: '800', color: theme.primaryDark, margin: '0 0 16px 0' }}>
@@ -885,119 +1057,362 @@ export default function PatientLandingPage() {
             </p>
           </div>
 
-          {submitSuccess && (
-            <div style={{ background: '#DCFCE7', border: '1px solid #86EFAC', color: '#166534', padding: '16px', borderRadius: '8px', marginBottom: '24px', fontSize: '14px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-              <CheckCircleIcon size={20} color="#166534" style={{ marginTop: '2px', flexShrink: 0 }} />
-              <div>
-                <strong>Appointment Request Received! (Ref ID: {submittedAptId})</strong><br />
-                Our receptionist Sunita has received your request in the CMS panel and will contact you via WhatsApp shortly to confirm your slot.
+          {submitSuccess && confirmedDetails ? (
+            <div style={{ background: '#F8FAFC', border: '2px solid #86EFAC', borderRadius: '14px', padding: '28px', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #E2E8F0', paddingBottom: '16px', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#DCFCE7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CheckCircleIcon size={28} color="#15803D" />
+                  </div>
+                  <div>
+                    <h4 style={{ margin: '0 0 4px 0', fontSize: '18px', color: '#166534', fontWeight: '800' }}>
+                      Appointment Slip Confirmed!
+                    </h4>
+                    <div style={{ fontSize: '12px', color: '#64748B' }}>
+                      Ref ID: <strong>{submittedAptId}</strong> &bull; Scheduled with {content.doctor.name}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Token Badge */}
+                <div style={{ background: '#0F766E', color: '#FFFFFF', padding: '8px 18px', borderRadius: '12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.9 }}>OPD TOKEN</div>
+                  <div style={{ fontSize: '24px', fontWeight: '800' }}>#{confirmedToken < 10 ? `0${confirmedToken}` : confirmedToken}</div>
+                </div>
+              </div>
+
+              {/* Slip Summary Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', background: '#FFFFFF', padding: '18px', borderRadius: '10px', border: '1px solid #E2E8F0', marginBottom: '20px', fontSize: '13px' }}>
+                <div>
+                  <div style={{ color: '#64748B', fontSize: '11px' }}>Patient Name</div>
+                  <strong style={{ color: '#0F172A', fontSize: '14px' }}>{confirmedDetails.patientName}</strong>
+                </div>
+                <div>
+                  <div style={{ color: '#64748B', fontSize: '11px' }}>Phone Number</div>
+                  <strong style={{ color: '#0F172A', fontSize: '14px' }}>{confirmedDetails.phone}</strong>
+                </div>
+                <div>
+                  <div style={{ color: '#64748B', fontSize: '11px' }}>Clinical Specialty</div>
+                  <strong style={{ color: '#0F766E', fontSize: '14px' }}>{confirmedDetails.service}</strong>
+                </div>
+                <div>
+                  <div style={{ color: '#64748B', fontSize: '11px' }}>Confirmed Slot Time</div>
+                  <strong style={{ color: '#166534', fontSize: '14px' }}>{confirmedDetails.date} ({confirmedDetails.time})</strong>
+                </div>
+                <div>
+                  <div style={{ color: '#64748B', fontSize: '11px' }}>Consultation Fee</div>
+                  <strong style={{ color: '#0F172A', fontSize: '14px' }}>₹{content.doctor.consultationFee} (7-day free follow-up)</strong>
+                </div>
+                <div>
+                  <div style={{ color: '#64748B', fontSize: '11px' }}>Clinic Address</div>
+                  <strong style={{ color: '#0F172A', fontSize: '13px' }}>Sector 18, Noida (Near Metro Gate 2)</strong>
+                </div>
+              </div>
+
+              {/* Actions Strip: Download Slip, Calendar .ics, Maps */}
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="ux-btn"
+                  style={{
+                    background: '#0F766E',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    padding: '10px 16px',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  <PrinterIcon size={16} color="#FFFFFF" />
+                  <span>Print / Save Slip</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={downloadIcsCalendar}
+                  className="ux-btn"
+                  style={{
+                    background: '#FFFFFF',
+                    color: '#0F766E',
+                    border: '1px solid #0F766E',
+                    padding: '10px 16px',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  <CalendarIcon size={16} color="#0F766E" />
+                  <span>Add to Calendar (.ics)</span>
+                </button>
+
+                <a
+                  href={`https://maps.google.com/?q=${encodeURIComponent(content.clinic.mapLocationName + ' ' + content.clinic.area + ' ' + content.clinic.city)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="ux-btn"
+                  style={{
+                    background: '#F1F5F9',
+                    color: '#334155',
+                    border: '1px solid #CBD5E1',
+                    padding: '10px 16px',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  <MapPinIcon size={16} color="#334155" />
+                  <span>Get Directions</span>
+                </a>
+
+                <a
+                  href={`https://wa.me/${content.doctor.whatsappNumber.replace(/[^0-9]/g, '')}?text=Hello%20Sunita,%20I%20have%20booked%20appointment%20${submittedAptId}%20with%20Token%20%23${confirmedToken}%20for%20${encodeURIComponent(confirmedDetails.patientName)}.`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="ux-btn"
+                  style={{
+                    background: '#DCFCE7',
+                    color: '#15803D',
+                    border: '1px solid #86EFAC',
+                    padding: '10px 16px',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    fontWeight: '700',
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  <MessageCircleIcon size={16} color="#15803D" />
+                  <span>WhatsApp Desk</span>
+                </a>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSubmitSuccess(false);
+                    setFormData({
+                      patientName: '',
+                      phone: '',
+                      service: content.services[0]?.title || 'General Health Checkup',
+                      preferredDate: '',
+                      shift: 'Morning',
+                      notes: '',
+                    });
+                  }}
+                  className="ux-btn"
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#64748B',
+                    padding: '10px 14px',
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                    marginLeft: 'auto',
+                  }}
+                >
+                  Book Another Appointment
+                </button>
               </div>
             </div>
+          ) : (
+            <form onSubmit={handleBookAppointment} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              
+              {/* 1. LIVE SLOT PICKER */}
+              <div style={{ background: `${theme.primary}08`, border: `1px solid ${theme.primary}25`, borderRadius: '12px', padding: '18px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: '800', color: theme.primaryDark, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <ClockIcon size={16} color={theme.primary} />
+                    <span>1. Pick Available Consultation Slot (Live CDN Availability)</span>
+                  </label>
+                  <span style={{ fontSize: '11px', color: '#166534', background: '#DCFCE7', padding: '2px 8px', borderRadius: '999px', fontWeight: '700' }}>
+                    Next: {content.availability?.nextAvailableSlot || 'Today 5:30 PM'}
+                  </span>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '10px' }}>
+                  {(content.availability?.todaySlots || [
+                    { id: 's1', time: '05:30 PM', period: 'evening', available: true },
+                    { id: 's2', time: '06:00 PM', period: 'evening', available: true },
+                    { id: 's3', time: '06:30 PM', period: 'evening', available: false },
+                    { id: 's4', time: '07:00 PM', period: 'evening', available: true },
+                    { id: 's5', time: '10:00 AM', period: 'morning', available: true },
+                    { id: 's6', time: '10:30 AM', period: 'morning', available: true },
+                  ]).map((slot) => {
+                    const isSelected = selectedSlotTime === slot.time;
+                    return (
+                      <button
+                        key={slot.id}
+                        type="button"
+                        disabled={!slot.available}
+                        onClick={() => {
+                          setSelectedSlotTime(slot.time);
+                          setFormData({
+                            ...formData,
+                            shift: slot.period === 'morning' ? 'Morning' : 'Evening',
+                            preferredDate: (slot.period === 'morning' ? new Date(Date.now() + 86400000).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]) ?? '',
+                          });
+                        }}
+                        className="ux-btn"
+                        style={{
+                          padding: '10px 12px',
+                          borderRadius: '8px',
+                          border: isSelected
+                            ? `2px solid ${theme.primary}`
+                            : slot.available
+                            ? '1px solid #CBD5E1'
+                            : '1px dashed #E2E8F0',
+                          background: isSelected
+                            ? '#FFFFFF'
+                            : slot.available
+                            ? '#FFFFFF'
+                            : '#F1F5F9',
+                          color: isSelected
+                            ? theme.primary
+                            : slot.available
+                            ? '#0F172A'
+                            : '#94A3B8',
+                          cursor: slot.available ? 'pointer' : 'not-allowed',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '2px',
+                          boxShadow: isSelected ? `0 4px 12px ${theme.primary}25` : 'none',
+                        }}
+                      >
+                        <span style={{ fontSize: '13px', fontWeight: '800' }}>{slot.time}</span>
+                        <span style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: '600', color: isSelected ? theme.primary : slot.available ? '#16A34A' : '#94A3B8' }}>
+                          {isSelected ? '✓ Selected' : slot.available ? slot.period : 'Reserved'}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 2. PATIENT CONTACT DETAILS */}
+              <div style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A', borderBottom: '1px solid #F1F5F9', paddingBottom: '6px' }}>
+                2. Patient Contact Details
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', marginBottom: '6px' }}>Patient Full Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Sunil Deshmukh"
+                  value={formData.patientName}
+                  onChange={(e) => setFormData({ ...formData, patientName: e.target.value })}
+                  style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '14px', boxSizing: 'border-box' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', marginBottom: '6px' }}>Phone Number (for WhatsApp Confirmation &amp; Token) *</label>
+                <input
+                  type="tel"
+                  required
+                  placeholder="+91 98765 00000"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '14px', boxSizing: 'border-box' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', marginBottom: '6px' }}>Clinical Specialty</label>
+                  <select
+                    value={formData.service}
+                    onChange={(e) => setFormData({ ...formData, service: e.target.value })}
+                    style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
+                  >
+                    {content.services.map((s) => (
+                      <option key={s.id} value={s.title}>{s.title}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', marginBottom: '6px' }}>Preferred Shift</label>
+                  <select
+                    value={formData.shift}
+                    onChange={(e) => setFormData({ ...formData, shift: e.target.value as any })}
+                    style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
+                  >
+                    <option value="Morning">Morning ({content.clinic.morningHours || '09:00 AM – 01:30 PM'})</option>
+                    <option value="Evening">Evening ({content.clinic.eveningHours || '04:30 PM – 08:00 PM'})</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', marginBottom: '6px' }}>Preferred Date</label>
+                <input
+                  type="date"
+                  value={formData.preferredDate}
+                  onChange={(e) => setFormData({ ...formData, preferredDate: e.target.value })}
+                  style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '14px', boxSizing: 'border-box' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', marginBottom: '6px' }}>Symptoms / Notes (Optional)</label>
+                <textarea
+                  rows={2}
+                  placeholder="e.g. Fasting blood test review, chronic knee stiffness..."
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '14px', boxSizing: 'border-box' }}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="ux-btn"
+                style={{
+                  background: theme.primary,
+                  color: '#FFFFFF',
+                  padding: '14px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  fontWeight: 'bold',
+                  fontSize: '15px',
+                  cursor: 'pointer',
+                  marginTop: '8px',
+                  boxShadow: `0 4px 12px ${theme.primary}40`,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                }}
+              >
+                <CalendarIcon size={18} color="#FFFFFF" />
+                <span>{submitting ? 'Generating OPD Token...' : `Confirm Slot ${selectedSlotTime ? `(${selectedSlotTime})` : ''}`}</span>
+              </button>
+
+              <div style={{ fontSize: '11px', color: '#94A3B8', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                <LockIcon size={13} color="#94A3B8" />
+                <span>DPDP Act 2023 Compliant. Your personal data is encrypted and used solely for consultation scheduling.</span>
+              </div>
+            </form>
           )}
-
-          <form onSubmit={handleBookAppointment} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', marginBottom: '6px' }}>Patient Full Name *</label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Sunil Deshmukh"
-                value={formData.patientName}
-                onChange={(e) => setFormData({ ...formData, patientName: e.target.value })}
-                style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '14px', boxSizing: 'border-box' }}
-              />
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', marginBottom: '6px' }}>Phone Number (for WhatsApp Confirmation) *</label>
-              <input
-                type="tel"
-                required
-                placeholder="+91 98765 00000"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '14px', boxSizing: 'border-box' }}
-              />
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', marginBottom: '6px' }}>Clinical Specialty</label>
-                <select
-                  value={formData.service}
-                  onChange={(e) => setFormData({ ...formData, service: e.target.value })}
-                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
-                >
-                  {content.services.map((s) => (
-                    <option key={s.id} value={s.title}>{s.title}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', marginBottom: '6px' }}>Preferred Shift</label>
-                <select
-                  value={formData.shift}
-                  onChange={(e) => setFormData({ ...formData, shift: e.target.value as any })}
-                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
-                >
-                  <option value="Morning">Morning (09:00 AM – 01:30 PM)</option>
-                  <option value="Evening">Evening (04:30 PM – 08:00 PM)</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', marginBottom: '6px' }}>Preferred Date</label>
-              <input
-                type="date"
-                value={formData.preferredDate}
-                onChange={(e) => setFormData({ ...formData, preferredDate: e.target.value })}
-                style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '14px', boxSizing: 'border-box' }}
-              />
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', marginBottom: '6px' }}>Symptoms / Notes (Optional)</label>
-              <textarea
-                rows={2}
-                placeholder="e.g. Fasting blood test review, chronic knee stiffness..."
-                value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '14px', boxSizing: 'border-box' }}
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={submitting}
-              className="ux-btn"
-              style={{
-                background: theme.primary,
-                color: '#FFFFFF',
-                padding: '14px',
-                borderRadius: '8px',
-                border: 'none',
-                fontWeight: 'bold',
-                fontSize: '15px',
-                cursor: 'pointer',
-                marginTop: '8px',
-                boxShadow: `0 4px 12px ${theme.primary}40`,
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-              }}
-            >
-              <CalendarIcon size={18} color="#FFFFFF" />
-              <span>{submitting ? 'Submitting to Clinic...' : 'Confirm Appointment Request'}</span>
-            </button>
-
-            <div style={{ fontSize: '11px', color: '#94A3B8', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-              <LockIcon size={13} color="#94A3B8" />
-              <span>DPDP Act 2023 Compliant. Your personal data is encrypted and used solely for consultation scheduling.</span>
-            </div>
-          </form>
         </div>
       </section>
 

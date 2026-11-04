@@ -138,6 +138,26 @@ body {
   }
 }
 
+/* Responsive Header Navigation */
+.desktop-nav {
+  display: flex !important;
+  gap: 20px;
+  align-items: center;
+}
+
+.mobile-nav-toggle {
+  display: none !important;
+}
+
+@media (max-width: 960px) {
+  .desktop-nav {
+    display: none !important;
+  }
+  .mobile-nav-toggle {
+    display: flex !important;
+  }
+}
+
 /* Smooth Focus Rings */
 input:focus, textarea:focus, select:focus, button:focus-visible, a:focus-visible {
   outline: none;

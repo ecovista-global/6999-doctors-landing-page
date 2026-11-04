@@ -2,6 +2,63 @@
   "content": {
     "theme": "Teal Poster",
     "announcement": "Complimentary 7-day follow-up consultation included with every visit.",
+    "availability": {
+      "nextAvailableSlot": "Today, 05:30 PM",
+      "isAcceptingToday": true,
+      "runningLateMinutes": 0,
+      "runningLateReason": "Emergency acute care review",
+      "currentServingToken": 3,
+      "todaySlots": [
+        {
+          "id": "slot-1",
+          "time": "05:30 PM",
+          "period": "evening",
+          "available": true
+        },
+        {
+          "id": "slot-2",
+          "time": "06:00 PM",
+          "period": "evening",
+          "available": true
+        },
+        {
+          "id": "slot-3",
+          "time": "06:30 PM",
+          "period": "evening",
+          "available": false
+        },
+        {
+          "id": "slot-4",
+          "time": "07:00 PM",
+          "period": "evening",
+          "available": true
+        },
+        {
+          "id": "slot-5",
+          "time": "07:30 PM",
+          "period": "evening",
+          "available": true
+        },
+        {
+          "id": "slot-6",
+          "time": "10:00 AM",
+          "period": "morning",
+          "available": true
+        },
+        {
+          "id": "slot-7",
+          "time": "10:30 AM",
+          "period": "morning",
+          "available": true
+        },
+        {
+          "id": "slot-8",
+          "time": "11:15 AM",
+          "period": "morning",
+          "available": true
+        }
+      ]
+    },
     "doctor": {
       "name": "Dr. Maanvita Kumari",
       "degree": "MBBS, MD (General Medicine)",
@@ -46,7 +103,8 @@
       "transitGuidance": "Located directly in Central Market Sector 18, just 200 meters from Noida Sector 18 Metro Station (Blue Line, Gate 2). Ample multi-level car parking available next to Health Plaza.",
       "mapLocationName": "HealthConsult Clinic Location",
       "mapSubtitle": "Sector 18 Central Market, Noida",
-      "googleMapEmbedUrl": "https://maps.google.com/maps?q=Sector%2018%2C%20Noida&t=&z=15&ie=UTF8&iwloc=&output=embed"
+      "googleMapEmbedUrl": "https://maps.google.com/maps?q=Sector%2018%2C%20Noida&t=&z=15&ie=UTF8&iwloc=&output=embed",
+      "googleReviewUrl": "https://g.page/r/healthconsult-noida/review"
     },
     "hero": {
       "headline": "Consult your health with our doctor anywhere, anytime",
@@ -155,12 +213,6 @@
         "title": "Gastrointestinal & Acidity",
         "description": "Treatment of GERD, acid reflux, peptic ulcers, IBS, chronic constipation, liver sluggishness, and dietary intolerance.",
         "icon": "microscope"
-      },
-      {
-        "id": "srv-9",
-        "title": "Preventive Lifestyle Medicine",
-        "description": "Evidence-based guidance on weight management, uric acid reduction, cholesterol balance, and cardiac risk factor reduction.",
-        "icon": "shield"
       }
     ],
     "reviews": [
@@ -258,59 +310,130 @@
   },
   "appointments": [
     {
-      "patientName": "Sunil Varma",
-      "phone": "+91 98200 11223",
+      "id": "APT-1089",
+      "patientName": "Anand Mishra",
+      "phone": "9811122334",
+      "doctor": "Dr. Maanvita Kumari",
       "service": "General Health Checkup",
-      "preferredDate": "2026-11-03",
-      "shift": "Morning",
-      "notes": "Time slot confirmed with patient",
-      "id": "APT-1086",
-      "status": "confirmed",
-      "createdAt": "Just now"
-    },
-    {
-      "id": "APT-1086",
-      "patientName": "Sanjay Malhotra",
-      "phone": "+91 98111 22334",
-      "service": "Preventive Executive Health",
-      "preferredDate": "2026-11-06",
-      "shift": "Morning",
-      "status": "confirmed",
-      "notes": "Slot confirmed for 10:45 AM by Sunita",
-      "createdAt": "Today"
-    },
-    {
-      "id": "APT-1081",
-      "patientName": "Ramesh Sharma",
-      "phone": "+91 98101 23456",
-      "service": "Diabetes Management",
       "preferredDate": "2026-11-04",
-      "shift": "Morning",
-      "status": "new",
-      "notes": "Fasting reports ready, prefers 10:30 AM slot",
-      "createdAt": "15 mins ago"
+      "shift": "Evening",
+      "status": "completed",
+      "opdStage": "done",
+      "notes": "Submitted via patient website form",
+      "createdAt": "Just now",
+      "googleReviewSent": true
     },
     {
-      "id": "APT-1080",
-      "patientName": "Pooja Verma",
-      "phone": "+91 98712 34567",
+      "id": "APT-1088",
+      "tokenNumber": 7,
+      "patientName": "Priya Narang",
+      "phone": "+91 98111 88776",
+      "doctor": "Dr. Maanvita Kumari",
+      "service": "Geriatric & Elderly Care",
+      "preferredDate": "2026-11-04",
+      "shift": "Evening",
+      "status": "new",
+      "opdStage": "waiting",
+      "notes": "Token #07 • Fasting sugar reports to show",
+      "createdAt": "10 mins ago",
+      "whatsappConfirmationSent": false,
+      "googleReviewSent": false
+    },
+    {
+      "id": "APT-1087",
+      "tokenNumber": 6,
+      "patientName": "Kavita Roy",
+      "phone": "+91 98999 11223",
+      "doctor": "Dr. Maanvita Kumari",
       "service": "Thyroid Disorders",
       "preferredDate": "2026-11-04",
       "shift": "Evening",
-      "status": "contacted",
-      "notes": "WhatsApp confirmation sent by front desk",
-      "createdAt": "45 mins ago"
+      "status": "confirmed",
+      "opdStage": "waiting",
+      "notes": "Token #06 • Reached clinic reception",
+      "createdAt": "25 mins ago",
+      "whatsappConfirmationSent": true,
+      "googleReviewSent": false
+    },
+    {
+      "id": "APT-1086",
+      "tokenNumber": 5,
+      "patientName": "Sunil Varma",
+      "phone": "+91 98200 11223",
+      "doctor": "Dr. Maanvita Kumari",
+      "service": "General Health Checkup",
+      "preferredDate": "2026-11-04",
+      "shift": "Evening",
+      "status": "confirmed",
+      "opdStage": "waiting",
+      "notes": "Token #05 • Waiting in AC lounge",
+      "createdAt": "40 mins ago",
+      "whatsappConfirmationSent": true,
+      "googleReviewSent": false
+    },
+    {
+      "id": "APT-1085",
+      "tokenNumber": 4,
+      "patientName": "Sanjay Malhotra",
+      "phone": "+91 98111 22334",
+      "doctor": "Dr. Maanvita Kumari",
+      "service": "Preventive Executive Health",
+      "preferredDate": "2026-11-04",
+      "shift": "Evening",
+      "status": "in_consultation",
+      "opdStage": "in_consultation",
+      "notes": "Token #04 • Currently inside with Dr. Maanvita",
+      "createdAt": "1 hour ago",
+      "whatsappConfirmationSent": true,
+      "googleReviewSent": false
+    },
+    {
+      "id": "APT-1081",
+      "tokenNumber": 3,
+      "patientName": "Ramesh Sharma",
+      "phone": "+91 98101 23456",
+      "doctor": "Dr. Maanvita Kumari",
+      "service": "Diabetes Management",
+      "preferredDate": "2026-11-04",
+      "shift": "Morning",
+      "status": "completed",
+      "opdStage": "done",
+      "notes": "Token #03 • Completed visit & prescription issued",
+      "createdAt": "2 hours ago",
+      "whatsappConfirmationSent": true,
+      "googleReviewSent": true
+    },
+    {
+      "id": "APT-1080",
+      "tokenNumber": 2,
+      "patientName": "Pooja Verma",
+      "phone": "+91 98712 34567",
+      "doctor": "Dr. Maanvita Kumari",
+      "service": "Thyroid Disorders",
+      "preferredDate": "2026-11-04",
+      "shift": "Morning",
+      "status": "completed",
+      "opdStage": "done",
+      "notes": "Token #02 • Completed visit. Google review sent",
+      "createdAt": "3 hours ago",
+      "whatsappConfirmationSent": true,
+      "googleReviewSent": true
     },
     {
       "id": "APT-1079",
+      "tokenNumber": 1,
       "patientName": "Harish Chandra",
       "phone": "+91 99110 56789",
+      "doctor": "Dr. Maanvita Kumari",
       "service": "Hypertension Care",
-      "preferredDate": "2026-11-03",
-      "shift": "Evening",
-      "status": "confirmed",
-      "notes": "Confirmed 6:15 PM slot",
-      "createdAt": "2 hours ago"
+      "preferredDate": "2026-11-04",
+      "shift": "Morning",
+      "status": "completed",
+      "opdStage": "done",
+      "notes": "Token #01 • Morning OPD completed",
+      "createdAt": "4 hours ago",
+      "whatsappConfirmationSent": true,
+      "googleReviewSent": true
     }
   ]
 }

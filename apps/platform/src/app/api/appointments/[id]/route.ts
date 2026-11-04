@@ -5,7 +5,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   try {
     const { id } = await params;
     const body = await req.json();
-    const updated = updateAppointmentStatus(id, body.status, body.notes);
+    const updated = updateAppointmentStatus(id, body.status, body.notes, {
+      opdStage: body.opdStage,
+      tokenNumber: body.tokenNumber,
+      whatsappConfirmationSent: body.whatsappConfirmationSent,
+      googleReviewSent: body.googleReviewSent,
+    });
     if (!updated) {
       return NextResponse.json({ error: 'Appointment not found' }, { status: 404 });
     }

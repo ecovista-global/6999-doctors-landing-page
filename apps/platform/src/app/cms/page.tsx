@@ -59,10 +59,14 @@ import {
   UsersIcon,
   TrendingUpIcon,
   FilterIcon,
+  PrinterIcon,
+  Share2Icon,
+  CopyIcon,
 } from '@/components/Icons';
 
 type Tab =
   | 'dashboard'
+  | 'opd_board'
   | 'appointments'
   | 'editor'
   | 'services'
@@ -167,6 +171,17 @@ export default function CmsPanelPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
+  // OPD Board & Workflow State
+  const [showWeeklySummaryModal, setShowWeeklySummaryModal] = useState(false);
+  const [printSlipPatient, setPrintSlipPatient] = useState<AppointmentRecord | null>(null);
+  const [quickWalkIn, setQuickWalkIn] = useState({
+    patientName: '',
+    phone: '',
+    service: 'General Health Checkup',
+    shift: 'Evening' as 'Morning' | 'Evening',
+  });
+  const [inContextEditActive, setInContextEditActive] = useState(false);
+
   // Quick Walk-in Appointment Modal state
   const [showAddAptModal, setShowAddAptModal] = useState(false);
   const [newAptData, setNewAptData] = useState({
@@ -179,6 +194,13 @@ export default function CmsPanelPage() {
   });
 
   const previewIframeRef = useRef<HTMLIFrameElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
 
   // 1. Fetch Live Content from /api/content
   const fetchContent = async () => {
@@ -216,7 +238,18 @@ export default function CmsPanelPage() {
       fetchAppointments();
     }, 4000);
 
-    return () => clearInterval(interval);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, []);
 
   // Content field modifier helper
@@ -314,6 +347,7 @@ export default function CmsPanelPage() {
         setAppointments((prev) =>
           prev.map((apt) => (apt.id === id ? result.appointment : apt))
         );
+        showToast(`Appointment ${id} updated to "${newStatus}"`);
       } else {
         alert('Failed to update appointment status.');
       }
@@ -342,6 +376,7 @@ export default function CmsPanelPage() {
         const result = await res.json();
         setAppointments((prev) => [result.appointment, ...prev]);
         setShowAddAptModal(false);
+        showToast(`Consultation booked for ${result.appointment.patientName} (${result.appointment.id})`);
         setNewAptData({
           patientName: '',
           phone: '',
@@ -357,6 +392,217 @@ export default function CmsPanelPage() {
       console.error(err);
       alert('Error creating appointment.');
     }
+  };
+
+  // 5b. Update OPD Stage & Auto-Sync Serving Token
+  const handleUpdateOpdStage = async (
+    id: string,
+    newStage: 'waiting' | 'in_consultation' | 'done',
+    extra?: { notes?: string; whatsappConfirmationSent?: boolean; googleReviewSent?: boolean }
+  ) => {
+    setActionLoadingId(id);
+    const targetApt = appointments.find((a) => a.id === id);
+    const newStatus: AppointmentRecord['status'] =
+      newStage === 'done' ? 'completed' : 'confirmed';
+
+    try {
+      const res = await fetch(`/api/appointments/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          opdStage: newStage,
+          status: newStatus,
+          ...extra,
+        }),
+      });
+
+      if (res.ok) {
+        const result = await res.json();
+        setAppointments((prev) =>
+          prev.map((apt) => (apt.id === id ? result.appointment : apt))
+        );
+
+        if (newStage === 'in_consultation' && targetApt?.tokenNumber && content) {
+          const updatedContent = {
+            ...content,
+            availability: {
+              ...content.availability,
+              currentServingToken: targetApt.tokenNumber,
+            },
+          };
+          setContent(updatedContent);
+          await handlePublish(updatedContent);
+          showToast(`Token #${String(targetApt.tokenNumber).padStart(2, '0')} called inside. Live site updated!`);
+        } else if (newStage === 'done') {
+          showToast(`Consultation completed for ${targetApt?.patientName || 'patient'}`);
+        } else {
+          showToast(`Patient moved to ${newStage}`);
+        }
+      } else {
+        alert('Failed to update OPD stage.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error updating OPD stage');
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  // 5c. 10-Second Quick Walk-in Add for Front Desk Sunita
+  const handleAddQuickWalkIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!quickWalkIn.patientName.trim() || !quickWalkIn.phone.trim()) {
+      alert('Please provide patient name and phone number.');
+      return;
+    }
+
+    const nextTokenNum = appointments.reduce((max, a) => Math.max(max, a.tokenNumber || 0), 0) + 1;
+
+    try {
+      const payload = {
+        patientName: quickWalkIn.patientName.trim(),
+        phone: quickWalkIn.phone.trim(),
+        service: quickWalkIn.service || (content?.services[0]?.title ?? 'General Health Checkup'),
+        shift: quickWalkIn.shift,
+        preferredDate: new Date().toISOString().split('T')[0],
+        notes: '10-second walk-in added at OPD reception',
+        tokenNumber: nextTokenNum,
+        opdStage: 'waiting' as const,
+        status: 'confirmed' as const,
+      };
+
+      const res = await fetch('/api/appointments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        const result = await res.json();
+        setAppointments((prev) => [result.appointment, ...prev]);
+        showToast(`Token #${String(nextTokenNum).padStart(2, '0')} issued to walk-in patient ${quickWalkIn.patientName}`);
+        setQuickWalkIn({
+          patientName: '',
+          phone: '',
+          service: content?.services[0]?.title || 'General Health Checkup',
+          shift: 'Evening',
+        });
+      } else {
+        alert('Failed to add walk-in patient.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error adding walk-in patient.');
+    }
+  };
+
+  // 5d. Broadcast Doctor Running Late to Patient Site
+  const handleBroadcastLate = async (minutes: number) => {
+    if (!content) return;
+    const reason = minutes > 0 ? 'Emergency patient handling in clinic' : '';
+    const updated = {
+      ...content,
+      availability: {
+        ...content.availability,
+        runningLateMinutes: minutes,
+        runningLateReason: reason,
+      },
+    };
+    setContent(updated);
+    await handlePublish(updated);
+    showToast(minutes > 0 ? `Doctor running ~${minutes}m late broadcasted to patient site` : 'Delay notice cleared: Doctor is on time!');
+  };
+
+  // 5e. Advance Serving Token
+  const handleStepServingToken = async (delta: number) => {
+    if (!content) return;
+    const currentNum = content.availability?.currentServingToken || 1;
+    const nextNum = Math.max(1, currentNum + delta);
+
+    const updated = {
+      ...content,
+      availability: {
+        ...content.availability,
+        currentServingToken: nextNum,
+      },
+    };
+    setContent(updated);
+    await handlePublish(updated);
+    showToast(`Patient site now showing: Serving Token #${String(nextNum).padStart(2, '0')}`);
+  };
+
+  // 5f. Update Next Available Slot Chip on Site
+  const handleUpdateNextSlot = async (slotStr: string) => {
+    if (!content) return;
+    const updated = {
+      ...content,
+      availability: {
+        ...content.availability,
+        nextAvailableSlot: slotStr,
+      },
+    };
+    setContent(updated);
+    await handlePublish(updated);
+    showToast(`Live slot chip updated to "${slotStr}"`);
+  };
+
+  // 5g. Send WhatsApp Booking Confirmation
+  const handleSendWhatsAppConfirmation = (apt: AppointmentRecord) => {
+    const cleanPhone = apt.phone.replace(/\D/g, '');
+    const token = `#${String(apt.tokenNumber || 1).padStart(2, '0')}`;
+    const text = `Namaste ${apt.patientName}, your consultation at HealthConsult Clinic with Dr. Maanvita Kumari is confirmed for ${apt.preferredDate} (${apt.shift} shift). Token: ${token}.\n\nAddress: Plot 14, Health Plaza, Sector 18, Noida.\nGoogle Maps: https://maps.google.com/?q=HealthConsult+Clinic+Noida\n\nPlease reply:\n1 to Confirm attendance\n2 to Reschedule\n3 to Cancel`;
+    window.open(`https://wa.me/91${cleanPhone}?text=${encodeURIComponent(text)}`, '_blank');
+    handleUpdateOpdStage(apt.id, apt.opdStage || 'waiting', { whatsappConfirmationSent: true });
+  };
+
+  // 5h. Send WhatsApp 2-Hour Reminder
+  const handleSendWhatsAppReminder = (apt: AppointmentRecord) => {
+    const cleanPhone = apt.phone.replace(/\D/g, '');
+    const token = `#${String(apt.tokenNumber || 1).padStart(2, '0')}`;
+    const text = `HealthConsult Reminder: Dr. Maanvita Kumari consultation is scheduled in 2 hours for ${apt.patientName} (Token ${token}).\nClinic: Sector 18 Noida (Near Metro Gate 2).\nReply 1 if on your way, 2 if running late.`;
+    window.open(`https://wa.me/91${cleanPhone}?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
+  // 5i. Send Google Review on WhatsApp (Google Non-Gating Compliant)
+  const handleSendGoogleReview = (apt: AppointmentRecord) => {
+    const cleanPhone = apt.phone.replace(/\D/g, '');
+    const reviewUrl = content?.clinic?.googleReviewUrl || 'https://g.page/r/healthconsult-noida/review';
+    const text = `Namaste ${apt.patientName}! Thank you for visiting Dr. Maanvita Kumari at HealthConsult Clinic today.\n\nCould you take 30 seconds to share your experience on Google? Your feedback helps other families find trusted primary care:\n${reviewUrl}`;
+    window.open(`https://wa.me/91${cleanPhone}?text=${encodeURIComponent(text)}`, '_blank');
+    handleUpdateOpdStage(apt.id, 'done', { googleReviewSent: true });
+  };
+
+  // 5j. Weekly Doctor Summary Generator
+  const getWeeklySummaryStats = () => {
+    const totalBookings = appointments.length;
+    const completed = appointments.filter((a) => a.opdStage === 'done' || a.status === 'completed').length;
+    const walkins = appointments.filter((a) => a.notes?.toLowerCase().includes('walk-in')).length;
+    const cancelled = appointments.filter((a) => a.status === 'cancelled').length;
+    const reviewsSent = appointments.filter((a) => a.googleReviewSent).length;
+
+    const srvCounts: Record<string, number> = {};
+    appointments.forEach((a) => {
+      srvCounts[a.service] = (srvCounts[a.service] || 0) + 1;
+    });
+    let topService = 'General Health Checkup';
+    let maxSrvCount = 0;
+    for (const [srv, cnt] of Object.entries(srvCounts)) {
+      if (cnt > maxSrvCount) {
+        maxSrvCount = cnt;
+        topService = srv;
+      }
+    }
+
+    const shiftCounts: Record<string, number> = { Morning: 0, Evening: 0, Afternoon: 0 };
+    appointments.forEach((a) => {
+      if (a.shift) shiftCounts[a.shift] = (shiftCounts[a.shift] || 0) + 1;
+    });
+    const busiestShift = (shiftCounts.Evening || 0) >= (shiftCounts.Morning || 0) ? 'Evening OPD (5:00 PM - 8:00 PM)' : 'Morning OPD (9:00 AM - 1:00 PM)';
+
+    const text = `*Weekly Practice Summary for Dr. Maanvita Kumari*\n*HealthConsult Family Clinic (Noida Sec 18)*\n\n• *${totalBookings}* Total patient appointments\n• *${completed}* Completed consultations\n• *${walkins}* Front-desk walk-in patients\n• *${cancelled}* Cancellations / no-shows\n• Busiest shift: *${busiestShift}*\n• Top clinical demand: *${topService}*\n• *${reviewsSent}* Google Review requests dispatched\n\nLive Control Plane: http://localhost:3000/cms`;
+
+    return { totalBookings, completed, walkins, cancelled, busiestShift, topService, reviewsSent, text };
   };
 
   // 6. Direct Theme Switcher with Instant Publish
@@ -542,6 +788,13 @@ export default function CmsPanelPage() {
       groupTitle: 'CLINICAL OPERATIONS',
       items: [
         { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboardIcon size={18} /> },
+        {
+          id: 'opd_board',
+          label: "Today's OPD Board",
+          icon: <ActivityIcon size={18} />,
+          badge: `${appointments.filter((a) => (a.opdStage || 'waiting') === 'waiting' && a.status !== 'cancelled').length} Waiting`,
+          badgeColor: '#0F766E',
+        },
         {
           id: 'appointments',
           label: 'Appointments',
@@ -738,6 +991,7 @@ export default function CmsPanelPage() {
           {/* Global Search Input */}
           <div style={{ position: 'relative', width: '380px' }}>
             <input
+              ref={searchInputRef}
               type="text"
               placeholder="Search patients, appointments, services, reviews..."
               value={searchQuery}
@@ -841,7 +1095,10 @@ export default function CmsPanelPage() {
             </button>
 
             <button
-              onClick={() => setActiveTab('appointments')}
+              onClick={() => {
+                setActiveTab('appointments');
+                setAptFilter('new');
+              }}
               className="ux-btn"
               title="Patient inquiries notification"
               style={{
@@ -1124,8 +1381,24 @@ export default function CmsPanelPage() {
                       </button>
                     </div>
 
+                    {searchQuery.trim() && (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 12px', background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '6px', fontSize: '12px', color: '#166534', marginBottom: '10px' }}>
+                        <span>Search filter active: <strong>&quot;{searchQuery}&quot;</strong></span>
+                        <button onClick={() => setSearchQuery('')} style={{ background: 'none', border: 'none', color: '#166534', cursor: 'pointer', fontWeight: 'bold' }}>✕ Clear</button>
+                      </div>
+                    )}
+
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                      {appointments.slice(0, 5).map((apt) => (
+                      {(searchQuery.trim()
+                        ? appointments.filter(
+                            (a) =>
+                              a.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                              a.phone.includes(searchQuery) ||
+                              a.service.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                              a.id.toLowerCase().includes(searchQuery.toLowerCase())
+                          )
+                        : appointments
+                      ).slice(0, 5).map((apt) => (
                         <div
                           key={apt.id}
                           style={{
@@ -1331,10 +1604,19 @@ export default function CmsPanelPage() {
 
                   {/* Today's Shift Card */}
                   <div className="ux-card" style={{ background: '#FFFFFF', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '20px' }}>
-                    <h4 style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: '700', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <ClockIcon size={16} color="#0F766E" />
-                      <span>Today&apos;s OPD Shifts</span>
-                    </h4>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <h4 style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <ClockIcon size={16} color="#0F766E" />
+                        <span>Today&apos;s OPD Shifts</span>
+                      </h4>
+                      <button
+                        onClick={() => setActiveTab('clinic_hours')}
+                        className="ux-btn"
+                        style={{ background: 'none', border: 'none', color: '#0F766E', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}
+                      >
+                        Edit Hours &rarr;
+                      </button>
+                    </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 10px', background: '#F0FDF4', borderRadius: '6px', border: '1px solid #BBF7D0' }}>
@@ -1376,6 +1658,722 @@ export default function CmsPanelPage() {
                     <span>+ Add Walk-in / Phone Consultation</span>
                   </button>
 
+                </div>
+
+              </div>
+            </div>
+          )}
+
+          {/* ======================================================= */}
+          {/* TAB 1B: TODAY'S OPD BOARD (RECEPTIONIST SUNITA & CLINIC) */}
+          {/* ======================================================= */}
+          {activeTab === 'opd_board' && (
+            <div>
+              {/* Top Banner & Real-Time OPD Control Strip */}
+              <div
+                className="ux-card"
+                style={{
+                  background: '#FFFFFF',
+                  borderRadius: '16px',
+                  border: '1px solid #E2E8F0',
+                  padding: '22px 24px',
+                  marginBottom: '20px',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '16px' }}>
+                  <div>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#DCFCE7', color: '#166534', padding: '3px 10px', borderRadius: '999px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', marginBottom: '6px' }}>
+                      <span className="pulse-beacon" style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#16A34A', display: 'inline-block' }} />
+                      <span>Live Clinic Operations &bull; Receptionist Desk</span>
+                    </div>
+                    <h2 style={{ margin: '0 0 4px 0', fontSize: '22px', fontWeight: '800', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <ActivityIcon size={24} color="#0F766E" />
+                      <span>Today&apos;s OPD Board &bull; Queue &amp; Availability Control</span>
+                    </h2>
+                    <p style={{ margin: 0, fontSize: '13px', color: '#64748B' }}>
+                      Control live patient token sequence, 1-tap WhatsApp notifications, broadcast doctor delays, and dispatch Google review requests.
+                    </p>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <button
+                      onClick={() => setShowWeeklySummaryModal(true)}
+                      className="ux-btn"
+                      style={{
+                        background: '#0F766E',
+                        color: '#FFFFFF',
+                        border: 'none',
+                        padding: '9px 16px',
+                        borderRadius: '8px',
+                        fontSize: '13px',
+                        fontWeight: '700',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        boxShadow: '0 2px 4px rgba(15,118,110,0.2)',
+                      }}
+                    >
+                      <Share2Icon size={15} color="#FFFFFF" />
+                      <span>Dr. Maanvita Weekly WhatsApp Digest</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        fetchAppointments();
+                        fetchContent();
+                        showToast('OPD Board refreshed');
+                      }}
+                      className="ux-btn"
+                      style={{
+                        background: '#F1F5F9',
+                        color: '#334155',
+                        border: '1px solid #CBD5E1',
+                        padding: '9px 14px',
+                        borderRadius: '8px',
+                        fontSize: '13px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                      }}
+                    >
+                      <RefreshCwIcon size={14} color="#334155" />
+                      <span>Refresh Board</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 3 Real-time Control Cards */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px', paddingTop: '16px', borderTop: '1px solid #F1F5F9' }}>
+                  
+                  {/* Control 1: Currently Serving Token */}
+                  <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', padding: '14px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', marginBottom: '8px' }}>
+                      Currently Serving In Cabin
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '24px', fontWeight: '900', color: '#0F766E', letterSpacing: '-0.5px' }}>
+                          #{String(content?.availability?.currentServingToken || 1).padStart(2, '0')}
+                        </span>
+                        <span style={{ fontSize: '11px', color: '#64748B' }}>Live on patient site</span>
+                      </div>
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <button
+                          onClick={() => handleStepServingToken(-1)}
+                          className="ux-btn"
+                          style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', background: '#FFF', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
+                          title="Previous Token"
+                        >
+                          ◀
+                        </button>
+                        <button
+                          onClick={() => handleStepServingToken(1)}
+                          className="ux-btn"
+                          style={{ padding: '6px 14px', borderRadius: '6px', border: 'none', background: '#0F766E', color: '#FFF', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
+                          title="Advance to Next Token"
+                        >
+                          Next Token ▶
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Control 2: Running Late Broadcast */}
+                  <div style={{ background: (content?.availability?.runningLateMinutes || 0) > 0 ? '#FFFBEB' : '#F8FAFC', border: (content?.availability?.runningLateMinutes || 0) > 0 ? '1px solid #FCD34D' : '1px solid #E2E8F0', borderRadius: '10px', padding: '14px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: '700', color: (content?.availability?.runningLateMinutes || 0) > 0 ? '#B45309' : '#64748B', textTransform: 'uppercase' }}>
+                        Doctor Delay Broadcast
+                      </div>
+                      {(content?.availability?.runningLateMinutes || 0) > 0 && (
+                        <span style={{ fontSize: '11px', fontWeight: '800', color: '#D97706', background: '#FEF3C7', padding: '2px 6px', borderRadius: '4px' }}>
+                          ~{content?.availability?.runningLateMinutes}m Late Live
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      <button
+                        onClick={() => handleBroadcastLate(0)}
+                        className="ux-btn"
+                        style={{
+                          padding: '5px 10px',
+                          borderRadius: '6px',
+                          border: (content?.availability?.runningLateMinutes || 0) === 0 ? '2px solid #16A34A' : '1px solid #CBD5E1',
+                          background: (content?.availability?.runningLateMinutes || 0) === 0 ? '#DCFCE7' : '#FFFFFF',
+                          color: (content?.availability?.runningLateMinutes || 0) === 0 ? '#166534' : '#475569',
+                          fontSize: '11px',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        ✓ On Time (Clear)
+                      </button>
+                      <button
+                        onClick={() => handleBroadcastLate(15)}
+                        className="ux-btn"
+                        style={{
+                          padding: '5px 10px',
+                          borderRadius: '6px',
+                          border: content?.availability?.runningLateMinutes === 15 ? '2px solid #D97706' : '1px solid #CBD5E1',
+                          background: content?.availability?.runningLateMinutes === 15 ? '#FEF3C7' : '#FFFFFF',
+                          color: content?.availability?.runningLateMinutes === 15 ? '#92400E' : '#475569',
+                          fontSize: '11px',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        +15 min
+                      </button>
+                      <button
+                        onClick={() => handleBroadcastLate(20)}
+                        className="ux-btn"
+                        style={{
+                          padding: '5px 10px',
+                          borderRadius: '6px',
+                          border: content?.availability?.runningLateMinutes === 20 ? '2px solid #D97706' : '1px solid #CBD5E1',
+                          background: content?.availability?.runningLateMinutes === 20 ? '#FEF3C7' : '#FFFFFF',
+                          color: content?.availability?.runningLateMinutes === 20 ? '#92400E' : '#475569',
+                          fontSize: '11px',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        +20 min
+                      </button>
+                      <button
+                        onClick={() => handleBroadcastLate(30)}
+                        className="ux-btn"
+                        style={{
+                          padding: '5px 10px',
+                          borderRadius: '6px',
+                          border: content?.availability?.runningLateMinutes === 30 ? '2px solid #DC2626' : '1px solid #CBD5E1',
+                          background: content?.availability?.runningLateMinutes === 30 ? '#FEE2E2' : '#FFFFFF',
+                          color: content?.availability?.runningLateMinutes === 30 ? '#991B1B' : '#475569',
+                          fontSize: '11px',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        +30 min
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Control 3: Live Next Available Slot Chip */}
+                  <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', padding: '14px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', marginBottom: '8px' }}>
+                      Live Next Available Slot Chip
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      {[
+                        'Today, 05:30 PM',
+                        'Today, 06:15 PM',
+                        'Tomorrow, 09:30 AM',
+                        'Walk-ins Only',
+                      ].map((slot) => {
+                        const isSelected = content?.availability?.nextAvailableSlot === slot;
+                        return (
+                          <button
+                            key={slot}
+                            onClick={() => handleUpdateNextSlot(slot)}
+                            className="ux-btn"
+                            style={{
+                              padding: '5px 9px',
+                              borderRadius: '6px',
+                              border: isSelected ? '2px solid #0F766E' : '1px solid #CBD5E1',
+                              background: isSelected ? '#CCFBF1' : '#FFFFFF',
+                              color: isSelected ? '#0F766E' : '#475569',
+                              fontSize: '11px',
+                              fontWeight: isSelected ? '700' : '500',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            {slot}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              {/* 10-Second Quick Walk-in Add Bar */}
+              <div
+                className="ux-card"
+                style={{
+                  background: '#FFFFFF',
+                  borderRadius: '14px',
+                  border: '1px solid #E2E8F0',
+                  padding: '16px 20px',
+                  marginBottom: '20px',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                  <div style={{ fontSize: '13px', fontWeight: '700', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <PlusIcon size={16} color="#0F766E" />
+                    <span>10-Second Walk-In Add (Front Desk Sunita)</span>
+                  </div>
+                  <span style={{ fontSize: '12px', color: '#64748B' }}>
+                    Auto-assigns next sequential token number into the Waiting queue
+                  </span>
+                </div>
+
+                <form onSubmit={handleAddQuickWalkIn} style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Patient Name (e.g. Ramesh Verma)"
+                    value={quickWalkIn.patientName}
+                    onChange={(e) => setQuickWalkIn({ ...quickWalkIn, patientName: e.target.value })}
+                    style={{ flex: '1 1 200px', minWidth: '180px', padding: '9px 12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '13px' }}
+                  />
+
+                  <input
+                    type="tel"
+                    required
+                    placeholder="Phone (e.g. 98100 12345)"
+                    value={quickWalkIn.phone}
+                    onChange={(e) => setQuickWalkIn({ ...quickWalkIn, phone: e.target.value })}
+                    style={{ flex: '1 1 160px', minWidth: '140px', padding: '9px 12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '13px' }}
+                  />
+
+                  <select
+                    value={quickWalkIn.service}
+                    onChange={(e) => setQuickWalkIn({ ...quickWalkIn, service: e.target.value })}
+                    style={{ flex: '1 1 200px', minWidth: '180px', padding: '9px 12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '13px', background: '#FFF' }}
+                  >
+                    {content?.services.map((s) => (
+                      <option key={s.id} value={s.title}>{s.title}</option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={quickWalkIn.shift}
+                    onChange={(e) => setQuickWalkIn({ ...quickWalkIn, shift: e.target.value as 'Morning' | 'Evening' })}
+                    style={{ flex: '0 0 130px', padding: '9px 12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '13px', background: '#FFF' }}
+                  >
+                    <option value="Morning">Morning OPD</option>
+                    <option value="Evening">Evening OPD</option>
+                  </select>
+
+                  <button
+                    type="submit"
+                    className="ux-btn"
+                    style={{
+                      background: '#0F766E',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      padding: '9px 20px',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    <PlusIcon size={16} color="#FFFFFF" />
+                    <span>Add Walk-In Patient</span>
+                  </button>
+                </form>
+              </div>
+
+              {/* 3-Column Kanban Board */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', alignItems: 'flex-start' }}>
+                
+                {/* COLUMN 1: WAITING */}
+                <div style={{ background: '#F8FAFC', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', paddingBottom: '10px', borderBottom: '2px solid #0F766E' }}>
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: '800', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span>WAITING</span>
+                        <span style={{ background: '#CCFBF1', color: '#0F766E', fontSize: '11px', fontWeight: '800', padding: '2px 8px', borderRadius: '999px' }}>
+                          {appointments.filter((a) => (a.opdStage || 'waiting') === 'waiting' && a.status !== 'cancelled').length}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>Patients in clinic waiting lounge</div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', minHeight: '320px' }}>
+                    {appointments
+                      .filter((a) => (a.opdStage || 'waiting') === 'waiting' && a.status !== 'cancelled')
+                      .map((apt) => (
+                        <div
+                          key={apt.id}
+                          className="ux-card"
+                          style={{
+                            background: '#FFFFFF',
+                            borderRadius: '12px',
+                            border: '1px solid #E2E8F0',
+                            padding: '14px',
+                            boxShadow: '0 2px 5px rgba(0,0,0,0.02)',
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                            <span style={{ background: '#F0FDF4', color: '#166534', border: '1px solid #BBF7D0', fontWeight: '800', fontSize: '13px', padding: '3px 8px', borderRadius: '6px' }}>
+                              Token #{String(apt.tokenNumber || 1).padStart(2, '0')}
+                            </span>
+                            <span style={{ fontSize: '11px', fontWeight: '600', color: '#64748B' }}>
+                              {apt.shift || 'Evening'}
+                            </span>
+                          </div>
+
+                          <div style={{ fontWeight: '700', fontSize: '14px', color: '#0F172A', marginBottom: '2px' }}>
+                            {apt.patientName}
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#475569', marginBottom: '8px' }}>
+                            {apt.service}
+                          </div>
+                          <div style={{ fontSize: '11px', color: '#64748B', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <PhoneIcon size={12} color="#64748B" />
+                            <span>{apt.phone}</span>
+                            <span>&bull; {apt.preferredDate}</span>
+                          </div>
+
+                          {/* Quick 1-Tap Actions */}
+                          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', paddingTop: '10px', borderTop: '1px solid #F1F5F9' }}>
+                            <button
+                              onClick={() => handleUpdateOpdStage(apt.id, 'in_consultation')}
+                              className="ux-btn"
+                              style={{
+                                flex: '1 1 100%',
+                                background: '#0F766E',
+                                color: '#FFFFFF',
+                                border: 'none',
+                                padding: '7px 12px',
+                                borderRadius: '6px',
+                                fontSize: '12px',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '6px',
+                              }}
+                            >
+                              <span>Call Inside Cabin &rarr;</span>
+                            </button>
+
+                            <button
+                              onClick={() => handleSendWhatsAppConfirmation(apt)}
+                              className="ux-btn"
+                              title="Send WhatsApp confirmation & reply options"
+                              style={{
+                                flex: '1',
+                                background: '#F0FDF4',
+                                color: '#166534',
+                                border: '1px solid #BBF7D0',
+                                padding: '5px 8px',
+                                borderRadius: '6px',
+                                fontSize: '11px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '4px',
+                              }}
+                            >
+                              <MessageCircleIcon size={12} color="#166534" />
+                              <span>{apt.whatsappConfirmationSent ? '✓ Sent' : 'WA Confirm'}</span>
+                            </button>
+
+                            <button
+                              onClick={() => handleSendWhatsAppReminder(apt)}
+                              className="ux-btn"
+                              title="Send 2-hour reminder with quick reply"
+                              style={{
+                                flex: '1',
+                                background: '#F0FDF4',
+                                color: '#166534',
+                                border: '1px solid #BBF7D0',
+                                padding: '5px 8px',
+                                borderRadius: '6px',
+                                fontSize: '11px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '4px',
+                              }}
+                            >
+                              <ClockIcon size={12} color="#166534" />
+                              <span>2h Remind</span>
+                            </button>
+
+                            <a
+                              href={`tel:${apt.phone}`}
+                              className="ux-btn"
+                              style={{
+                                flex: '1',
+                                background: '#F8FAFC',
+                                color: '#334155',
+                                border: '1px solid #CBD5E1',
+                                padding: '5px 8px',
+                                borderRadius: '6px',
+                                fontSize: '11px',
+                                fontWeight: '600',
+                                textDecoration: 'none',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '4px',
+                              }}
+                            >
+                              <PhoneIcon size={12} color="#334155" />
+                              <span>Call</span>
+                            </a>
+
+                            <button
+                              onClick={() => setPrintSlipPatient(apt)}
+                              className="ux-btn"
+                              title="Print Clinic Appointment Slip"
+                              style={{
+                                background: '#F8FAFC',
+                                color: '#334155',
+                                border: '1px solid #CBD5E1',
+                                padding: '5px 8px',
+                                borderRadius: '6px',
+                                fontSize: '11px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                              }}
+                            >
+                              <PrinterIcon size={12} color="#334155" />
+                              <span>Slip</span>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+
+                    {appointments.filter((a) => (a.opdStage || 'waiting') === 'waiting' && a.status !== 'cancelled').length === 0 && (
+                      <div style={{ textAlign: 'center', padding: '36px 12px', color: '#94A3B8', fontSize: '13px' }}>
+                        Waiting lounge is clear. Add walk-in above or wait for arrivals.
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* COLUMN 2: IN CONSULTATION */}
+                <div style={{ background: '#F0FDF4', borderRadius: '14px', border: '1px solid #BBF7D0', padding: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', paddingBottom: '10px', borderBottom: '2px solid #16A34A' }}>
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: '800', color: '#166534', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span className="pulse-beacon" style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#16A34A', display: 'inline-block' }} />
+                        <span>IN CONSULTATION</span>
+                        <span style={{ background: '#DCFCE7', color: '#166534', fontSize: '11px', fontWeight: '800', padding: '2px 8px', borderRadius: '999px' }}>
+                          {appointments.filter((a) => a.opdStage === 'in_consultation').length}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#15803D', marginTop: '2px' }}>Active inside doctor cabin</div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', minHeight: '320px' }}>
+                    {appointments
+                      .filter((a) => a.opdStage === 'in_consultation')
+                      .map((apt) => (
+                        <div
+                          key={apt.id}
+                          className="ux-card"
+                          style={{
+                            background: '#FFFFFF',
+                            borderRadius: '12px',
+                            border: '2px solid #0F766E',
+                            padding: '16px',
+                            boxShadow: '0 4px 12px rgba(15,118,110,0.12)',
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                            <span style={{ background: '#0F766E', color: '#FFFFFF', fontWeight: '800', fontSize: '13px', padding: '3px 8px', borderRadius: '6px' }}>
+                              Token #{String(apt.tokenNumber || 1).padStart(2, '0')} &bull; In Cabin
+                            </span>
+                            <span style={{ fontSize: '11px', color: '#0F766E', fontWeight: '700' }}>Active Now</span>
+                          </div>
+
+                          <div style={{ fontWeight: '800', fontSize: '16px', color: '#0F172A', marginBottom: '4px' }}>
+                            {apt.patientName}
+                          </div>
+                          <div style={{ fontSize: '13px', color: '#0F766E', fontWeight: '600', marginBottom: '8px' }}>
+                            {apt.service}
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#64748B', marginBottom: '14px' }}>
+                            Phone: {apt.phone} &bull; Ref: {apt.id}
+                          </div>
+
+                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            <button
+                              onClick={() => handleUpdateOpdStage(apt.id, 'done')}
+                              className="ux-btn"
+                              style={{
+                                flex: '1 1 100%',
+                                background: '#16A34A',
+                                color: '#FFFFFF',
+                                border: 'none',
+                                padding: '9px 14px',
+                                borderRadius: '6px',
+                                fontSize: '13px',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '6px',
+                              }}
+                            >
+                              <CheckCircleIcon size={16} color="#FFFFFF" />
+                              <span>Mark Consultation Complete &rarr;</span>
+                            </button>
+
+                            <button
+                              onClick={() => setPrintSlipPatient(apt)}
+                              className="ux-btn"
+                              style={{
+                                flex: '1',
+                                background: '#F8FAFC',
+                                color: '#334155',
+                                border: '1px solid #CBD5E1',
+                                padding: '6px 10px',
+                                borderRadius: '6px',
+                                fontSize: '12px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '4px',
+                              }}
+                            >
+                              <PrinterIcon size={13} color="#334155" />
+                              <span>Print Slip</span>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+
+                    {appointments.filter((a) => a.opdStage === 'in_consultation').length === 0 && (
+                      <div style={{ textAlign: 'center', padding: '36px 12px', color: '#166534', fontSize: '13px', background: '#FFFFFF', borderRadius: '10px', border: '1px dashed #BBF7D0' }}>
+                        No patient currently in cabin. Click &quot;Call Inside Cabin&quot; from the Waiting queue.
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* COLUMN 3: DONE / COMPLETED */}
+                <div style={{ background: '#F8FAFC', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', paddingBottom: '10px', borderBottom: '2px solid #64748B' }}>
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: '800', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span>DONE / COMPLETED</span>
+                        <span style={{ background: '#E2E8F0', color: '#334155', fontSize: '11px', fontWeight: '800', padding: '2px 8px', borderRadius: '999px' }}>
+                          {appointments.filter((a) => a.opdStage === 'done' || a.status === 'completed').length}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>Post-visit Google review &amp; pharmacy</div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', minHeight: '320px' }}>
+                    {appointments
+                      .filter((a) => a.opdStage === 'done' || a.status === 'completed')
+                      .map((apt) => (
+                        <div
+                          key={apt.id}
+                          className="ux-card"
+                          style={{
+                            background: '#FFFFFF',
+                            borderRadius: '12px',
+                            border: '1px solid #E2E8F0',
+                            padding: '14px',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
+                            <span style={{ background: '#E2E8F0', color: '#334155', fontWeight: '700', fontSize: '12px', padding: '2px 7px', borderRadius: '5px' }}>
+                              Token #{String(apt.tokenNumber || 1).padStart(2, '0')} &bull; Done
+                            </span>
+                            <span style={{ fontSize: '11px', color: '#16A34A', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                              <CheckIcon size={12} color="#16A34A" />
+                              <span>Completed</span>
+                            </span>
+                          </div>
+
+                          <div style={{ fontWeight: '700', fontSize: '14px', color: '#0F172A', marginBottom: '2px' }}>
+                            {apt.patientName}
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#64748B', marginBottom: '10px' }}>
+                            {apt.service} &bull; {apt.phone}
+                          </div>
+
+                          {/* Post-visit Google Review Request Trigger */}
+                          <div style={{ paddingTop: '8px', borderTop: '1px solid #F1F5F9', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                            <button
+                              onClick={() => handleSendGoogleReview(apt)}
+                              className="ux-btn"
+                              style={{
+                                flex: '1 1 100%',
+                                background: apt.googleReviewSent ? '#F0FDF4' : '#FEF3C7',
+                                color: apt.googleReviewSent ? '#166534' : '#92400E',
+                                border: apt.googleReviewSent ? '1px solid #BBF7D0' : '1px solid #FCD34D',
+                                padding: '7px 10px',
+                                borderRadius: '6px',
+                                fontSize: '12px',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '6px',
+                              }}
+                            >
+                              <StarIcon size={14} color={apt.googleReviewSent ? '#166534' : '#D97706'} />
+                              <span>{apt.googleReviewSent ? '✓ Google Review Sent' : '★ Request Google Review on WhatsApp'}</span>
+                            </button>
+
+                            <button
+                              onClick={() => setPrintSlipPatient(apt)}
+                              className="ux-btn"
+                              style={{
+                                flex: '1',
+                                background: '#F8FAFC',
+                                color: '#334155',
+                                border: '1px solid #CBD5E1',
+                                padding: '5px 8px',
+                                borderRadius: '6px',
+                                fontSize: '11px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '4px',
+                              }}
+                            >
+                              <PrinterIcon size={12} color="#334155" />
+                              <span>Print Discharge Slip</span>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+
+                    {appointments.filter((a) => a.opdStage === 'done' || a.status === 'completed').length === 0 && (
+                      <div style={{ textAlign: 'center', padding: '36px 12px', color: '#94A3B8', fontSize: '13px' }}>
+                        No completed consultations yet today.
+                      </div>
+                    )}
+                  </div>
                 </div>
 
               </div>
@@ -1498,6 +2496,7 @@ export default function CmsPanelPage() {
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
                   <thead>
                     <tr style={{ background: '#F8FAFC', borderBottom: '2px solid #E2E8F0', color: '#475569' }}>
+                      <th style={{ padding: '12px' }}>Token</th>
                       <th style={{ padding: '12px' }}>ID &amp; Patient</th>
                       <th style={{ padding: '12px' }}>Phone / WhatsApp</th>
                       <th style={{ padding: '12px' }}>Specialty</th>
@@ -1510,13 +2509,18 @@ export default function CmsPanelPage() {
                   <tbody>
                     {filteredAppointments.length === 0 ? (
                       <tr>
-                        <td colSpan={7} style={{ padding: '36px', textAlign: 'center', color: '#64748B' }}>
+                        <td colSpan={8} style={{ padding: '36px', textAlign: 'center', color: '#64748B' }}>
                           No appointments match the selected filter.
                         </td>
                       </tr>
                     ) : (
                       filteredAppointments.map((apt) => (
                         <tr key={apt.id} style={{ borderBottom: '1px solid #E2E8F0' }}>
+                          <td style={{ padding: '12px' }}>
+                            <span style={{ background: '#F0FDF4', color: '#166534', border: '1px solid #BBF7D0', fontWeight: '800', fontSize: '12px', padding: '3px 8px', borderRadius: '6px', whiteSpace: 'nowrap' }}>
+                              Token #{String(apt.tokenNumber || 1).padStart(2, '0')}
+                            </span>
+                          </td>
                           <td style={{ padding: '12px', fontWeight: '600' }}>
                             <div>{apt.patientName}</div>
                             <div style={{ fontSize: '11px', color: '#94A3B8' }}>{apt.id} &bull; {apt.createdAt}</div>
@@ -1574,7 +2578,27 @@ export default function CmsPanelPage() {
                             {apt.notes}
                           </td>
                           <td style={{ padding: '12px', textAlign: 'right' }}>
-                            <div style={{ display: 'inline-flex', gap: '6px' }}>
+                            <div style={{ display: 'inline-flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                              <button
+                                onClick={() => handleSendWhatsAppConfirmation(apt)}
+                                className="ux-btn"
+                                title="Send WhatsApp confirmation & reply options"
+                                style={{ background: '#F0FDF4', color: '#166534', border: '1px solid #BBF7D0', padding: '5px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                              >
+                                <MessageCircleIcon size={12} color="#166534" />
+                                <span>{apt.whatsappConfirmationSent ? '✓ WA' : 'WA Confirm'}</span>
+                              </button>
+
+                              <button
+                                onClick={() => setPrintSlipPatient(apt)}
+                                className="ux-btn"
+                                title="Print Clinic Appointment Slip"
+                                style={{ background: '#F8FAFC', color: '#334155', border: '1px solid #CBD5E1', padding: '5px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                              >
+                                <PrinterIcon size={12} color="#334155" />
+                                <span>Slip</span>
+                              </button>
+
                               {apt.status === 'new' && (
                                 <button
                                   disabled={actionLoadingId === apt.id}
@@ -2194,6 +3218,140 @@ export default function CmsPanelPage() {
                         <span>Open Live Site</span>
                         <ExternalLinkIcon size={12} color="#FFFFFF" />
                       </a>
+                    </div>
+                  </div>
+
+                  {/* Direct In-Context Preview Quick Edit Toolbar */}
+                  <div
+                    style={{
+                      width: '100%',
+                      background: '#FFFFFF',
+                      borderRadius: '10px',
+                      border: '1px solid #94A3B8',
+                      padding: '12px 16px',
+                      marginBottom: '12px',
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
+                      boxSizing: 'border-box',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <div style={{ fontSize: '12px', fontWeight: '800', color: '#0F766E', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <SparklesIcon size={14} color="#0F766E" />
+                        <span>Direct In-Context Quick Edit (Visible Instant Control)</span>
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#64748B' }}>
+                        Edits apply directly to the live site preview below
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 90px 130px auto', gap: '8px', alignItems: 'center' }}>
+                      <div>
+                        <div style={{ fontSize: '10px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', marginBottom: '2px' }}>Hero Headline</div>
+                        <input
+                          type="text"
+                          value={content.hero.headline}
+                          onChange={(e) => handleContentChange('hero', 'headline', e.target.value)}
+                          placeholder="Headline"
+                          style={{ width: '100%', padding: '6px 8px', borderRadius: '5px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                        />
+                      </div>
+
+                      <div>
+                        <div style={{ fontSize: '10px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', marginBottom: '2px' }}>Doctor Specialty</div>
+                        <input
+                          type="text"
+                          value={content.doctor.specialty}
+                          onChange={(e) => handleContentChange('doctor', 'specialty', e.target.value)}
+                          placeholder="Specialty"
+                          style={{ width: '100%', padding: '6px 8px', borderRadius: '5px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                        />
+                      </div>
+
+                      <div>
+                        <div style={{ fontSize: '10px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', marginBottom: '2px' }}>Fee (₹)</div>
+                        <input
+                          type="number"
+                          value={content.doctor.consultationFee}
+                          onChange={(e) => handleContentChange('doctor', 'consultationFee', Number(e.target.value))}
+                          placeholder="Fee"
+                          style={{ width: '100%', padding: '6px 8px', borderRadius: '5px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                        />
+                      </div>
+
+                      <div>
+                        <div style={{ fontSize: '10px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', marginBottom: '2px' }}>Next Slot</div>
+                        <input
+                          type="text"
+                          value={content.availability?.nextAvailableSlot || 'Today, 05:30 PM'}
+                          onChange={(e) => {
+                            if (!content) return;
+                            setContent({
+                              ...content,
+                              availability: {
+                                ...content.availability,
+                                nextAvailableSlot: e.target.value,
+                              },
+                            });
+                            setHasUnsavedChanges(true);
+                          }}
+                          placeholder="Slot"
+                          style={{ width: '100%', padding: '6px 8px', borderRadius: '5px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                        />
+                      </div>
+
+                      <div style={{ paddingTop: '16px' }}>
+                        <button
+                          onClick={() => handlePublish()}
+                          className="ux-btn"
+                          style={{
+                            background: '#0F766E',
+                            color: '#FFFFFF',
+                            border: 'none',
+                            padding: '7px 14px',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            fontWeight: '700',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          <SendIcon size={12} color="#FFFFFF" />
+                          <span>Publish Live</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Quick Section Jump Pills */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '10px', paddingTop: '8px', borderTop: '1px solid #F1F5F9', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '11px', fontWeight: '700', color: '#64748B' }}>Quick-Focus Section:</span>
+                      {[
+                        { id: 'clinic', label: 'Clinic & Schedule' },
+                        { id: 'hero', label: 'Hero Block' },
+                        { id: 'doctor', label: 'Doctor Credentials' },
+                        { id: 'services', label: 'Services' },
+                        { id: 'reviews', label: 'Reviews' },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setEditorSection(item.id as EditorSection)}
+                          className="ux-btn"
+                          style={{
+                            background: editorSection === item.id ? '#CCFBF1' : '#F8FAFC',
+                            color: editorSection === item.id ? '#0F766E' : '#475569',
+                            border: editorSection === item.id ? '1px solid #0F766E' : '1px solid #CBD5E1',
+                            padding: '3px 8px',
+                            borderRadius: '4px',
+                            fontSize: '11px',
+                            cursor: 'pointer',
+                            fontWeight: editorSection === item.id ? '700' : '500',
+                          }}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
@@ -2822,6 +3980,329 @@ export default function CmsPanelPage() {
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* 1. Printable Clinic Appointment Slip Modal */}
+      {printSlipPatient && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '20px',
+          }}
+        >
+          <div
+            className="ux-card"
+            style={{
+              background: '#FFFFFF',
+              borderRadius: '16px',
+              maxWidth: '520px',
+              width: '100%',
+              padding: '28px',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
+              position: 'relative',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+            }}
+          >
+            <button
+              onClick={() => setPrintSlipPatient(null)}
+              className="ux-btn"
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: '#64748B',
+              }}
+            >
+              <XIcon size={20} color="#64748B" />
+            </button>
+
+            {/* Printable Area */}
+            <div style={{ border: '2px solid #0F766E', borderRadius: '12px', padding: '20px', background: '#F8FAFC' }}>
+              <div style={{ textAlign: 'center', borderBottom: '1px solid #CBD5E1', paddingBottom: '12px', marginBottom: '14px' }}>
+                <div style={{ fontSize: '18px', fontWeight: '800', color: '#0F172A' }}>
+                  {content?.clinic.name}
+                </div>
+                <div style={{ fontSize: '12px', color: '#475569', marginTop: '2px' }}>
+                  Plot 14, Health Plaza, Sector 18, Noida &bull; Ph: +91 98710 23456
+                </div>
+                <div style={{ fontSize: '11px', color: '#0F766E', fontWeight: '600', marginTop: '2px' }}>
+                  {content?.doctor.name} &bull; {content?.doctor.degree} &bull; Reg: {content?.doctor.registrationNumber}
+                </div>
+              </div>
+
+              {/* Big Token Stamp */}
+              <div style={{ textAlign: 'center', background: '#CCFBF1', border: '1px solid #5EEAD4', borderRadius: '8px', padding: '10px', marginBottom: '16px' }}>
+                <div style={{ fontSize: '11px', fontWeight: '700', color: '#0F766E', textTransform: 'uppercase' }}>
+                  OPD Consultation Token
+                </div>
+                <div style={{ fontSize: '34px', fontWeight: '900', color: '#0F766E', letterSpacing: '1px' }}>
+                  #{String(printSlipPatient.tokenNumber || 1).padStart(2, '0')}
+                </div>
+              </div>
+
+              {/* Patient details grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '12px', marginBottom: '14px' }}>
+                <div>
+                  <span style={{ color: '#64748B' }}>Patient Name:</span>
+                  <div style={{ fontWeight: '700', color: '#0F172A' }}>{printSlipPatient.patientName}</div>
+                </div>
+                <div>
+                  <span style={{ color: '#64748B' }}>Phone / WhatsApp:</span>
+                  <div style={{ fontWeight: '700', color: '#0F172A' }}>{printSlipPatient.phone}</div>
+                </div>
+                <div>
+                  <span style={{ color: '#64748B' }}>Date &amp; Shift:</span>
+                  <div style={{ fontWeight: '700', color: '#0F172A' }}>{printSlipPatient.preferredDate} ({printSlipPatient.shift || 'Evening'})</div>
+                </div>
+                <div>
+                  <span style={{ color: '#64748B' }}>Clinical Procedure:</span>
+                  <div style={{ fontWeight: '700', color: '#0F172A' }}>{printSlipPatient.service}</div>
+                </div>
+                <div>
+                  <span style={{ color: '#64748B' }}>Consultation Fee:</span>
+                  <div style={{ fontWeight: '700', color: '#16A34A' }}>₹{content?.doctor.consultationFee || 600} (7-Day Follow-Up Incl.)</div>
+                </div>
+                <div>
+                  <span style={{ color: '#64748B' }}>Registration ID:</span>
+                  <div style={{ fontWeight: '600', color: '#0F172A' }}>{printSlipPatient.id}</div>
+                </div>
+              </div>
+
+              <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '10px', fontSize: '11px', color: '#475569', lineHeight: 1.4 }}>
+                <strong>Clinic Guidance:</strong> Located in Central Market Sector 18, 200m from Noida Sector 18 Metro (Blue Line, Gate 2). Please arrive 10 minutes prior to token call. Multi-level car parking available next to Health Plaza.
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: '10px', marginTop: '18px' }}>
+              <button
+                onClick={() => window.print()}
+                className="ux-btn"
+                style={{
+                  flex: '1',
+                  background: '#0F766E',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  padding: '10px 16px',
+                  borderRadius: '8px',
+                  fontWeight: '700',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                }}
+              >
+                <PrinterIcon size={16} color="#FFFFFF" />
+                <span>Print Slip (PDF)</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  const cleanPhone = printSlipPatient.phone.replace(/\D/g, '');
+                  const token = `#${String(printSlipPatient.tokenNumber || 1).padStart(2, '0')}`;
+                  const text = `Namaste ${printSlipPatient.patientName}, here is your HealthConsult Clinic appointment slip.\nToken: ${token}\nDoctor: Dr. Maanvita Kumari\nDate: ${printSlipPatient.preferredDate} (${printSlipPatient.shift || 'Evening'})\nFee: ₹${content?.doctor.consultationFee || 600} (7-day follow-up complimentary)\nDirections: https://maps.google.com/?q=HealthConsult+Clinic+Noida`;
+                  window.open(`https://wa.me/91${cleanPhone}?text=${encodeURIComponent(text)}`, '_blank');
+                }}
+                className="ux-btn"
+                style={{
+                  flex: '1',
+                  background: '#F0FDF4',
+                  color: '#166534',
+                  border: '1px solid #BBF7D0',
+                  padding: '10px 16px',
+                  borderRadius: '8px',
+                  fontWeight: '700',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                }}
+              >
+                <MessageCircleIcon size={16} color="#166534" />
+                <span>Share on WhatsApp</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. Weekly Doctor WhatsApp Summary Digest Modal */}
+      {showWeeklySummaryModal && (() => {
+        const stats = getWeeklySummaryStats();
+        return (
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(15, 23, 42, 0.65)',
+              backdropFilter: 'blur(4px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 9999,
+              padding: '20px',
+            }}
+          >
+            <div
+              className="ux-card"
+              style={{
+                background: '#FFFFFF',
+                borderRadius: '16px',
+                maxWidth: '560px',
+                width: '100%',
+                padding: '28px',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
+                position: 'relative',
+              }}
+            >
+              <button
+                onClick={() => setShowWeeklySummaryModal(false)}
+                className="ux-btn"
+                style={{
+                  position: 'absolute',
+                  top: '16px',
+                  right: '16px',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#64748B',
+                }}
+              >
+                <XIcon size={20} color="#64748B" />
+              </button>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#F0FDF4', border: '1px solid #BBF7D0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <MessageCircleIcon size={22} color="#166534" />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#0F172A' }}>
+                    Dr. Maanvita Weekly WhatsApp Digest
+                  </h3>
+                  <div style={{ fontSize: '12px', color: '#64748B' }}>
+                    Plain-language weekly practice report delivered to doctor&apos;s phone (+91 98710 23456)
+                  </div>
+                </div>
+              </div>
+
+              {/* Stats Highlights Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '16px' }}>
+                <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '20px', fontWeight: '800', color: '#0F766E' }}>{stats.totalBookings}</div>
+                  <div style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>Appointments</div>
+                </div>
+                <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '20px', fontWeight: '800', color: '#16A34A' }}>{stats.completed}</div>
+                  <div style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>Completed</div>
+                </div>
+                <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '20px', fontWeight: '800', color: '#D97706' }}>{stats.reviewsSent}</div>
+                  <div style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>Reviews Sent</div>
+                </div>
+              </div>
+
+              {/* Formatted Plain-Text Preview */}
+              <div style={{ background: '#F1F5F9', borderRadius: '10px', padding: '14px', fontSize: '13px', color: '#1E293B', fontFamily: 'monospace', whiteSpace: 'pre-line', lineHeight: 1.5, marginBottom: '20px', border: '1px solid #CBD5E1' }}>
+                {stats.text}
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  onClick={() => {
+                    const docPhone = '9871023456';
+                    window.open(`https://wa.me/91${docPhone}?text=${encodeURIComponent(stats.text)}`, '_blank');
+                    showToast('Opening WhatsApp with Dr. Maanvita Kumari');
+                  }}
+                  className="ux-btn"
+                  style={{
+                    flex: '1',
+                    background: '#16A34A',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    padding: '11px 16px',
+                    borderRadius: '8px',
+                    fontWeight: '700',
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 2px 4px rgba(22,163,74,0.2)',
+                  }}
+                >
+                  <MessageCircleIcon size={16} color="#FFFFFF" />
+                  <span>Send to Doctor&apos;s WhatsApp</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(stats.text);
+                    showToast('Digest copied to clipboard!');
+                  }}
+                  className="ux-btn"
+                  style={{
+                    background: '#F8FAFC',
+                    color: '#334155',
+                    border: '1px solid #CBD5E1',
+                    padding: '11px 16px',
+                    borderRadius: '8px',
+                    fontWeight: '600',
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  <CopyIcon size={15} color="#334155" />
+                  <span>Copy Text</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Floating Status Notification Toast */}
+      {toastMessage && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '24px',
+            right: '24px',
+            background: '#0F172A',
+            color: '#FFFFFF',
+            padding: '12px 20px',
+            borderRadius: '10px',
+            boxShadow: '0 12px 30px rgba(0,0,0,0.25)',
+            fontSize: '13px',
+            fontWeight: '600',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            zIndex: 9999,
+          }}
+        >
+          <CheckCircleIcon size={18} color="#34D399" />
+          <span>{toastMessage}</span>
         </div>
       )}
 

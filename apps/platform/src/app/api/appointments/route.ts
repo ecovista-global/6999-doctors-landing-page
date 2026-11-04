@@ -18,6 +18,9 @@ export async function POST(req: Request) {
       preferredDate: body.preferredDate || new Date().toISOString().split('T')[0],
       shift: body.shift || 'Morning',
       notes: body.notes || 'Submitted via patient website form',
+      tokenNumber: body.tokenNumber,
+      opdStage: body.opdStage || 'waiting',
+      status: body.status || 'new',
     });
     return NextResponse.json({ success: true, appointment: newApt }, { status: 201 });
   } catch (err: any) {

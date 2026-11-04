@@ -1,9 +1,26 @@
 import fs from 'fs';
 import path from 'path';
 
+export interface SlotItem {
+  id: string;
+  time: string;
+  period: 'morning' | 'evening';
+  available: boolean;
+}
+
+export interface DoctorAvailability {
+  nextAvailableSlot: string; // e.g. "Today, 05:30 PM"
+  isAcceptingToday: boolean;
+  runningLateMinutes: number; // 0, 15, 20, 30
+  runningLateReason: string;
+  currentServingToken: number; // e.g. 4
+  todaySlots: SlotItem[];
+}
+
 export interface DoctorContent {
   theme: string;
   announcement: string;
+  availability: DoctorAvailability;
   doctor: {
     name: string;
     degree: string;
@@ -42,6 +59,7 @@ export interface DoctorContent {
     mapLocationName: string;
     mapSubtitle: string;
     googleMapEmbedUrl: string;
+    googleReviewUrl: string;
   };
   hero: {
     headline: string;
@@ -85,15 +103,19 @@ export interface DoctorContent {
 
 export interface AppointmentRecord {
   id: string;
+  tokenNumber: number;
   patientName: string;
   phone: string;
   doctor?: string;
   service: string;
   preferredDate: string;
   shift: 'Morning' | 'Afternoon' | 'Evening';
-  status: 'new' | 'contacted' | 'confirmed' | 'completed' | 'cancelled';
+  status: 'new' | 'contacted' | 'confirmed' | 'completed' | 'cancelled' | 'waiting' | 'in_consultation';
+  opdStage: 'waiting' | 'in_consultation' | 'done';
   notes: string;
   createdAt: string;
+  whatsappConfirmationSent?: boolean;
+  googleReviewSent?: boolean;
 }
 
 const STORAGE_FILE = path.join(process.cwd(), 'fixtures', 'live-store.json');
@@ -101,6 +123,23 @@ const STORAGE_FILE = path.join(process.cwd(), 'fixtures', 'live-store.json');
 const DEFAULT_CONTENT: DoctorContent = {
   theme: 'Green Trust',
   announcement: 'Complimentary 7-day follow-up consultation included with every visit.',
+  availability: {
+    nextAvailableSlot: 'Today, 05:30 PM',
+    isAcceptingToday: true,
+    runningLateMinutes: 0,
+    runningLateReason: 'Emergency acute case review',
+    currentServingToken: 4,
+    todaySlots: [
+      { id: 'slot-1', time: '05:30 PM', period: 'evening', available: true },
+      { id: 'slot-2', time: '06:00 PM', period: 'evening', available: true },
+      { id: 'slot-3', time: '06:30 PM', period: 'evening', available: false },
+      { id: 'slot-4', time: '07:00 PM', period: 'evening', available: true },
+      { id: 'slot-5', time: '07:30 PM', period: 'evening', available: true },
+      { id: 'slot-6', time: '10:00 AM', period: 'morning', available: true },
+      { id: 'slot-7', time: '10:30 AM', period: 'morning', available: true },
+      { id: 'slot-8', time: '11:15 AM', period: 'morning', available: true },
+    ],
+  },
   doctor: {
     name: 'Dr. Maanvita Kumari',
     degree: 'MBBS, MD (General Medicine)',
@@ -146,6 +185,7 @@ const DEFAULT_CONTENT: DoctorContent = {
     mapLocationName: 'HealthConsult Clinic Location',
     mapSubtitle: 'Sector 18 Central Market, Noida',
     googleMapEmbedUrl: 'https://maps.google.com/maps?q=Sector%2018%2C%20Noida&t=&z=15&ie=UTF8&iwloc=&output=embed',
+    googleReviewUrl: 'https://g.page/r/healthconsult-noida/review',
   },
   hero: {
     headline: 'Consult your health with our doctor anywhere, anytime',
@@ -157,25 +197,25 @@ const DEFAULT_CONTENT: DoctorContent = {
   whyChooseUs: [
     {
       id: 'wcu-1',
-      icon: '⏱️',
+      icon: 'clock',
       title: 'Minimal Waiting Time',
       description: 'WhatsApp slot coordination ensures you spend minimal time in the waiting area, receiving prompt doctor attention.',
     },
     {
       id: 'wcu-2',
-      icon: '🩺',
+      icon: 'stethoscope',
       title: 'Evidence-Based Medicine',
       description: 'Rational clinical diagnoses with zero unnecessary lab investigations or heavy over-prescription of antibiotics.',
     },
     {
       id: 'wcu-3',
-      icon: '📲',
+      icon: 'message',
       title: 'Digital Health Records',
       description: 'Clear digital prescriptions delivered instantly to your WhatsApp, accessible whenever you need them.',
     },
     {
       id: 'wcu-4',
-      icon: '🤝',
+      icon: 'userCheck',
       title: 'Dedicated Consultation',
       description: 'Thorough 15+ minute consultation sessions allowing ample time to address your symptoms, queries, and lifestyle concerns.',
     },
@@ -183,25 +223,25 @@ const DEFAULT_CONTENT: DoctorContent = {
   accreditations: [
     {
       id: 'acc-1',
-      icon: '🛡️',
+      icon: 'shield',
       title: 'NABH Safety Standards',
       description: 'Sterilized clinic environment & protocols',
     },
     {
       id: 'acc-2',
-      icon: '💊',
+      icon: 'pill',
       title: 'Transparent Consultation',
       description: 'Complimentary 7-day follow-up included',
     },
     {
       id: 'acc-3',
-      icon: '⚡',
+      icon: 'zap',
       title: 'Digital WhatsApp Reports',
       description: 'Instant prescription & diagnostic delivery',
     },
     {
       id: 'acc-4',
-      icon: '🔒',
+      icon: 'lock',
       title: 'DPDP Act 2023 Compliant',
       description: '100% encrypted & private health records',
     },
@@ -211,55 +251,55 @@ const DEFAULT_CONTENT: DoctorContent = {
       id: 'srv-1',
       title: 'General Health Checkup',
       description: 'Complete physical examination, baseline vital assessments, blood pressure screening, and personalized preventive health roadmaps.',
-      icon: '🔬',
+      icon: 'stethoscope',
     },
     {
       id: 'srv-2',
       title: 'Diabetes & Hypertension',
       description: 'Careful blood sugar monitoring, HbA1c review, blood pressure stabilization, diet counseling, and long-term kidney & heart protection.',
-      icon: '🩸',
+      icon: 'heartPulse',
     },
     {
       id: 'srv-3',
       title: 'Fevers & Seasonal Illnesses',
       description: 'Rapid diagnostic assessment for dengue, malaria, typhoid, viral flu, bronchitis, seasonal allergies, and acute throat infections.',
-      icon: '🌡️',
+      icon: 'thermometer',
     },
     {
       id: 'srv-4',
       title: 'Thyroid & Endocrine Care',
       description: 'Expert clinical evaluation of hypothyroidism, hyperthyroidism, metabolic shifts, chronic fatigue, and hormone stabilization.',
-      icon: '💊',
+      icon: 'pill',
     },
     {
       id: 'srv-5',
       title: 'Geriatric & Elderly Care',
       description: 'Compassionate healthcare for senior citizens, routine medication interaction reviews, arthritis pain support, and mobility advice.',
-      icon: '👵',
+      icon: 'userCheck',
     },
     {
       id: 'srv-6',
       title: 'Adult Vaccinations',
       description: 'Annual influenza shots, pneumococcal protection, hepatitis B boosters, tetanus prophylaxis, and adult immunization schedules.',
-      icon: '💉',
+      icon: 'syringe',
     },
     {
       id: 'srv-7',
       title: 'Respiratory & Asthma Care',
       description: 'Management of chronic wheezing, asthma flare-ups, seasonal allergic rhinitis, smoker\'s cough, and post-viral lung recovery.',
-      icon: '🫁',
+      icon: 'activity',
     },
     {
       id: 'srv-8',
       title: 'Gastrointestinal & Acidity',
       description: 'Treatment of GERD, acid reflux, peptic ulcers, IBS, chronic constipation, liver sluggishness, and dietary intolerance.',
-      icon: '🥣',
+      icon: 'microscope',
     },
     {
       id: 'srv-9',
       title: 'Preventive Lifestyle Medicine',
       description: 'Evidence-based guidance on weight management, uric acid reduction, cholesterol balance, and cardiac risk factor reduction.',
-      icon: '🥗',
+      icon: 'shield',
     },
   ],
   reviews: [
@@ -359,6 +399,7 @@ const DEFAULT_CONTENT: DoctorContent = {
 const DEFAULT_APPOINTMENTS: AppointmentRecord[] = [
   {
     id: 'APT-1081',
+    tokenNumber: 3,
     patientName: 'Ramesh Sharma',
     phone: '+91 98101 23456',
     doctor: 'Dr. Maanvita Kumari',
@@ -366,32 +407,38 @@ const DEFAULT_APPOINTMENTS: AppointmentRecord[] = [
     preferredDate: '2026-11-04',
     shift: 'Morning',
     status: 'new',
+    opdStage: 'waiting',
     notes: 'Fasting reports ready, prefers 10:30 AM slot',
     createdAt: '15 mins ago',
   },
   {
     id: 'APT-1080',
+    tokenNumber: 2,
     patientName: 'Pooja Verma',
     phone: '+91 98712 34567',
     doctor: 'Dr. Maanvita Kumari',
     service: 'Thyroid Disorders',
     preferredDate: '2026-11-04',
     shift: 'Evening',
-    status: 'contacted',
+    status: 'in_consultation',
+    opdStage: 'in_consultation',
     notes: 'WhatsApp confirmation sent by front desk',
     createdAt: '45 mins ago',
   },
   {
     id: 'APT-1079',
+    tokenNumber: 1,
     patientName: 'Harish Chandra',
     phone: '+91 99110 56789',
     doctor: 'Dr. Maanvita Kumari',
     service: 'Hypertension Care',
     preferredDate: '2026-11-03',
     shift: 'Evening',
-    status: 'confirmed',
+    status: 'completed',
+    opdStage: 'done',
     notes: 'Confirmed 6:15 PM slot',
     createdAt: '2 hours ago',
+    googleReviewSent: false,
   },
 ];
 
@@ -409,6 +456,10 @@ function loadStore(): StoreData {
       const mergedContent: DoctorContent = {
         ...DEFAULT_CONTENT,
         ...parsed.content,
+        availability: {
+          ...DEFAULT_CONTENT.availability,
+          ...(parsed.content?.availability || {}),
+        },
         doctor: { ...DEFAULT_CONTENT.doctor, ...(parsed.content?.doctor || {}) },
         clinic: {
           ...DEFAULT_CONTENT.clinic,
@@ -425,9 +476,28 @@ function loadStore(): StoreData {
         reviews: parsed.content?.reviews || DEFAULT_CONTENT.reviews,
         faqs: parsed.content?.faqs || DEFAULT_CONTENT.faqs,
       };
+
+      const rawApts: any[] = parsed.appointments || DEFAULT_APPOINTMENTS;
+      const normalizedApts: AppointmentRecord[] = rawApts.map((a, idx) => ({
+        id: a.id || `APT-${1080 + idx}`,
+        tokenNumber: a.tokenNumber || (idx + 1),
+        patientName: a.patientName || 'Anonymous Patient',
+        phone: a.phone || '+91 98000 00000',
+        doctor: a.doctor || 'Dr. Maanvita Kumari',
+        service: a.service || 'General Consultation',
+        preferredDate: a.preferredDate || '2026-11-04',
+        shift: a.shift || 'Morning',
+        status: a.status || 'new',
+        opdStage: a.opdStage || (a.status === 'completed' ? 'done' : a.status === 'in_consultation' ? 'in_consultation' : 'waiting'),
+        notes: a.notes || '',
+        createdAt: a.createdAt || 'Recent',
+        whatsappConfirmationSent: a.whatsappConfirmationSent || false,
+        googleReviewSent: a.googleReviewSent || false,
+      }));
+
       return {
         content: mergedContent,
-        appointments: parsed.appointments || DEFAULT_APPOINTMENTS,
+        appointments: normalizedApts,
       };
     }
   } catch (err) {
@@ -449,13 +519,19 @@ function saveStore(data: StoreData) {
 let memoryStore = loadStore();
 
 export function getContent(): DoctorContent {
+  memoryStore = loadStore();
   return memoryStore.content;
 }
 
 export function updateContent(newContent: Partial<DoctorContent>): DoctorContent {
+  memoryStore = loadStore();
   memoryStore.content = {
     ...memoryStore.content,
     ...newContent,
+    availability: {
+      ...memoryStore.content.availability,
+      ...(newContent.availability || {}),
+    },
     doctor: { ...memoryStore.content.doctor, ...(newContent.doctor || {}) },
     clinic: {
       ...memoryStore.content.clinic,
@@ -477,26 +553,48 @@ export function updateContent(newContent: Partial<DoctorContent>): DoctorContent
 }
 
 export function getAppointments(): AppointmentRecord[] {
+  memoryStore = loadStore();
   return memoryStore.appointments;
 }
 
-export function addAppointment(apt: Omit<AppointmentRecord, 'id' | 'createdAt' | 'status'>): AppointmentRecord {
+export function addAppointment(
+  apt: Omit<AppointmentRecord, 'id' | 'createdAt' | 'status' | 'tokenNumber' | 'opdStage'> & {
+    tokenNumber?: number;
+    opdStage?: 'waiting' | 'in_consultation' | 'done';
+    status?: AppointmentRecord['status'];
+  }
+): AppointmentRecord {
+  memoryStore = loadStore();
+  const nextToken = apt.tokenNumber || (memoryStore.appointments.length + 1);
   const newRecord: AppointmentRecord = {
     ...apt,
     id: `APT-${1082 + memoryStore.appointments.length}`,
-    status: 'new',
+    tokenNumber: nextToken,
+    status: apt.status || (apt.opdStage === 'in_consultation' ? 'in_consultation' : apt.opdStage === 'done' ? 'completed' : 'new'),
+    opdStage: apt.opdStage || 'waiting',
     createdAt: 'Just now',
+    whatsappConfirmationSent: false,
+    googleReviewSent: false,
   };
   memoryStore.appointments = [newRecord, ...memoryStore.appointments];
   saveStore(memoryStore);
   return newRecord;
 }
 
-export function updateAppointmentStatus(id: string, status: AppointmentRecord['status'], notes?: string): AppointmentRecord | null {
+export function updateAppointmentStatus(
+  id: string,
+  status: AppointmentRecord['status'],
+  notes?: string,
+  extra?: Partial<AppointmentRecord>
+): AppointmentRecord | null {
+  memoryStore = loadStore();
   const apt = memoryStore.appointments.find((a) => a.id === id);
   if (!apt) return null;
   apt.status = status;
   if (notes !== undefined) apt.notes = notes;
+  if (extra) {
+    Object.assign(apt, extra);
+  }
   saveStore(memoryStore);
   return apt;
 }
