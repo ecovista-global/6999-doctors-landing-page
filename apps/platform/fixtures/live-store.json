@@ -7,7 +7,7 @@
       "isAcceptingToday": true,
       "runningLateMinutes": 0,
       "runningLateReason": "Emergency acute care review",
-      "currentServingToken": 3,
+      "currentServingToken": 9,
       "todaySlots": [
         {
           "id": "slot-1",
@@ -72,7 +72,8 @@
       "consultationFee": 600,
       "phone": "+91 98765 43210",
       "whatsappNumber": "+91 98765 43210",
-      "email": "contact@healthconsult.in"
+      "email": "contact@healthconsult.in",
+      "photoUrl": "/assets/dr_maanvita_portrait.svg"
     },
     "clinic": {
       "name": "HealthConsult Family Clinic",
@@ -104,7 +105,9 @@
       "mapLocationName": "HealthConsult Clinic Location",
       "mapSubtitle": "Sector 18 Central Market, Noida",
       "googleMapEmbedUrl": "https://maps.google.com/maps?q=Sector%2018%2C%20Noida&t=&z=15&ie=UTF8&iwloc=&output=embed",
-      "googleReviewUrl": "https://g.page/r/healthconsult-noida/review"
+      "googleReviewUrl": "https://g.page/r/healthconsult-noida/review",
+      "photoUrl": "/assets/noida_clinic_facade.svg",
+      "logoUrl": "/assets/stethoscope_branding.svg"
     },
     "hero": {
       "headline": "Consult your health with our doctor anywhere, anytime",
@@ -306,11 +309,60 @@
         "question": "What emergency facilities are available?",
         "answer": "The clinic provides primary acute emergency stabilization (oxygen, nebulization, primary wound dressing, glucose revival). Severe trauma or cardiac emergencies are stabilized and referred to partner tertiary hospitals."
       }
+    ],
+    "media": [
+      {
+        "id": "med-1",
+        "title": "Dr. Maanvita Portrait (Hero)",
+        "fileName": "dr_maanvita_portrait.svg",
+        "fileType": "image/svg+xml",
+        "fileSize": "42 KB",
+        "url": "/assets/dr_maanvita_portrait.svg",
+        "diskUrl": "/assets/dr_maanvita_portrait.svg",
+        "assignedTo": "hero_doctor_portrait",
+        "uploadedAt": "Active Hero Asset"
+      },
+      {
+        "id": "med-2",
+        "title": "HealthConsult Noida Clinic Facade",
+        "fileName": "noida_clinic_facade.svg",
+        "fileType": "image/svg+xml",
+        "fileSize": "68 KB",
+        "url": "/assets/noida_clinic_facade.svg",
+        "diskUrl": "/assets/noida_clinic_facade.svg",
+        "assignedTo": "clinic_facade",
+        "uploadedAt": "Active Clinic Asset"
+      },
+      {
+        "id": "med-3",
+        "title": "Stethoscope Emerald Logo",
+        "fileName": "stethoscope_branding.svg",
+        "fileType": "image/svg+xml",
+        "fileSize": "14 KB",
+        "url": "/assets/stethoscope_branding.svg",
+        "diskUrl": "/assets/stethoscope_branding.svg",
+        "assignedTo": "nav_logo",
+        "uploadedAt": "Active Logo Asset"
+      }
     ]
   },
   "appointments": [
     {
+      "id": "APT-1090",
+      "patientName": "Nakul ",
+      "phone": "7307436493",
+      "doctor": "Dr. Maanvita Kumari",
+      "service": "General Health Checkup",
+      "preferredDate": "2026-11-04",
+      "shift": "Morning",
+      "status": "completed",
+      "opdStage": "done",
+      "notes": "Slot time: 07:00 PM. needed blood test ",
+      "createdAt": "Just now"
+    },
+    {
       "id": "APT-1089",
+      "tokenNumber": 1,
       "patientName": "Anand Mishra",
       "phone": "9811122334",
       "doctor": "Dr. Maanvita Kumari",
@@ -321,6 +373,7 @@
       "opdStage": "done",
       "notes": "Submitted via patient website form",
       "createdAt": "Just now",
+      "whatsappConfirmationSent": false,
       "googleReviewSent": true
     },
     {

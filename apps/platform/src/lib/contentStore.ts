@@ -17,6 +17,19 @@ export interface DoctorAvailability {
   todaySlots: SlotItem[];
 }
 
+export interface MediaItem {
+  id: string;
+  title: string;
+  fileName: string;
+  fileType: string;
+  fileSize: string;
+  url: string;
+  diskUrl?: string;
+  assignedTo: 'hero_doctor_portrait' | 'clinic_facade' | 'nav_logo' | 'gallery' | 'unassigned';
+  uploadedAt: string;
+  dimensions?: string;
+}
+
 export interface DoctorContent {
   theme: string;
   announcement: string;
@@ -35,6 +48,7 @@ export interface DoctorContent {
     phone: string;
     whatsappNumber: string;
     email: string;
+    photoUrl?: string;
   };
   clinic: {
     name: string;
@@ -60,6 +74,8 @@ export interface DoctorContent {
     mapSubtitle: string;
     googleMapEmbedUrl: string;
     googleReviewUrl: string;
+    photoUrl?: string;
+    logoUrl?: string;
   };
   hero: {
     headline: string;
@@ -99,6 +115,7 @@ export interface DoctorContent {
     question: string;
     answer: string;
   }>;
+  media: MediaItem[];
 }
 
 export interface AppointmentRecord {
@@ -154,6 +171,7 @@ const DEFAULT_CONTENT: DoctorContent = {
     phone: '+91 98765 43210',
     whatsappNumber: '+91 98765 43210',
     email: 'contact@healthconsult.in',
+    photoUrl: '/assets/dr_maanvita_portrait.svg',
   },
   clinic: {
     name: 'HealthConsult Family Clinic',
@@ -186,6 +204,8 @@ const DEFAULT_CONTENT: DoctorContent = {
     mapSubtitle: 'Sector 18 Central Market, Noida',
     googleMapEmbedUrl: 'https://maps.google.com/maps?q=Sector%2018%2C%20Noida&t=&z=15&ie=UTF8&iwloc=&output=embed',
     googleReviewUrl: 'https://g.page/r/healthconsult-noida/review',
+    photoUrl: '/assets/noida_clinic_facade.svg',
+    logoUrl: '/assets/stethoscope_branding.svg',
   },
   hero: {
     headline: 'Consult your health with our doctor anywhere, anytime',
@@ -394,6 +414,41 @@ const DEFAULT_CONTENT: DoctorContent = {
       answer: 'The clinic provides primary acute emergency stabilization (oxygen, nebulization, primary wound dressing, glucose revival). Severe trauma or cardiac emergencies are stabilized and referred to partner tertiary hospitals.',
     },
   ],
+  media: [
+    {
+      id: 'med-1',
+      title: 'Dr. Maanvita Portrait (Hero)',
+      fileName: 'dr_maanvita_portrait.svg',
+      fileType: 'image/svg+xml',
+      fileSize: '42 KB',
+      url: '/assets/dr_maanvita_portrait.svg',
+      diskUrl: '/assets/dr_maanvita_portrait.svg',
+      assignedTo: 'hero_doctor_portrait',
+      uploadedAt: 'Active Hero Asset',
+    },
+    {
+      id: 'med-2',
+      title: 'HealthConsult Noida Clinic Facade',
+      fileName: 'noida_clinic_facade.svg',
+      fileType: 'image/svg+xml',
+      fileSize: '68 KB',
+      url: '/assets/noida_clinic_facade.svg',
+      diskUrl: '/assets/noida_clinic_facade.svg',
+      assignedTo: 'clinic_facade',
+      uploadedAt: 'Active Clinic Asset',
+    },
+    {
+      id: 'med-3',
+      title: 'Stethoscope Emerald Logo',
+      fileName: 'stethoscope_branding.svg',
+      fileType: 'image/svg+xml',
+      fileSize: '14 KB',
+      url: '/assets/stethoscope_branding.svg',
+      diskUrl: '/assets/stethoscope_branding.svg',
+      assignedTo: 'nav_logo',
+      uploadedAt: 'Active Logo Asset',
+    },
+  ],
 };
 
 const DEFAULT_APPOINTMENTS: AppointmentRecord[] = [
@@ -475,6 +530,7 @@ function loadStore(): StoreData {
         services: parsed.content?.services || DEFAULT_CONTENT.services,
         reviews: parsed.content?.reviews || DEFAULT_CONTENT.reviews,
         faqs: parsed.content?.faqs || DEFAULT_CONTENT.faqs,
+        media: parsed.content?.media || DEFAULT_CONTENT.media,
       };
 
       const rawApts: any[] = parsed.appointments || DEFAULT_APPOINTMENTS;

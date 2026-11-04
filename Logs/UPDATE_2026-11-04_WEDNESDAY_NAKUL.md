@@ -58,6 +58,16 @@ Today's engineering effort delivered 8 high-conversion, clinical-grade features 
 * **Printable Clinic Appointment Slip Modal:** Authentic Indian clinical OPD slip with DMC registration details, QR transit guidance, and 1-tap print/WhatsApp share.
 * **Doctor Weekly Digest Modal:** Computes live practice metrics and delivers a clean WhatsApp message to Dr. Maanvita's mobile.
 
+### 2.4 Functional Media Library & Asset Pipeline (`activeTab === 'media'`)
+* **Interactive Drag-and-Drop & File Picker Dropzone:** Replaced the non-interactive mock div with a functional file upload dropzone backed by a hidden `<input type="file">`, supporting JPG, PNG, WebP, and SVG files.
+* **Upload API (`/api/upload`):** Developed a Next.js server endpoint handling both `multipart/form-data` uploads and JSON base64 payloads, saving physical files to `apps/platform/public/uploads` and generating immediate Data URIs.
+* **Real Thumbnail Preview:** Replaced placeholder colored SVG icons with real image thumbnails (`<img src={item.url} />`).
+* **1-Click Live Site Asset Assignment:** Each uploaded image card includes 1-tap triggers:
+  * `★ Set as Doctor Portrait` &rarr; updates `content.doctor.photoUrl`, instantly displaying the doctor's portrait on `http://localhost:3000/` and in the CMS header.
+  * `★ Set as Clinic Photo` &rarr; updates `content.clinic.photoUrl`, updating the clinic section.
+  * `★ Set as Nav Logo` &rarr; updates `content.clinic.logoUrl`.
+* **Default Vector Clinical Assets:** Provided authentic SVG assets for Dr. Maanvita's portrait (`/assets/dr_maanvita_portrait.svg`), the Noida clinic facade (`/assets/noida_clinic_facade.svg`), and the clinic branding logo (`/assets/stethoscope_branding.svg`).
+
 ---
 
 ## 3. Verification & Testing
@@ -77,3 +87,4 @@ Today's engineering effort delivered 8 high-conversion, clinical-grade features 
    * `PATCH /api/appointments/APT-1089` &rarr; Successfully transitioned stage from `waiting` &rarr; `in_consultation` &rarr; `done` with `googleReviewSent: true`.
 4. **Mirroring:**
    Mirrored all modified files to sibling workspace `/home/nakul/Documents/EcoDigitech`.
+

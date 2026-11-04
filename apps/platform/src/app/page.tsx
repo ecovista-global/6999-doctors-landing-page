@@ -584,10 +584,18 @@ export default function PatientLandingPage() {
           {/* Doctor Portrait & Profile Card */}
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div className="ux-card" style={{ width: '100%', maxWidth: '440px', background: '#FFFFFF', borderRadius: '16px', overflow: 'hidden', border: '1px solid #E2E8F0', boxShadow: '0 20px 40px rgba(0,0,0,0.06)' }}>
-              <div style={{ height: '340px', background: `linear-gradient(135deg, ${theme.primary} 0%, ${theme.primaryDark} 100%)`, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div className="ux-icon-box" style={{ width: '180px', height: '180px', borderRadius: '50%', background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <StethoscopeIcon size={96} color="#FFFFFF" strokeWidth={1.5} />
-                </div>
+              <div style={{ height: '340px', background: `linear-gradient(135deg, ${theme.primary} 0%, ${theme.primaryDark} 100%)`, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                {content.doctor.photoUrl ? (
+                  <img
+                    src={content.doctor.photoUrl}
+                    alt={content.doctor.name}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                ) : (
+                  <div className="ux-icon-box" style={{ width: '180px', height: '180px', borderRadius: '50%', background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <StethoscopeIcon size={96} color="#FFFFFF" strokeWidth={1.5} />
+                  </div>
+                )}
                 <div style={{ position: 'absolute', top: '16px', right: '16px', background: '#047857', color: '#FFFFFF', padding: '5px 12px', borderRadius: '999px', fontSize: '11px', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                   <span className="pulse-beacon" style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#34D399', display: 'inline-block' }} />
                   <span>In-Clinic Today</span>
@@ -900,34 +908,50 @@ export default function PatientLandingPage() {
                 }}
               >
                 {!showInteractiveMap ? (
-                  <div style={{ textAlign: 'center', padding: '32px' }}>
-                    <div className="ux-icon-box" style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#FFFFFF', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', marginBottom: '12px' }}>
-                      <MapPinIcon size={28} color="#DC2626" />
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      minHeight: '280px',
+                      backgroundImage: content.clinic.photoUrl ? `url(${content.clinic.photoUrl})` : undefined,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      position: 'relative',
+                    }}
+                  >
+                    <div style={{ position: 'absolute', inset: 0, background: content.clinic.photoUrl ? 'rgba(255,255,255,0.85)' : 'transparent', backdropFilter: content.clinic.photoUrl ? 'blur(2px)' : 'none' }} />
+                    <div style={{ textAlign: 'center', padding: '32px', position: 'relative', zIndex: 2 }}>
+                      <div className="ux-icon-box" style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#FFFFFF', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', marginBottom: '12px' }}>
+                        <MapPinIcon size={28} color="#DC2626" />
+                      </div>
+                      <h4 style={{ margin: '0 0 6px 0', fontSize: '20px', fontWeight: 'bold', color: '#0F172A' }}>
+                        {content.clinic.mapLocationName}
+                      </h4>
+                      <p style={{ margin: '0 0 20px 0', fontSize: '14px', color: '#64748B' }}>
+                        {content.clinic.mapSubtitle}
+                      </p>
+                      <button
+                        type="button"
+                        className="ux-btn"
+                        onClick={() => setShowInteractiveMap(true)}
+                        style={{
+                          background: '#FFFFFF',
+                          color: theme.primary,
+                          border: `1px solid ${theme.primary}`,
+                          padding: '10px 20px',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                        }}
+                      >
+                        Click to Load Interactive Google Map
+                      </button>
                     </div>
-                    <h4 style={{ margin: '0 0 6px 0', fontSize: '20px', fontWeight: 'bold', color: '#0F172A' }}>
-                      {content.clinic.mapLocationName}
-                    </h4>
-                    <p style={{ margin: '0 0 20px 0', fontSize: '14px', color: '#64748B' }}>
-                      {content.clinic.mapSubtitle}
-                    </p>
-                    <button
-                      type="button"
-                      className="ux-btn"
-                      onClick={() => setShowInteractiveMap(true)}
-                      style={{
-                        background: '#FFFFFF',
-                        color: theme.primary,
-                        border: `1px solid ${theme.primary}`,
-                        padding: '10px 20px',
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        fontWeight: '700',
-                        cursor: 'pointer',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                      }}
-                    >
-                      Click to Load Interactive Google Map
-                    </button>
                   </div>
                 ) : (
                   <iframe

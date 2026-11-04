@@ -182,6 +182,12 @@ export default function CmsPanelPage() {
   });
   const [inContextEditActive, setInContextEditActive] = useState(false);
 
+  // Media Library State
+  const mediaFileInputRef = useRef<HTMLInputElement>(null);
+  const [isDraggingMedia, setIsDraggingMedia] = useState(false);
+  const [uploadingMedia, setUploadingMedia] = useState(false);
+  const [mediaCategoryFilter, setMediaCategoryFilter] = useState<'all' | 'doctor' | 'clinic' | 'logo'>('all');
+
   // Quick Walk-in Appointment Modal state
   const [showAddAptModal, setShowAddAptModal] = useState(false);
   const [newAptData, setNewAptData] = useState({
@@ -603,6 +609,124 @@ export default function CmsPanelPage() {
     const text = `*Weekly Practice Summary for Dr. Maanvita Kumari*\n*HealthConsult Family Clinic (Noida Sec 18)*\n\n• *${totalBookings}* Total patient appointments\n• *${completed}* Completed consultations\n• *${walkins}* Front-desk walk-in patients\n• *${cancelled}* Cancellations / no-shows\n• Busiest shift: *${busiestShift}*\n• Top clinical demand: *${topService}*\n• *${reviewsSent}* Google Review requests dispatched\n\nLive Control Plane: http://localhost:3000/cms`;
 
     return { totalBookings, completed, walkins, cancelled, busiestShift, topService, reviewsSent, text };
+  };
+
+  // 5k. Media Library Upload & Assignment Handlers
+  const handleUploadMediaFile = async (file: File) => {
+    if (!content) return;
+    setUploadingMedia(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const newAsset = data.asset;
+        const currentMedia = content.media || [];
+        const updated = {
+          ...content,
+          media: [newAsset, ...currentMedia],
+        };
+        setContent(updated);
+        await handlePublish(updated);
+        showToast(`Uploaded "${file.name}" to Media Library`);
+      } else {
+        // Fallback to client-side FileReader
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          const dataUrl = event.target?.result as string;
+          const newAsset = {
+            id: `med-${Date.now()}`,
+            title: file.name.replace(/\.[^/.]+$/, ''),
+            fileName: file.name,
+            fileType: file.type || 'image/jpeg',
+            fileSize: `${Math.round(file.size / 1024)} KB`,
+            url: dataUrl,
+            assignedTo: 'unassigned' as const,
+            uploadedAt: 'Just now',
+          };
+          const currentMedia = content.media || [];
+          const updated = {
+            ...content,
+            media: [newAsset, ...currentMedia],
+          };
+          setContent(updated);
+          await handlePublish(updated);
+          showToast(`Uploaded "${file.name}" to Media Library`);
+        };
+        reader.readAsDataURL(file);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to upload file');
+    } finally {
+      setUploadingMedia(false);
+    }
+  };
+
+  const handleSetDoctorPhoto = async (url: string) => {
+    if (!content) return;
+    const updatedMedia = (content.media || []).map((m) => ({
+      ...m,
+      assignedTo: m.url === url ? ('hero_doctor_portrait' as const) : m.assignedTo === 'hero_doctor_portrait' ? ('unassigned' as const) : m.assignedTo,
+    }));
+    const updated = {
+      ...content,
+      doctor: { ...content.doctor, photoUrl: url },
+      media: updatedMedia,
+    };
+    setContent(updated);
+    await handlePublish(updated);
+    showToast('Updated Doctor Portrait on live patient site!');
+  };
+
+  const handleSetClinicPhoto = async (url: string) => {
+    if (!content) return;
+    const updatedMedia = (content.media || []).map((m) => ({
+      ...m,
+      assignedTo: m.url === url ? ('clinic_facade' as const) : m.assignedTo === 'clinic_facade' ? ('unassigned' as const) : m.assignedTo,
+    }));
+    const updated = {
+      ...content,
+      clinic: { ...content.clinic, photoUrl: url },
+      media: updatedMedia,
+    };
+    setContent(updated);
+    await handlePublish(updated);
+    showToast('Updated Clinic Facade photo on live patient site!');
+  };
+
+  const handleSetNavLogo = async (url: string) => {
+    if (!content) return;
+    const updatedMedia = (content.media || []).map((m) => ({
+      ...m,
+      assignedTo: m.url === url ? ('nav_logo' as const) : m.assignedTo === 'nav_logo' ? ('unassigned' as const) : m.assignedTo,
+    }));
+    const updated = {
+      ...content,
+      clinic: { ...content.clinic, logoUrl: url },
+      media: updatedMedia,
+    };
+    setContent(updated);
+    await handlePublish(updated);
+    showToast('Updated Navigation Brand Logo on live site!');
+  };
+
+  const handleDeleteMedia = async (id: string) => {
+    if (!content) return;
+    const updatedMedia = (content.media || []).filter((m) => m.id !== id);
+    const updated = {
+      ...content,
+      media: updatedMedia,
+    };
+    setContent(updated);
+    await handlePublish(updated);
+    showToast('Asset removed from Media Library');
   };
 
   // 6. Direct Theme Switcher with Instant Publish
@@ -1122,12 +1246,19 @@ export default function CmsPanelPage() {
               )}
             </button>
 
-            <div style={{ borderLeft: '1px solid #E2E8F0', paddingLeft: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ borderLeft: '1px solid #E2E8F0', paddingLeft: '14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontWeight: '700', fontSize: '13px', color: '#0F172A', lineHeight: 1.2 }}>
                   {content.doctor.name}
                 </div>
                 <div style={{ fontSize: '11px', color: '#64748B' }}>{content.doctor.specialty}</div>
+              </div>
+              <div style={{ width: '38px', height: '38px', borderRadius: '50%', overflow: 'hidden', border: '2px solid #0F766E', background: '#CCFBF1', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {content.doctor.photoUrl ? (
+                  <img src={content.doctor.photoUrl} alt="Dr. Maanvita" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <UserCheckIcon size={20} color="#0F766E" />
+                )}
               </div>
             </div>
           </div>
@@ -3727,77 +3858,332 @@ export default function CmsPanelPage() {
           )}
 
           {/* ======================================================= */}
-          {/* TAB 8: MEDIA LIBRARY                                    */}
+          {/* TAB 8: MEDIA LIBRARY & ASSET PIPELINE                   */}
           {/* ======================================================= */}
           {activeTab === 'media' && (
             <div className="ux-card" style={{ background: '#FFFFFF', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '24px' }}>
-              <h2 style={{ margin: '0 0 8px 0', fontSize: '20px', color: '#0F766E', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <ImageIcon size={22} color="#0F766E" />
-                <span>Cloudflare R2 Media Library &bull; Asset Pipeline</span>
-              </h2>
-              <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: '#64748B' }}>
-                Automatic AVIF/WebP generation, EXIF metadata stripping, and focal-point centering per ADR-009.
-              </p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
+                <div>
+                  <h2 style={{ margin: '0 0 8px 0', fontSize: '20px', color: '#0F766E', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <ImageIcon size={22} color="#0F766E" />
+                    <span>Media Library &bull; Asset Pipeline &amp; Photo Management</span>
+                  </h2>
+                  <p style={{ margin: 0, fontSize: '13px', color: '#64748B' }}>
+                    Upload doctor portraits, clinic facades, and branding assets. 1-click set as active on the live patient portal (http://localhost:3000/).
+                  </p>
+                </div>
 
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    onClick={() => mediaFileInputRef.current?.click()}
+                    className="ux-btn"
+                    style={{
+                      background: '#0F766E',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      padding: '9px 18px',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      boxShadow: '0 2px 6px rgba(15,118,110,0.2)',
+                    }}
+                  >
+                    <UploadIcon size={16} color="#FFFFFF" />
+                    <span>+ Upload Photo</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Hidden Real File Input */}
+              <input
+                ref={mediaFileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    handleUploadMediaFile(file);
+                    e.target.value = '';
+                  }
+                }}
+              />
+
+              {/* Clickable & Draggable Upload Dropzone */}
               <div
+                onClick={() => mediaFileInputRef.current?.click()}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDraggingMedia(true);
+                }}
+                onDragLeave={() => setIsDraggingMedia(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setIsDraggingMedia(false);
+                  const file = e.dataTransfer.files?.[0];
+                  if (file) {
+                    handleUploadMediaFile(file);
+                  }
+                }}
+                className="ux-card"
                 style={{
-                  border: '2px dashed #0F766E',
-                  borderRadius: '10px',
-                  padding: '36px',
+                  border: isDraggingMedia ? '2px dashed #0F766E' : '2px dashed #0F766E',
+                  borderRadius: '12px',
+                  padding: '36px 20px',
                   textAlign: 'center',
-                  background: '#F0FDF4',
+                  background: isDraggingMedia ? '#CCFBF1' : '#F0FDF4',
+                  cursor: 'pointer',
                   marginBottom: '24px',
+                  transition: 'all 0.2s ease',
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
-                  <UploadIcon size={36} color="#0F766E" />
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+                  <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#CCFBF1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <UploadIcon size={28} color="#0F766E" />
+                  </div>
                 </div>
-                <div style={{ fontWeight: '700', fontSize: '15px', color: '#0F766E' }}>
-                  Upload Doctor Portrait or Clinic Photos
+                <div style={{ fontWeight: '800', fontSize: '16px', color: '#0F766E' }}>
+                  {uploadingMedia ? 'Uploading & Processing Image...' : 'Click to Upload or Drag & Drop Photos Here'}
                 </div>
-                <div style={{ fontSize: '12px', color: '#64748B', marginTop: '4px' }}>
-                  Supports JPG, PNG, WebP (Auto-optimized to AVIF with Sharp &bull; Presigned R2 PUT)
+                <div style={{ fontSize: '12px', color: '#64748B', marginTop: '6px' }}>
+                  Supports JPG, PNG, WebP, SVG &bull; Preserved in <code>public/uploads</code> with instant live site sync
+                </div>
+                <button
+                  type="button"
+                  className="ux-btn"
+                  style={{
+                    marginTop: '14px',
+                    background: '#0F766E',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    padding: '8px 18px',
+                    borderRadius: '8px',
+                    fontWeight: '700',
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  <UploadIcon size={14} color="#FFFFFF" />
+                  <span>Browse File From Computer</span>
+                </button>
+              </div>
+
+              {/* Filter Pills */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+                <h3 style={{ fontSize: '15px', fontWeight: '800', color: '#334155', margin: 0 }}>
+                  Active Media Assets ({content.media?.length || 0})
+                </h3>
+
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  {[
+                    { id: 'all', label: `All (${content.media?.length || 0})` },
+                    { id: 'doctor', label: 'Doctor Portraits' },
+                    { id: 'clinic', label: 'Clinic Facades' },
+                    { id: 'logo', label: 'Branding Logos' },
+                  ].map((f) => (
+                    <button
+                      key={f.id}
+                      onClick={() => setMediaCategoryFilter(f.id as any)}
+                      className="ux-btn"
+                      style={{
+                        padding: '5px 12px',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: mediaCategoryFilter === f.id ? '700' : '500',
+                        border: mediaCategoryFilter === f.id ? '1px solid #0F766E' : '1px solid #CBD5E1',
+                        background: mediaCategoryFilter === f.id ? '#CCFBF1' : '#FFFFFF',
+                        color: mediaCategoryFilter === f.id ? '#0F766E' : '#475569',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              <h3 style={{ fontSize: '15px', color: '#334155', marginBottom: '12px' }}>Active Media Assets</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '16px' }}>
-                <div className="ux-card" style={{ border: '1px solid #E2E8F0', borderRadius: '8px', padding: '14px', background: '#F8FAFC' }}>
-                  <div style={{ height: '140px', background: '#CCFBF1', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <UserCheckIcon size={48} color="#0F766E" />
-                  </div>
-                  <div style={{ fontWeight: '700', fontSize: '13px', marginTop: '10px' }}>dr_maanvita_portrait.webp</div>
-                  <div style={{ fontSize: '11px', color: '#64748B' }}>Focal Point: (50%, 30%) &bull; 42 KB WebP</div>
-                  <div style={{ marginTop: '8px', fontSize: '11px', color: '#047857', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <CheckCircleIcon size={13} color="#047857" />
-                    <span>Active on Hero</span>
-                  </div>
-                </div>
+              {/* Active Media Assets Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '18px' }}>
+                {(content.media || [])
+                  .filter((item) => {
+                    if (mediaCategoryFilter === 'doctor') return item.assignedTo === 'hero_doctor_portrait' || item.fileName.includes('portrait') || item.fileName.includes('doctor');
+                    if (mediaCategoryFilter === 'clinic') return item.assignedTo === 'clinic_facade' || item.fileName.includes('clinic') || item.fileName.includes('facade');
+                    if (mediaCategoryFilter === 'logo') return item.assignedTo === 'nav_logo' || item.fileName.includes('logo') || item.fileName.includes('branding');
+                    return true;
+                  })
+                  .map((item) => {
+                    const isDoctorPortrait = content.doctor.photoUrl === item.url || item.assignedTo === 'hero_doctor_portrait';
+                    const isClinicPhoto = content.clinic.photoUrl === item.url || item.assignedTo === 'clinic_facade';
+                    const isNavLogo = content.clinic.logoUrl === item.url || item.assignedTo === 'nav_logo';
 
-                <div className="ux-card" style={{ border: '1px solid #E2E8F0', borderRadius: '8px', padding: '14px', background: '#F8FAFC' }}>
-                  <div style={{ height: '140px', background: '#E0F2FE', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <BuildingIcon size={48} color="#0284C7" />
-                  </div>
-                  <div style={{ fontWeight: '700', fontSize: '13px', marginTop: '10px' }}>noida_clinic_facade.webp</div>
-                  <div style={{ fontSize: '11px', color: '#64748B' }}>Focal Point: (50%, 50%) &bull; 68 KB WebP</div>
-                  <div style={{ marginTop: '8px', fontSize: '11px', color: '#047857', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <CheckCircleIcon size={13} color="#047857" />
-                    <span>Active on OPD Section</span>
-                  </div>
-                </div>
+                    return (
+                      <div
+                        key={item.id}
+                        className="ux-card"
+                        style={{
+                          border: isDoctorPortrait || isClinicPhoto ? '2px solid #0F766E' : '1px solid #E2E8F0',
+                          borderRadius: '12px',
+                          padding: '14px',
+                          background: '#FFFFFF',
+                          boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'space-between',
+                        }}
+                      >
+                        <div>
+                          {/* Real Image Thumbnail */}
+                          <div style={{ height: '160px', width: '100%', background: '#F1F5F9', borderRadius: '8px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px', position: 'relative' }}>
+                            <img
+                              src={item.url}
+                              alt={item.title}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                            {/* Active Assignment Badge */}
+                            {isDoctorPortrait && (
+                              <span style={{ position: 'absolute', top: '8px', right: '8px', background: '#0F766E', color: '#FFF', fontSize: '10px', fontWeight: '800', padding: '3px 8px', borderRadius: '999px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                                <CheckIcon size={11} color="#FFF" />
+                                <span>Active Doctor Portrait</span>
+                              </span>
+                            )}
+                            {isClinicPhoto && (
+                              <span style={{ position: 'absolute', top: '8px', right: '8px', background: '#0284C7', color: '#FFF', fontSize: '10px', fontWeight: '800', padding: '3px 8px', borderRadius: '999px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                                <CheckIcon size={11} color="#FFF" />
+                                <span>Active Clinic Photo</span>
+                              </span>
+                            )}
+                            {isNavLogo && (
+                              <span style={{ position: 'absolute', top: '8px', right: '8px', background: '#D97706', color: '#FFF', fontSize: '10px', fontWeight: '800', padding: '3px 8px', borderRadius: '999px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                                <CheckIcon size={11} color="#FFF" />
+                                <span>Active Nav Logo</span>
+                              </span>
+                            )}
+                          </div>
 
-                <div className="ux-card" style={{ border: '1px solid #E2E8F0', borderRadius: '8px', padding: '14px', background: '#F8FAFC' }}>
-                  <div style={{ height: '140px', background: '#FEF3C7', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <StethoscopeIcon size={48} color="#D97706" />
-                  </div>
-                  <div style={{ fontWeight: '700', fontSize: '13px', marginTop: '10px' }}>stethoscope_branding.png</div>
-                  <div style={{ fontSize: '11px', color: '#64748B' }}>Lossless SVG/PNG &bull; 14 KB</div>
-                  <div style={{ marginTop: '8px', fontSize: '11px', color: '#047857', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <CheckCircleIcon size={13} color="#047857" />
-                    <span>Active on Nav Logo</span>
-                  </div>
-                </div>
+                          <div style={{ fontWeight: '700', fontSize: '13px', color: '#0F172A', marginBottom: '2px', wordBreak: 'break-all' }}>
+                            {item.title || item.fileName}
+                          </div>
+                          <div style={{ fontSize: '11px', color: '#64748B', marginBottom: '12px' }}>
+                            {item.fileSize} &bull; {item.fileType}
+                          </div>
+                        </div>
+
+                        {/* 1-Click Assignment & Management Actions */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', paddingTop: '10px', borderTop: '1px solid #F1F5F9' }}>
+                          <button
+                            onClick={() => handleSetDoctorPhoto(item.url)}
+                            className="ux-btn"
+                            style={{
+                              width: '100%',
+                              background: isDoctorPortrait ? '#DCFCE7' : '#F0FDF4',
+                              color: '#166534',
+                              border: '1px solid #BBF7D0',
+                              padding: '6px 10px',
+                              borderRadius: '6px',
+                              fontSize: '11px',
+                              fontWeight: '700',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '5px',
+                            }}
+                          >
+                            <UserCheckIcon size={13} color="#166534" />
+                            <span>{isDoctorPortrait ? '✓ Current Doctor Portrait' : '★ Set as Doctor Portrait'}</span>
+                          </button>
+
+                          <button
+                            onClick={() => handleSetClinicPhoto(item.url)}
+                            className="ux-btn"
+                            style={{
+                              width: '100%',
+                              background: isClinicPhoto ? '#E0F2FE' : '#F8FAFC',
+                              color: '#0369A1',
+                              border: '1px solid #BAE6FD',
+                              padding: '6px 10px',
+                              borderRadius: '6px',
+                              fontSize: '11px',
+                              fontWeight: '700',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '5px',
+                            }}
+                          >
+                            <BuildingIcon size={13} color="#0369A1" />
+                            <span>{isClinicPhoto ? '✓ Current Clinic Photo' : '★ Set as Clinic Photo'}</span>
+                          </button>
+
+                          <div style={{ display: 'flex', gap: '6px', marginTop: '2px' }}>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(item.url);
+                                showToast('Image URL copied to clipboard');
+                              }}
+                              className="ux-btn"
+                              style={{
+                                flex: '1',
+                                background: '#F8FAFC',
+                                color: '#475569',
+                                border: '1px solid #CBD5E1',
+                                padding: '5px 8px',
+                                borderRadius: '5px',
+                                fontSize: '11px',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '4px',
+                              }}
+                            >
+                              <CopyIcon size={12} color="#475569" />
+                              <span>Copy URL</span>
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                if (confirm(`Delete asset "${item.fileName}"?`)) {
+                                  handleDeleteMedia(item.id);
+                                }
+                              }}
+                              className="ux-btn"
+                              style={{
+                                background: '#FEF2F2',
+                                color: '#991B1B',
+                                border: '1px solid #FECACA',
+                                padding: '5px 8px',
+                                borderRadius: '5px',
+                                fontSize: '11px',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                              }}
+                              title="Delete Asset"
+                            >
+                              <Trash2Icon size={13} color="#991B1B" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
               </div>
+
+              {(content.media || []).length === 0 && (
+                <div style={{ textAlign: 'center', padding: '40px', color: '#94A3B8', fontSize: '13px' }}>
+                  No media assets uploaded yet. Use the upload box above to add your first clinic photo.
+                </div>
+              )}
             </div>
           )}
 
