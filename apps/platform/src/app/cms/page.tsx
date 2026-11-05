@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useCmsShell } from '@/components/cms/CmsShellContext';
 import { DoctorContent, AppointmentRecord } from '@/lib/contentStore';
 import {
   StethoscopeIcon,
@@ -68,13 +69,17 @@ type Tab =
   | 'dashboard'
   | 'opd_board'
   | 'appointments'
+  | 'enquiries'
   | 'editor'
+  | 'blog'
   | 'services'
   | 'reviews'
+  | 'faqs'
   | 'clinic_hours'
   | 'themes'
   | 'media'
-  | 'settings';
+  | 'settings'
+  | 'versions';
 
 type EditorSection = 'clinic' | 'hero' | 'doctor' | 'pillars' | 'services' | 'reviews' | 'faqs';
 
@@ -153,7 +158,13 @@ function renderEditorIconPreview(iconName: string, color = '#0F766E') {
 }
 
 export default function CmsPanelPage() {
-  const [activeTab, setActiveTab] = useState<Tab>('dashboard');
+  const shell = useCmsShell();
+  const [localActiveTab, setLocalActiveTab] = useState<Tab>('dashboard');
+  const activeTab = (shell?.activeNav as Tab) || localActiveTab;
+  const setActiveTab = (tab: Tab) => {
+    setLocalActiveTab(tab);
+    if (shell?.setActiveNav) shell.setActiveNav(tab);
+  };
   const [editorSection, setEditorSection] = useState<EditorSection>('clinic');
   const [deviceViewport, setDeviceViewport] = useState<'360px' | '768px' | '100%'>('100%');
   const [publishStatus, setPublishStatus] = useState<'idle' | 'publishing' | 'published' | 'error'>('idle');
@@ -168,8 +179,38 @@ export default function CmsPanelPage() {
   // Live Appointments Store
   const [appointments, setAppointments] = useState<AppointmentRecord[]>([]);
   const [aptFilter, setAptFilter] = useState<'all' | 'new' | 'contacted' | 'confirmed' | 'completed' | 'cancelled'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [localSearchQuery, setLocalSearchQuery] = useState('');
+  const searchQuery = shell?.searchQuery ?? localSearchQuery;
+  const setSearchQuery = (query: string) => {
+    setLocalSearchQuery(query);
+    if (shell?.setSearchQuery) shell.setSearchQuery(query);
+  };
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+
+  // Sync breadcrumbs with shell
+  useEffect(() => {
+    if (!shell?.setBreadcrumbs) return;
+    const tabLabels: Record<string, string> = {
+      dashboard: 'Dashboard',
+      opd_board: "Today's OPD Board",
+      appointments: 'Appointments',
+      enquiries: 'Patient Enquiries',
+      editor: 'Site Block Editor',
+      services: 'Services Catalog',
+      reviews: 'Patient Reviews',
+      clinic_hours: 'Clinic Hours & Map',
+      themes: 'Themes',
+      media: 'Media Library',
+      settings: 'Settings & Security',
+      versions: 'Version History',
+    };
+    const currentLabel = tabLabels[activeTab] || activeTab;
+    shell.setBreadcrumbs([
+      { label: 'CMS', href: '/cms' },
+      { label: activeTab === 'appointments' || activeTab === 'enquiries' || activeTab === 'opd_board' ? 'Submissions' : 'Site Management' },
+      { label: currentLabel },
+    ]);
+  }, [activeTab, shell]);
 
   // OPD Board & Workflow State
   const [showWeeklySummaryModal, setShowWeeklySummaryModal] = useState(false);
@@ -1106,363 +1147,96 @@ export default function CmsPanelPage() {
     );
   }
 
-  // Left Sidebar Menu Groups
-  const sidebarGroups = [
-    {
-      groupTitle: 'CLINICAL OPERATIONS',
-      items: [
-        { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboardIcon size={18} /> },
-        {
-          id: 'opd_board',
-          label: "Today's OPD Board",
-          icon: <ActivityIcon size={18} />,
-          badge: `${appointments.filter((a) => (a.opdStage || 'waiting') === 'waiting' && a.status !== 'cancelled').length} Waiting`,
-          badgeColor: '#0F766E',
-        },
-        {
-          id: 'appointments',
-          label: 'Appointments',
-          icon: <CalendarIcon size={18} />,
-          badge: newAppointmentsCount > 0 ? `${newAppointmentsCount} New` : `${appointments.length}`,
-          badgeColor: newAppointmentsCount > 0 ? '#DC2626' : '#64748B',
-        },
-      ],
-    },
-    {
-      groupTitle: 'LIVE WEBSITE MANAGEMENT',
-      items: [
-        { id: 'editor', label: 'Site Block Editor', icon: <Edit3Icon size={18} /> },
-        { id: 'services', label: 'Services Catalog', icon: <MicroscopeIcon size={18} /> },
-        { id: 'reviews', label: 'Patient Reviews', icon: <MessageCircleIcon size={18} /> },
-        { id: 'clinic_hours', label: 'Clinic Hours & Map', icon: <BuildingIcon size={18} /> },
-        { id: 'themes', label: '6 Clinical Themes', icon: <PaletteIcon size={18} />, badge: content.theme, badgeColor: '#0F766E' },
-        { id: 'media', label: 'Media Library', icon: <ImageIcon size={18} /> },
-      ],
-    },
-    {
-      groupTitle: 'GOVERNANCE & AUDIT',
-      items: [
-        { id: 'settings', label: 'Settings & Compliance', icon: <SettingsIcon size={18} /> },
-      ],
-    },
-  ];
-
   return (
-    <div style={{ minHeight: '100vh', background: '#F8FAFC', color: '#0F172A', display: 'flex', fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" }}>
-      
-      {/* ========================================================= */}
-      {/* 1. LEFT SIDEBAR NAVIGATION (INSPIRATION: MEDICORE AI)     */}
-      {/* ========================================================= */}
-      <aside
+    <div style={{ padding: '24px 28px', minWidth: 0 }}>
+      {/* Top Page Action & Publish Controls */}
+      <div
         style={{
-          width: '270px',
-          background: '#FFFFFF',
-          borderRight: '1px solid #E2E8F0',
           display: 'flex',
-          flexDirection: 'column',
           justifyContent: 'space-between',
-          position: 'sticky',
-          top: 0,
-          height: '100vh',
-          zIndex: 50,
-          boxShadow: '1px 0 3px rgba(0,0,0,0.02)',
-          flexShrink: 0,
+          alignItems: 'center',
+          marginBottom: '20px',
+          paddingBottom: '16px',
+          borderBottom: '1px solid var(--color-border-subtle, #E2E8F0)',
         }}
       >
-        <div>
-          {/* Brand Header */}
-          <div style={{ padding: '22px 20px', borderBottom: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#0F766E', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF', flexShrink: 0 }}>
-              <StethoscopeIcon size={22} color="#FFFFFF" />
-            </div>
-            <div>
-              <div style={{ fontWeight: '800', fontSize: '16px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px', lineHeight: 1.2 }}>
-                DoctorSite Pro
-              </div>
-              <div style={{ fontSize: '11px', color: '#64748B', fontWeight: '600', marginTop: '2px' }}>
-                Control Plane &bull; {content.clinic.name.split(' ')[0] || 'Clinic'}
-              </div>
-            </div>
-          </div>
-
-          {/* Navigation Items */}
-          <div style={{ padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: '20px', overflowY: 'auto', maxHeight: 'calc(100vh - 220px)' }}>
-            {sidebarGroups.map((group, gIdx) => (
-              <div key={gIdx}>
-                <div style={{ fontSize: '11px', fontWeight: '700', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.8px', padding: '0 12px 8px 12px' }}>
-                  {group.groupTitle}
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                  {group.items.map((item) => {
-                    const isActive = activeTab === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => setActiveTab(item.id as Tab)}
-                        className="ux-btn"
-                        style={{
-                          width: '100%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: '10px 14px',
-                          borderRadius: '8px',
-                          border: 'none',
-                          background: isActive ? '#0F766E' : 'transparent',
-                          color: isActive ? '#FFFFFF' : '#475569',
-                          fontWeight: isActive ? '700' : '600',
-                          fontSize: '13px',
-                          cursor: 'pointer',
-                          textAlign: 'left',
-                          transition: 'all 0.15s ease-in-out',
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <span style={{ display: 'flex', alignItems: 'center', color: isActive ? '#FFFFFF' : '#0F766E' }}>
-                            {item.icon}
-                          </span>
-                          <span>{item.label}</span>
-                        </div>
-                        {item.badge && (
-                          <span
-                            style={{
-                              background: isActive ? 'rgba(255,255,255,0.25)' : item.badgeColor,
-                              color: '#FFFFFF',
-                              fontSize: '11px',
-                              fontWeight: '700',
-                              padding: '2px 7px',
-                              borderRadius: '999px',
-                            }}
-                          >
-                            {item.badge}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <h1 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--color-text-main, #0F172A)' }}>
+            {activeTab === 'dashboard' && 'Clinical Practice Overview'}
+            {activeTab === 'opd_board' && "Today's Patient Queue (OPD)"}
+            {activeTab === 'appointments' && 'Appointment Records'}
+            {activeTab === 'editor' && 'Site Block Editor'}
+            {activeTab === 'services' && 'Clinical Services Catalog'}
+            {activeTab === 'reviews' && 'Patient Reviews & Testimonials'}
+            {activeTab === 'clinic_hours' && 'Clinic Operating Hours & Map'}
+            {activeTab === 'themes' && 'Clinical Theme Customizer'}
+            {activeTab === 'media' && 'Media & Asset Library'}
+            {activeTab === 'settings' && 'Clinic Settings & DPDP Compliance'}
+          </h1>
+          <span
+            style={{
+              fontSize: '12px',
+              color: 'var(--color-text-muted, #64748B)',
+              fontWeight: 600,
+            }}
+          >
+            Last synced: {lastPublishedAt}
+          </span>
         </div>
 
-        {/* Sidebar Footer: Mobile PWA Card & Active Doctor Identity */}
-        <div style={{ padding: '16px', borderTop: '1px solid #F1F5F9' }}>
-          <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', padding: '12px 14px', borderRadius: '10px', marginBottom: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#16A34A', display: 'inline-block' }} />
-              <strong style={{ fontSize: '12px', color: '#166534' }}>Patient Site Live Sync</strong>
-            </div>
-            <div style={{ fontSize: '11px', color: '#14532D', marginBottom: '8px' }}>
-              Connected to <code>localhost:3000</code>. Edits push immediately.
-            </div>
-            <a
-              href="/"
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                fontSize: '11px',
-                fontWeight: '700',
-                color: '#0F766E',
-                textDecoration: 'none',
-              }}
-            >
-              <span>View Client Website</span>
-              <ExternalLinkIcon size={12} color="#0F766E" />
-            </a>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#0F766E', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px', flexShrink: 0 }}>
-              {content.doctor.name.replace('Dr. ', '')[0]}
-            </div>
-            <div style={{ overflow: 'hidden' }}>
-              <div style={{ fontWeight: '700', fontSize: '13px', color: '#0F172A', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-                {content.doctor.name}
-              </div>
-              <div style={{ fontSize: '11px', color: '#64748B', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-                Staff: Sunita (Front Desk)
-              </div>
-            </div>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button
+            onClick={() => handlePublish()}
+            disabled={publishStatus === 'publishing'}
+            className="ux-btn cms-focus-ring"
+            title="Save changes and immediately update the live patient page"
+            style={{
+              background:
+                publishStatus === 'published'
+                  ? 'var(--color-status-confirmed, #059669)'
+                  : hasUnsavedChanges
+                  ? 'var(--color-status-pending, #D97706)'
+                  : 'var(--color-brand-primary, #0D5C46)',
+              color: '#FFFFFF',
+              border: 'none',
+              padding: '8px 18px',
+              borderRadius: 'var(--radius-md, 10px)',
+              fontWeight: 700,
+              fontSize: '13px',
+              cursor: publishStatus === 'publishing' ? 'not-allowed' : 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '7px',
+              boxShadow: 'var(--shadow-sm)',
+            }}
+          >
+            {publishStatus === 'publishing' && (
+              <>
+                <RefreshCwIcon size={14} color="#FFFFFF" className="spin" />
+                <span>Publishing Pipeline...</span>
+              </>
+            )}
+            {publishStatus === 'published' && (
+              <>
+                <CheckCircleIcon size={15} color="#FFFFFF" />
+                <span>Live on Patient Page!</span>
+              </>
+            )}
+            {publishStatus === 'idle' && (
+              <>
+                <SendIcon size={14} color="#FFFFFF" />
+                <span>{hasUnsavedChanges ? 'Publish Draft Changes' : 'Publish to Live Site'}</span>
+              </>
+            )}
+            {publishStatus === 'error' && (
+              <>
+                <XCircleIcon size={15} color="#FFFFFF" />
+                <span>Retry Publishing</span>
+              </>
+            )}
+          </button>
         </div>
-      </aside>
-
-      {/* ========================================================= */}
-      {/* 2. MAIN APP CANVAS (HEADER + DASHBOARD BODY)               */}
-      {/* ========================================================= */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflowY: 'auto' }}>
-        
-        {/* Top Header Bar */}
-        <header
-          style={{
-            height: '68px',
-            background: '#FFFFFF',
-            borderBottom: '1px solid #E2E8F0',
-            padding: '0 28px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            position: 'sticky',
-            top: 0,
-            zIndex: 40,
-            boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
-          }}
-        >
-          {/* Global Search Input */}
-          <div style={{ position: 'relative', width: '380px' }}>
-            <input
-              ref={searchInputRef}
-              type="text"
-              placeholder="Search patients, appointments, services, reviews..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '9px 36px 9px 36px',
-                borderRadius: '8px',
-                border: '1px solid #CBD5E1',
-                fontSize: '13px',
-                background: '#F8FAFC',
-                boxSizing: 'border-box',
-              }}
-            />
-            <span style={{ position: 'absolute', left: '12px', top: '10px', color: '#94A3B8' }}>
-              <SearchIcon size={16} color="#94A3B8" />
-            </span>
-            <span style={{ position: 'absolute', right: '10px', top: '9px', background: '#E2E8F0', color: '#64748B', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: '700' }}>
-              ⌘K
-            </span>
-          </div>
-
-          {/* Right Action Icons & Publish Controls */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <a
-              href="/"
-              target="_blank"
-              rel="noreferrer"
-              className="ux-btn"
-              title="Open live patient website in a new tab"
-              style={{
-                background: '#F0FDF4',
-                color: '#166534',
-                border: '1px solid #BBF7D0',
-                padding: '8px 14px',
-                borderRadius: '8px',
-                fontSize: '13px',
-                fontWeight: '600',
-                textDecoration: 'none',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              <GlobeIcon size={15} color="#166534" />
-              <span>View Patient Site (localhost:3000)</span>
-              <ExternalLinkIcon size={13} color="#166534" />
-            </a>
-
-            <button
-              onClick={() => handlePublish()}
-              disabled={publishStatus === 'publishing'}
-              className="ux-btn"
-              title="Save changes and immediately update the live patient page"
-              style={{
-                background:
-                  publishStatus === 'published'
-                    ? '#047857'
-                    : hasUnsavedChanges
-                    ? '#D97706'
-                    : '#0F766E',
-                color: '#FFFFFF',
-                border: 'none',
-                padding: '8px 16px',
-                borderRadius: '8px',
-                fontWeight: '700',
-                fontSize: '13px',
-                cursor: publishStatus === 'publishing' ? 'not-allowed' : 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '7px',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {publishStatus === 'publishing' && (
-                <>
-                  <RefreshCwIcon size={14} color="#FFFFFF" className="spin" />
-                  <span>Publishing...</span>
-                </>
-              )}
-              {publishStatus === 'published' && (
-                <>
-                  <CheckCircleIcon size={15} color="#FFFFFF" />
-                  <span>Live on Patient Page!</span>
-                </>
-              )}
-              {publishStatus === 'idle' && (
-                <>
-                  <SendIcon size={14} color="#FFFFFF" />
-                  <span>{hasUnsavedChanges ? 'Publish Changes (Unsaved)' : 'Publish to Live Site'}</span>
-                </>
-              )}
-              {publishStatus === 'error' && (
-                <>
-                  <XCircleIcon size={15} color="#FFFFFF" />
-                  <span>Retry Publishing</span>
-                </>
-              )}
-            </button>
-
-            <button
-              onClick={() => {
-                setActiveTab('appointments');
-                setAptFilter('new');
-              }}
-              className="ux-btn"
-              title="Patient inquiries notification"
-              style={{
-                width: '38px',
-                height: '38px',
-                borderRadius: '8px',
-                background: '#F1F5F9',
-                border: '1px solid #E2E8F0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                position: 'relative',
-              }}
-            >
-              <BellIcon size={18} color="#475569" />
-              {newAppointmentsCount > 0 && (
-                <span style={{ position: 'absolute', top: '-4px', right: '-4px', width: '16px', height: '16px', borderRadius: '50%', background: '#DC2626', color: '#FFF', fontSize: '10px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {newAppointmentsCount}
-                </span>
-              )}
-            </button>
-
-            <div style={{ borderLeft: '1px solid #E2E8F0', paddingLeft: '14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontWeight: '700', fontSize: '13px', color: '#0F172A', lineHeight: 1.2 }}>
-                  {content.doctor.name}
-                </div>
-                <div style={{ fontSize: '11px', color: '#64748B' }}>{content.doctor.specialty}</div>
-              </div>
-              <div style={{ width: '38px', height: '38px', borderRadius: '50%', overflow: 'hidden', border: '2px solid #0F766E', background: '#CCFBF1', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                {content.doctor.photoUrl ? (
-                  <img src={content.doctor.photoUrl} alt="Dr. Maanvita" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                ) : (
-                  <UserCheckIcon size={20} color="#0F766E" />
-                )}
-              </div>
-            </div>
-          </div>
-        </header>
+      </div>
 
         {/* Unsaved Changes Banner */}
         {hasUnsavedChanges && (
@@ -1497,7 +1271,7 @@ export default function CmsPanelPage() {
         {/* ========================================================= */}
         {/* 3. CONTENT WORKSPACE (SWITCHABLE PER ACTIVE TAB)          */}
         {/* ========================================================= */}
-        <main style={{ padding: '28px', maxWidth: '1440px', width: '100%', boxSizing: 'border-box' }}>
+        <div style={{ maxWidth: '1440px', width: '100%', boxSizing: 'border-box' }}>
           
           {/* ======================================================= */}
           {/* TAB 1: MEDICORE-INSPIRED DASHBOARD COMMAND CENTER       */}
@@ -4785,8 +4559,7 @@ export default function CmsPanelPage() {
             </div>
           )}
 
-        </main>
-      </div>
+        </div>
 
       {/* Quick Walk-in Modal */}
       {showAddAptModal && (

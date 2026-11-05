@@ -328,3 +328,10 @@ tbody tr:hover {
   background: #94A3B8;
 }
 
+/* 9. Accessible Keyboard Focus Styles (MT-104) */
+.cms-focus-ring:focus-visible {
+  outline: 2px solid var(--color-brand-primary, #0D5C46) !important;
+  outline-offset: 2px !important;
+}
+
+

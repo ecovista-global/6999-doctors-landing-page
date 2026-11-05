@@ -23,6 +23,15 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added (Milestone PA: Design System & Shells — MT-104)
+
+- **MT-104 (CMS app shell):**
+  - Implemented modular Next.js App Router CMS shell in `apps/platform/src/app/cms/layout.tsx` with dedicated state provider `CmsShellContext.tsx`.
+  - Built collapsible desktop sidebar component `Sidebar.tsx` supporting smooth 200ms cubic-bezier width transitions (270px to 76px), clinic brand mark (`LogoMark`), verified clinic status badge, grouped navigation for 7-page site and operations, active nav highlighting with `aria-current="page"`, and live sync connection indicator.
+  - Built top header bar `Header.tsx` featuring accessible breadcrumbs (`<nav aria-label="Breadcrumb">`), global search bar with `⌘K` keyboard hint, live patient site launcher, and light/dark theme switcher using clinical tokens.
+  - Implemented `.cms-focus-ring` in `globals.css` ensuring accessible `:focus-visible` styling (`outline: 2px solid var(--color-brand-primary); outline-offset: 2px`).
+  - Added unit test suite `apps/platform/test/cms-shell.test.ts` verifying smooth collapse, active navigation state highlighting, and accessible keyboard focus styles.
+
 ### Added (Milestone PA: Design System & Shells — MT-103)
 
 - **MT-103 (CSS pipeline & anti-FOUC verification):**
