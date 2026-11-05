@@ -85,9 +85,71 @@ sequenceDiagram
   H-->>R: 200
 ```
 
-## 3. Multi-tenancy
+### Professional Clinic Data Flows
+
+```mermaid
+sequenceDiagram
+  participant P as Patient on Static Page
+  participant GW as Platform Gateway
+  participant DB as PostgreSQL
+  participant Q as pg-boss Queue
+  participant RS as Resend Notifier
+  participant CMS as CMS Submissions Dashboard
+  participant REC as Receptionist / Doctor
+  participant AUD as audit_log
+
+  P->>GW: POST /v1/public/appointments (Idempotency-Key, Turnstile token, consent, payload)
+  GW->>GW: Verify CORS, Rate Limit (5/min/IP), Turnstile, Honeypot, Zod Schema
+  GW->>DB: Transaction: INSERT appointments (status='pending', AES-256-GCM PII) + INSERT outbox_events
+  GW-->>P: 202 Accepted (Confirmation reference)
+  DB->>Q: Outbox polling enqueues notification job
+  Q->>RS: Dispatch clinic alert email
+  Q->>CMS: Real-time update (Dashboard badge & row appear)
+  REC->>CMS: Inspect submission detail drawer
+  REC->>CMS: Transition status (Pending -> Confirmed)
+  CMS->>DB: UPDATE appointments SET status='confirmed'
+  CMS->>AUD: INSERT audit_log (actor, status transition, timestamp)
+  REC-->>P: Optional WhatsApp confirmation link (wa.me) / email
+```
+
+```mermaid
+sequenceDiagram
+  participant ED as Editor (CMS)
+  participant API as Platform /v1/sites/{id}
+  participant DB as PostgreSQL
+  participant IF as Preview iframe
+  participant QB as pg-boss Publish Saga
+  participant RN as Docker Renderer (GHA)
+  participant R2 as Cloudflare R2
+  participant CF as Cloudflare CDN Cache
+
+  ED->>API: Save draft content
+  API->>DB: UPDATE content_sheets (optimistic lock check)
+  API->>IF: postMessage(draft_json) -> instant template preview
+  ED->>API: Click "Publish"
+  API->>QB: Enqueue publish saga
+  QB->>RN: Trigger static render (7 pages)
+  RN->>RN: Validate content schema (zod) + compile static HTML/CSS/assets
+  RN->>R2: Upload export to sites/{site_id}/{version}/
+  RN->>DB: Atomic UPDATE sites SET live_version = version
+  RN->>CF: Purge cache by prefix tags
+  RN->>RN: Execute post-publish live verification
+  QB-->>ED: Emit SSE 'publish.completed' -> live site verified
+  Note over ED,CF: Rollback swaps sites.live_version back to previous version & purges cache
+```
+
+## 3. Multi-tenancy & Architectural Fit (ADR-201)
 
 Shared Postgres schema; every tenant-owned table has `tenant_id uuid not null`; row-level security policy `USING (tenant_id = current_setting('app.tenant_id')::uuid)`; the platform sets it per transaction (`SET LOCAL`). Operators/superadmin use a separate role with `BYPASSRLS` limited to server code. Acceptance: isolation test creates two tenants and asserts zero cross-reads on every table (13 § 1). DB-per-tenant rejected (cost and migrations at 1,000 tenants; ADR-002).
+
+### Architectural Fit for Professional Clinic (ADR-201)
+The "Custom backend and database configuration" in the ₹18,999 Professional Clinic plan is delivered as a **per-clinic isolated slice of the existing control plane**, not as a separate virtual machine or database cluster per clinic:
+1. **Tenant Slice:** One tenant row with `plan = 'professional'`, possessing its own RLS-isolated data in shared PostgreSQL (`tenants`, `users`, `sites`, `domains`, `content_sheets`, `leads`, `appointments`, `appointment_events`, `enquiries`, `posts`, `faqs`, `testimonials`, `clinic_settings`, `usage_counters`, `audit_log`).
+2. **Clinic Backend APIs:** The clinic's backend is the tenant-scoped set of `/v1` APIs in `apps/platform` (auth/2FA, CMS submissions, appointments, enquiries, blog, settings), configured per clinic through settings (hours, slots, notification emails, spam rules, enabled 7-page set).
+3. **Static Public Site:** The public site stays statically generated (`apps/site-template`, up to 7 pages) with zero server code and zero database connection of its own. It is compiled by the Docker renderer and hosted on Cloudflare R2 + CDN.
+4. **Dynamic Touchpoints:** Patient forms call the control plane via versioned public endpoints (`POST /v1/public/appointments`, `POST /v1/public/enquiries`, `GET /v1/public/availability`) protected by Cloudflare Turnstile, honeypot, rate limiting, and server-side Zod validation. Static fallbacks (`tel:`, `wa.me:`, `mailto:`) activate if the API is unreachable.
+5. **Margin Preservation:** A dedicated managed Postgres per clinic would multiply operational overhead for a 2-person team and cost more per year than the ₹18,999 plan nets.
+6. **Upgrade Path (ADR-202):** All tenant data is strictly keyed by `tenant_id` and RLS-enforced, enabling clean export into a standalone dedicated database if the clinic purchases the "Dedicated Database" enterprise add-on.
 
 ## 4. Site generation & delivery
 

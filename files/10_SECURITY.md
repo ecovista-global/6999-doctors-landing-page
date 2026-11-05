@@ -25,7 +25,11 @@ related: [04_DATA_MODEL.md, 07_API_CONTRACT.md, 09_ERROR_HANDLING.md, 12_GITHUB_
 
 **(SD-042) SQL injection.** *Meaning:* untrusted input reaching SQL. *Decision:* Drizzle typed queries and parameterized `sql` template only; ESLint rule `no-restricted-syntax` bans string-built SQL and `db.execute(` with concatenation; example allowed: `db.select().from(leads).where(eq(leads.tenantId, id))`. Rejected: raw SQL strings. *Failure:* data exfiltration; reveals as WAF SQLi rule hits and CI lint failure. *Verify:* 13 § 1 (injection payload tests); 12 § 2.
 
-**(SD-043) XSS.** *Meaning:* script injection through content. *Decision:* React escaping by default; JSON-LD via `JSON.stringify` then escaping `<` as `\u003c`; `dangerouslySetInnerHTML` banned except allowlisted markdown through `sanitize-html` strict config (no scripts, no inline handlers); CSP per client site: `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-src https://www.google.com/maps; connect-src https://api.doctorsite.in; base-uri 'none'; form-action 'self'`; portal CSP uses nonces. *Failure:* stored XSS in doctor content; reveals as CSP report-uri events. *Verify:* 13 § 3 (garbage content), 13 § 7.
+**(SD-043) XSS.** *Meaning:* script injection through content. *Decision:* React escaping by default; JSON-LD via `JSON.stringify` then escaping `<` as `\u003c`; `dangerouslySetInnerHTML` banned except allowlisted markdown/rich-text through `sanitize-html` strict config (no scripts, no inline handlers, no iframes except allowlisted Google Maps); CSP per client site: `default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.r2.cloudflarestorage.com; frame-src https://www.google.com/maps https://challenges.cloudflare.com; connect-src https://api.doctorsite.in; base-uri 'none'; form-action 'self'`; portal CSP uses nonces. *Failure:* stored XSS in doctor content; reveals as CSP report-uri events. *Verify:* 13 § 3 (garbage content), 13 § 7.
+
+**(SD-054) Rich-text sanitization & uploads.** *Meaning:* protecting blog content and media. *Decision:* `sanitize-html` strict allowlist on all blog posts (no `<script>`, no `<iframe>`, no inline handlers); media uploads verified by magic bytes, SVG stripped of active content, stored in Cloudflare R2 with non-executable MIME types and CDN cache. Disallowed content returns 422 `E-1607`.
+
+**(SD-055) Form spam protection.** *Meaning:* defending public appointment & enquiry endpoints. *Decision:* Cloudflare Turnstile token validation on server, invisible honeypot field, time-trap (< 3s reject), per-IP rate limit 5/min. Failed verification returns 403 `E-1604`.
 
 **(SD-044) CSRF.** *Meaning:* cross-site mutations. *Decision:* `SameSite=Lax` cookies; double-submit `X-CSRF-Token` header on every portal mutation; Server Actions verify `Origin` equals `https://app.doctorsite.in`. Public lead POST has no cookies (no CSRF surface) and uses CORS allowlist plus honeypot. *Failure:* forged state change; reveals as origin-reject counter. *Verify:* 13 § 1.
 
@@ -37,6 +41,8 @@ related: [04_DATA_MODEL.md, 07_API_CONTRACT.md, 09_ERROR_HANDLING.md, 12_GITHUB_
 
 **(SD-047) JWT rotation.** *Meaning:* token lifecycle. *Decision:* access JWT 15 min (ES256), refresh 30 days stored hashed in `refresh_tokens(family_id)`; each use rotates; reuse of a retired token revokes the family and forces login; "logout all devices" revokes all families; signing keys rotate every 90 days with `kid` overlap of 24 h. *Failure:* stolen token persistence; reveals as `refresh_reuse_total` (Sev-2). *Verify:* 13 § 1.
 
+**(SD-056) Two-Factor Authentication (2FA/TOTP).** *Meaning:* optional RFC-6238 TOTP for tenant owners. *Decision:* AES-256-GCM encrypted secret in `users.totp_secret_enc`, 6-digit codes with 1-period drift tolerance, 8 hashed backup codes, rate limit 5 attempts per 15 min with account lockout. Failed 2FA returns 401 `E-1605`.
+
 ## 4. Identity & access
 
 **(SD-048) IAM.** *Meaning:* who may do what.
@@ -46,7 +52,10 @@ related: [04_DATA_MODEL.md, 07_API_CONTRACT.md, 09_ERROR_HANDLING.md, 12_GITHUB_
 | Tenants (all) | CRUD | Read/Create | Own read | none |
 | Site content | Edit | Edit | Edit own | Edit own |
 | Publish/rollback | Yes | Yes | Publish own | none |
-| Leads | Read all | Read assigned | Read own | Read own |
+| Leads & Submissions | Read all | Read assigned | Read own | Read/Update own |
+| Blog & FAQs | CRUD all | CRUD assigned | CRUD own | Read own |
+| Testimonial Moderation | Yes | Yes | Yes | Draft only |
+| Settings & 2FA | Yes | Setup assist | Own | none |
 | Billing | All | Read | Own | none |
 | Feature flags, audit_log | Yes | Read | none | none |
 

@@ -14,6 +14,18 @@ related: [03_ARCHITECTURE.md, 05_DATA_SOURCES.md, 09_ERROR_HANDLING.md, 10_SECUR
 |---|---|---|---|---|---|---|
 | /v1/leads | POST | none (public, CORS allowlist) | 5/min/IP; 100/h/tenant | Required header | P1 | v1 |
 | /v1/leads | GET | tenant_owner/staff | 300/min/user | n/a (read) | P1 | v1 |
+| /v1/public/appointments | POST | none (public, CORS allowlist) | 5/min/IP; 100/h/tenant | Required header | P2 | v1 |
+| /v1/public/enquiries | POST | none (public, CORS allowlist) | 5/min/IP; 100/h/tenant | Required header | P2 | v1 |
+| /v1/public/availability | GET | none (public, CORS allowlist) | 60/min/IP | n/a (read) | P2 | v1 |
+| /v1/cms/submissions/appointments | GET, PATCH | tenant_owner/staff/operator | 300/min/user | Header on PATCH | P2 | v1 |
+| /v1/cms/submissions/enquiries | GET, PATCH | tenant_owner/staff/operator | 300/min/user | Header on PATCH | P2 | v1 |
+| /v1/cms/posts | GET, POST, PUT, DELETE | tenant_owner/operator | 60/min | Header on POST/PUT | P2 | v1 |
+| /v1/cms/faqs | GET, POST, PUT, DELETE, PATCH | tenant_owner/operator | 60/min | Header on writes | P2 | v1 |
+| /v1/cms/testimonials | GET, POST, PUT, DELETE, PATCH | tenant_owner/operator | 60/min | Header on writes | P2 | v1 |
+| /v1/cms/settings | GET, PUT | tenant_owner/staff | 60/min | Header on PUT | P2 | v1 |
+| /v1/cms/media/upload | POST | tenant_owner/operator | 20/min | Header required | P2 | v1 |
+| /v1/auth/totp/setup | POST | tenant_owner | 10/15 min/user | No | P2 | v1 |
+| /v1/auth/totp/verify | POST | none / session | 10/15 min/IP | No | P2 | v1 |
 | /v1/auth/otp/request | POST | none | 10/15 min/IP | No | P1 | v1 |
 | /v1/auth/otp/verify | POST | none | 10/15 min/IP | No | P1 | v1 |
 | /v1/auth/google/callback | GET | OAuth state | 10/15 min/IP | No | P2 | v1 |
@@ -40,7 +52,8 @@ P1: passwordless email OTP (6 digits, 10-min expiry, 5 attempts, delivered via R
 ### Payments and plan amounts in paise
 Razorpay orders are created via `POST /v1/payments/order` with integer amounts in paise (canonical pricing facts live in 01_PRD.md § 2):
 - **Basic Presence:** ₹6,999 = `699900` paise (first year); renewal ₹2,999 = `299900` paise.
-- **Practice Growth:** ₹12,999 = `1299900` paise (first year); renewal ₹5,999 = `599900` paise. *Sketch:*
+- **Practice Growth:** ₹12,999 = `1299900` paise (first year); renewal ₹5,999 = `599900` paise.
+- **Professional Clinic:** ₹18,999 = `1899900` paise (first year); renewal ₹9,999 = `999900` paise. *Sketch:*
 
 ```ts
 // apps/platform/src/lib/idempotency.ts

@@ -53,6 +53,21 @@ related: [03_ARCHITECTURE.md, 09_ERROR_HANDLING.md, 10_SECURITY.md, 12_GITHUB_AC
 - [ ] Google Analytics 4 stream verified receiving live test page views across all 5 pages
 - [ ] Per-page JSON-LD schemas validated without warnings on Schema Markup Validator
 
+### Professional Clinic tier add-on checklist (full-stack block)
+- [ ] 7-page static export verified (Home `/`, About `/about/`, Services `/services/`, Doctors `/doctors/`, Testimonials & FAQ `/testimonials-faq/`, Blog `/blog/`, Contact & Appointment `/contact/`)
+- [ ] 8th page rejection verified in content schema (`E-1601`)
+- [ ] Appointment booking form tested: submit -> `POST /v1/public/appointments` -> encrypted row in Postgres -> visible in CMS Today's OPD view
+- [ ] General enquiry form tested: submit -> `POST /v1/public/enquiries` -> encrypted row in Postgres -> visible in CMS
+- [ ] Cloudflare Turnstile spam protection verified blocking fake/automated submissions (`E-1604`)
+- [ ] Receptionist status transitions tested end-to-end (`Pending -> Confirmed -> Completed`, `Cancelled`) with audit trail
+- [ ] Rich-text blog editor tested: create post, sanitize HTML, upload cover image to R2, publish, verify live post page
+- [ ] Testimonials moderation tested: unapproved review hidden; approved review with recorded consent published
+- [ ] Clinic settings tested: operating hours and slot duration reflect on public availability endpoint
+- [ ] 2FA TOTP setup tested for clinic owner login (`/v1/auth/totp/verify`)
+- [ ] Nightly database backup to encrypted R2 bucket verified; restore drill tested
+- [ ] Database quota counter verified (warning at 80% of 5,000 submissions / 1 GB media)
+- [ ] 15-day bug fix window SLA clock and monthly 3-update allowance active
+
 ## 2. Checklist B — SaaS release
 
 - [ ] Migrations are expand-only (or contract approved) and applied before deploy

@@ -22,6 +22,13 @@ Prefixes: E-1xxx user, E-2xxx platform, E-3xxx third-party, E-4xxx infra.
 | E-1304 | Missing Idempotency-Key | 400 | Something went wrong, please retry. / कुछ गलत हुआ, कृपया पुनः प्रयास करें। | Fix client |
 | E-1401 | Webhook signature/replay invalid | 401 | n/a | Investigate if sustained |
 | E-1501 | Rate limited | 429 | Too many attempts, try later. / बहुत अधिक प्रयास, बाद में कोशिश करें। | None |
+| E-1601 | Page limit exceeded (max 7 pages) | 422 | Up to 7 pages allowed on this plan. / इस प्लान पर अधिकतम 7 पेज की अनुमति है। | Review page selection |
+| E-1602 | Quota exceeded (submissions/storage) | 429 | Plan volume quota reached. / प्लान कोटा सीमा समाप्त हो गई है। | Offer quota add-on |
+| E-1603 | Invalid status transition | 422 | Invalid appointment status transition. / अमान्य अपॉइंटमेंट स्थिति परिवर्तन। | Check allowed transitions |
+| E-1604 | Turnstile / spam verification failed | 403 | Security verification failed. / सुरक्षा सत्यापन विफल रहा। | Check spam logs |
+| E-1605 | 2FA code invalid or expired | 401 | Invalid or expired verification code. / अमान्य या समाप्त सत्यापन कोड। | User retry / recovery |
+| E-1606 | Testimonial consent unrecorded | 422 | Patient consent must be recorded. / मरीज की सहमति दर्ज होनी चाहिए। | Record patient consent |
+| E-1607 | Rich-text sanitization violation | 422 | Disallowed HTML or script tags detected. / अस्वीकृत HTML या स्क्रिप्ट टैग पाए गए। | Remove disallowed tags |
 | E-2101 | Content sheet failed validation | 422 | We could not build your page. / हम आपका पेज नहीं बना सके। | Fix sheet, replay |
 | E-2201 | Build failed | 500 | Build failed, team notified. / बिल्ड विफल, टीम को सूचित किया गया। | Check renderer logs |
 | E-2301 | Asset processing failed | 500 | Image processing failed. / छवि प्रोसेस नहीं हुई। | Re-upload/replay |

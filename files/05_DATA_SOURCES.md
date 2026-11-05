@@ -20,6 +20,11 @@ related: [03_ARCHITECTURE.md, 04_DATA_MODEL.md, 06_CONTENT_PIPELINE_SPEC.md, 07_
 | Cloudflare domain/SSL status | REST poll (every 5 min while pending) | Cloudflare | ≤ 5 min | zod response schema | domains | E-3301 retry, alert at 1 h |
 | Uptime probe results | JSON from external prober | Probe vendor | 5 min | schema | Better Stack | Sev-2 alert on 2 failures |
 | Analytics events | JSON batch | Client site / platform | ≤ 10 s | zod `EventSchema` | PostHog/Axiom class store (11) | Drop with counter, never block UX |
+| Public appointment submissions | JSON via POST /v1/public/appointments | Patient / browser | Real time | zod `AppointmentInputSchema` + Turnstile | appointments, outbox_events | E-1101, E-1604 Turnstile reject |
+| Public enquiry submissions | JSON via POST /v1/public/enquiries | Patient / browser | Real time | zod `EnquiryInputSchema` + Turnstile | enquiries, outbox_events | E-1101, E-1604 Turnstile reject |
+| Blog posts | JSON / rich-text TipTap | Doctor / owner | On save | zod `PostSchema` + `sanitize-html` | posts | E-1607 sanitize error |
+| FAQs and testimonials | JSON | Doctor / owner | On save | zod `FaqSchema`, `TestimonialSchema` | faqs, testimonials | E-1606 consent missing |
+| Clinic settings & slots | JSON | Staff / owner | On save | zod `ClinicSettingsSchema` | clinic_settings | E-1xxx validation errors |
 | Cron sweep outputs | Internal records | Workers | Daily | internal types | outbox_events | Alert on missed run (12 § 9) |
 
 ## 2. Event catalogue
@@ -28,6 +33,11 @@ related: [03_ARCHITECTURE.md, 04_DATA_MODEL.md, 06_CONTENT_PIPELINE_SPEC.md, 07_
 |---|---|---|---|---|
 | `lead.created` | POST /v1/leads | Notifier | `{lead_id, tenant_id}` | At-least-once, idempotent consumer |
 | `lead.notified` | Notifier | Analytics, lead_events | `{lead_id, channel, at}` | At-least-once |
+| `appointment.created` | POST /v1/public/appointments | Notifier, Dashboard | `{appointment_id, tenant_id}` | At-least-once, idempotent |
+| `appointment.status_changed` | PATCH /v1/cms/submissions/appointments | Audit, Analytics | `{appointment_id, from_status, to_status, actor_id}` | At-least-once |
+| `enquiry.created` | POST /v1/public/enquiries | Notifier, Dashboard | `{enquiry_id, tenant_id}` | At-least-once |
+| `post.published` | CMS Blog | Pipeline, Analytics | `{post_id, slug, tenant_id}` | At-least-once |
+| `testimonial.moderated` | CMS Testimonials | Pipeline | `{testimonial_id, status, tenant_id}` | At-least-once |
 | `content.saved` | Portal | Pipeline | `{site_id, version}` | At-least-once |
 | `site.published` | Pipeline | Notifier, analytics | `{site_id, version, host}` | At-least-once |
 | `payment.captured` | Webhook handler | Billing, Pipeline | `{payment_id, tenant_id, paise}` | Exactly-once effect (idempotent) |

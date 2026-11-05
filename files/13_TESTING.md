@@ -13,9 +13,15 @@ related: [03_ARCHITECTURE.md, 09_ERROR_HANDLING.md, 12_GITHUB_ACTIONS.md, 14_PRO
 | Layer | Scope | Target |
 |---|---|---|
 | Unit | `packages/*`, lib functions | ≥ 70% lines on packages |
-| Integration | Every Route Handler and queue worker against real Postgres + Redis (testcontainers) | 100% of routes; RLS isolation test across all tenant tables; injection payloads; EXPLAIN assertions for hot queries; query-count guard (≤ 5 per list route) |
-| E2E | Playwright: signup → pay → wizard → publish → lead (P2 happy path); client-site journeys (call, WhatsApp, form, form with API blocked) | Pass on every release |
+| Integration | Every Route Handler and queue worker against real Postgres + Redis (testcontainers) | 100% of routes; two-clinic RLS isolation test across all 15 tenant tables (F-02: zero cross-reads); injection payloads; EXPLAIN assertions for hot queries; query-count guard (≤ 5 per list route) |
+| E2E | Playwright: signup → pay → wizard → publish → lead (P2 happy path); client-site journeys (call, WhatsApp, form, form with API blocked); R6 live-wiring suite (edit in CMS -> save -> publish -> live site assert; public form submit -> Postgres row -> CMS dashboard visible) | Pass on every release |
 | Contract | Razorpay/WhatsApp webhook payload schemas vs recorded fixtures (07 § 4) | Fixtures updated when provider changes |
+
+### R6 Live-Wiring Proof Suite & State Machine Tests
+- **R6 Live-Wiring:** For every CMS-editable field, Playwright tests edit value in CMS -> trigger publish -> wait for swap -> navigate to live page URL -> assert new content is rendered. For public forms: submit test appointment -> assert encrypted row created in `appointments` -> login as receptionist -> assert appointment is listed in today's inbox.
+- **Two-Clinic Isolation (F-02):** Seeds Tenant A and Tenant B. Runs read/write matrix; asserts Tenant A cannot read Tenant B's appointments, enquiries, posts, FAQs, testimonials, or settings under any header combination.
+- **Status Machine (F-06):** Validates allowed transitions (`Pending -> Confirmed -> Completed`, `Pending -> Cancelled`, `Confirmed -> Cancelled`, `Cancelled -> Pending`). Rejects illegal transitions (e.g. `Completed -> Pending`) with 422 `E-1603`. Asserts audit trail recorded in `appointment_events` and `audit_log`.
+- **Spam Defense (F-08):** Tests Turnstile invalid token rejection (403 `E-1604`), honeypot rejection, time-trap (< 3s rejection), and rate limiting.
 
 ## 2. Tooling & environments
 

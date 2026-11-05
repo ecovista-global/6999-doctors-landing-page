@@ -23,6 +23,39 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added (Phase 0: Professional Clinic Plan — ₹18,999 Specification)
+
+- **New Plan Specification (`01_PRD.md`):**
+  - Added "Professional Clinic" commercial facts table to § 2 (₹18,999 Year 1 / ₹9,999 renewal, full-stack badge, up to 7 pages, custom backend/DB configuration, secure admin login, submissions dashboard, statuses, basic blog CMS, editable FAQs/testimonials, 5,000 submission quota, 1 GB media storage, 3 content updates/mo, 15-day bug fix window).
+  - Added Feature Traceability matrix (F-01 through F-15).
+  - Added clinic receptionist persona (Aarti, 26).
+  - Added 30 user stories (US-301 through US-330) with 2-4 acceptance criteria each.
+  - Added unit economics analysis for Year 1 (72.1% margin) and renewal (63.3% margin; flagged `< 70%`).
+  - Added DECISION-NEEDED questions for GST treatment, database allowance quotas, and 15-day bug fix window.
+- **New Specifications (`18_CMS_SPEC.md` & `19_UI_DESIGN_SYSTEM.md`):**
+  - Authored `18_CMS_SPEC.md` covering RBAC permissions matrix, 7-page content model, submissions inbox, status transitions state machine (`Pending -> Confirmed -> Completed, Cancelled`), rich-text editor with `sanitize-html` pipeline, media library with per-card photo replacement, publishing saga with atomic rollback, and immutable audit trail.
+  - Authored `19_UI_DESIGN_SYSTEM.md` covering clinical green/teal design tokens, typography with self-hosted woff2 and Devanagari fallback, Lucide SVG icon family, strict anti-emoji policy, component library, CMS app shell, 7-page public layouts, 200ms motion rules, WCAG 2.1 AA accessibility, multi-width screenshot protocol (360/768/1280 px, light/dark), and explicit anti-AI-look checklist.
+- **Architectural & Data Model Extensions (`03_ARCHITECTURE.md`, `04_DATA_MODEL.md`, `05_DATA_SOURCES.md`):**
+  - Added Mermaid sequence diagrams for patient appointment form submission and CMS publishing saga.
+  - Formulated ADR-201: delivered backend as an RLS-isolated slice in shared PostgreSQL rather than dedicated servers per clinic.
+  - Added 8 new tables: `appointments`, `appointment_events`, `enquiries`, `posts`, `faqs`, `testimonials`, `clinic_settings`, `usage_counters`.
+  - Added indexes for hot queries and keyset pagination.
+  - Documented AES-256-GCM encryption for patient contact fields.
+- **Contract & Error Updates (`07_API_CONTRACT.md`, `09_ERROR_HANDLING.md`):**
+  - Added routes: `/v1/public/appointments`, `/v1/public/enquiries`, `/v1/public/availability`, `/v1/cms/submissions/*`, `/v1/cms/posts`, `/v1/cms/faqs`, `/v1/cms/testimonials`, `/v1/cms/settings`, `/v1/cms/media/upload`, `/v1/auth/totp/*`.
+  - Added plan amount in paise: `1899900` (Year 1) / `999900` (renewal).
+  - Added error codes E-1601 to E-1607 for plan limits, quotas, transitions, Turnstile, 2FA, and sanitization.
+- **Security & Pipeline Updates (`06_CONTENT_PIPELINE_SPEC.md`, `10_SECURITY.md`, `11_ANALYTICS_SEO_SPEC.md`, `12_GITHUB_ACTIONS.md`, `13_TESTING.md`, `14_PRODUCTION_CHECKLIST.md`):**
+  - Documented TOTP 2FA, Turnstile bot verification, rich-text sanitization, and strict CSP.
+  - Added R6 live-wiring Playwright test strategy and two-clinic RLS isolation tests.
+  - Added Professional Clinic add-on checklist to Checklist A.
+- **Decisions Log (`17_DECISIONS.md`):**
+  - Recorded accepted ADR-201 and proposed ADR-202 through ADR-205.
+- **Implementation Queue (`15_MICROTASKS.md`):**
+  - Extended implementation roadmap with 6 new milestones: PA (Design system & shells), PB (Backend & data), PC (CMS), PD (Public site), PE (Operations), PF (Hardening).
+  - Added 46 microtasks (MT-101 to MT-146) each ≤ 2 h in standard template with F-xx tags and proof tests.
+  - Added updated burndown table (112 total tasks, 197.5 hours) and F-01..F-15 coverage matrix.
+
 ### Added (Milestone M0: Foundations — MT-001 through MT-008)
 
 - **MT-001 (Monorepo scaffold):** Configured pnpm workspaces, Turborepo pipeline (`build`, `lint`, `test`, `typecheck`), and directory layout (`apps/platform`, `apps/site-template`, `packages/config`, `packages/content-schema`, `packages/ui`).

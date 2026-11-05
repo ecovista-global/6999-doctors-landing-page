@@ -44,6 +44,8 @@ AI-agent protocol (mandatory, scoped-reading rule to save tokens):
 | 15 | 15_MICROTASKS.md | Implementation queue | AI agents |
 | 16 | 16_CHANGELOG.md | History | All |
 | 17 | 17_DECISIONS.md | ADR log | All |
+| 18 | 18_CMS_SPEC.md | Roles, content model, editor, media, publishing, audit | Engineers, CMS agents |
+| 19 | 19_UI_DESIGN_SYSTEM.md | Tokens, typography, icons, shells, a11y, anti-AI-look | Frontend agents |
 
 ## 3. Definitions of done
 

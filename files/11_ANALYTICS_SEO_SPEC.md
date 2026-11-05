@@ -19,6 +19,10 @@ related: [01_PRD.md, 08_UI_SPEC.md, 10_SECURITY.md, 14_PRODUCTION_CHECKLIST.md]
 | call_clicked | site_id | tel: link click | P1 |
 | whatsapp_clicked | site_id, placement (hero/bar) | wa.me click | P1 |
 | form_submitted | site_id, result (ok/error code) | Form submit | P1 |
+| appointment_submitted | site_id, service, date | POST /v1/public/appointments | P2 |
+| appointment_status_changed | site_id, from_status, to_status | Status changed in CMS | P2 |
+| enquiry_submitted | site_id, service | POST /v1/public/enquiries | P2 |
+| post_viewed | site_id, slug | Blog post viewed | P2 |
 | update_requested | site_id, source | Update logged | P1 |
 
 Acceptance: every event validated by zod `EventSchema`; unknown events rejected and counted.
@@ -46,9 +50,9 @@ Pre-publish checklist (automated where noted):
 | Item | Rule |
 |---|---|
 | Title/meta/OG | Unique: `{Dr. Name} — {Specialty} in {City}` ≤ 60 chars; description ≤ 155; OG image 1200×630 (auto) |
-| Canonical | `https://{host}/` (Basic Presence); exact per-page canonical for Practice Growth (`/`, `/about/`, `/services/`, `/testimonials/`, `/contact/`) |
-| sitemap.xml / robots.txt | Generated; Basic: root URL only; Practice Growth: all 5 responsive page URLs with `<lastmod>`; robots allows all; previews `noindex` |
-| JSON-LD | Basic: Physician + MedicalClinic validated in pipeline. Practice Growth: per-page structured data (Root: Physician + MedicalClinic; About: Physician credentials; Services: MedicalSpecialty; Testimonials: Review; Contact: MedicalClinic + openingHoursSpecification) |
+| Canonical | `https://{host}/` (Basic Presence); exact per-page canonical for Practice Growth (`/`, `/about/`, `/services/`, `/testimonials/`, `/contact/`) and Professional Clinic (`/`, `/about/`, `/services/`, `/doctors/`, `/testimonials-faq/`, `/blog/`, `/contact/`, plus `/blog/:slug/`) |
+| sitemap.xml / robots.txt | Generated; Basic: root URL only; Practice Growth: all 5 responsive page URLs with `<lastmod>`; Professional Clinic: all 7 responsive page URLs + published blog post URLs with `<lastmod>`; robots allows all; previews `noindex` |
+| JSON-LD | Basic: Physician + MedicalClinic validated in pipeline. Practice Growth: per-page structured data. Professional Clinic: Root (Physician + MedicalClinic), About (Physician credentials), Services (MedicalSpecialty), Doctors (MedicalOrganization + employee), Testimonials & FAQ (Review + FAQPage), Blog (Blog + BlogPosting for articles), Contact (MedicalClinic + openingHoursSpecification) |
 | NAP | Name, address, phone identical across page, JSON-LD and GMB |
 | Alt text | Required for every image (validation fails if empty) |
 | Headings | One H1, ordered H2/H3 |

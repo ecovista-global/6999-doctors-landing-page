@@ -89,7 +89,7 @@ Pick: Vercel instant rollback + feature-flag canary; Kubernetes rolling in P3 (r
 
 ## 5. Containers
 
-**(SD-061) Docker.** *Meaning:* images in CI from day 1. *Decision:* containerized: content renderer (`infra/docker/renderer.Dockerfile`: Node 22 slim + sharp + Chromium for Lighthouse) and Playwright runner; multi-stage (deps → build → runtime, non-root user, read-only FS); `hadolint` in CI; layer cache `type=gha`; image tag = git SHA; images pushed to GHCR. Platform itself ships via Vercel until P3. *Failure:* heavy image slows builds; reveals as renderer start time > 25 s. *Verify:* 13 § 2.
+**(SD-061) Docker.** *Meaning:* images in CI from day 1. *Decision:* containerized: content renderer (`infra/docker/renderer.Dockerfile`: Node 22 slim + sharp + Chromium for Lighthouse) and Playwright runner; multi-stage (deps → build → runtime, non-root user, read-only FS); `hadolint` in CI; layer cache `type=gha`; image tag = git SHA; images pushed to GHCR. For Professional Clinic, the Docker renderer statically compiles up to 7 pages (Home, About, Services, Doctors, Testimonials & FAQ, Blog index + posts, Contact & Appointment). Platform itself ships via Vercel until P3. *Failure:* heavy image slows builds; reveals as renderer start time > 25 s. *Verify:* 13 § 2.
 
 ## 6. Kubernetes + Helm (P3, fully specified)
 

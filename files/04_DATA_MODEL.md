@@ -20,6 +20,14 @@ erDiagram
   sites ||--o{ content_sheets : versions
   tenants ||--o{ leads : receives
   leads ||--o{ lead_events : logs
+  tenants ||--o{ appointments : books
+  appointments ||--o{ appointment_events : tracks
+  tenants ||--o{ enquiries : receives
+  tenants ||--o{ posts : authors
+  tenants ||--o{ faqs : maintains
+  tenants ||--o{ testimonials : displays
+  tenants ||--|| clinic_settings : configures
+  tenants ||--|| usage_counters : tracks
   tenants ||--o{ subscriptions : bills
   subscriptions ||--o{ payments : settles
   tenants ||--o{ audit_log : audited
@@ -33,13 +41,21 @@ erDiagram
 | Table | Purpose | Key columns | Owner | Retention |
 |---|---|---|---|---|
 | tenants | One paying clinic | id uuid pk, slug text unique, name, status (`draft/active/suspended/offboarded`), created_at timestamptz | Platform | Until offboarding + 90 d |
-| users | Logins | id, tenant_id, email citext unique, role enum(`superadmin,operator,tenant_owner,tenant_staff`), last_login_at | Platform | With tenant |
-| sites | One site per tenant | id, tenant_id unique, plan enum(`basic,growth`) default `basic`, live_version int, schema_version text, theme enum(`green,teal`), status | Pipeline | With tenant |
+| users | Logins | id, tenant_id, email citext unique, role enum(`superadmin,operator,tenant_owner,tenant_staff`), totp_secret_enc text, totp_enabled bool default false, last_login_at | Platform | With tenant |
+| sites | One site per tenant | id, tenant_id unique, plan enum(`basic,growth,professional`) default `basic`, live_version int, schema_version text, theme enum(`green,teal`), status | Pipeline | With tenant |
 | domains | Hostnames | id, site_id, host text unique, kind (`registered/byo`), cf_hostname_id, ssl_status, expires_on date | Pipeline | With tenant |
 | content_sheets | Versioned content | id, site_id, version int, data jsonb, schema_version, created_by, created_at, `unique(site_id, version)` | Wizard/operator | All versions 12 months; live + 5 prior forever |
 | leads | Patient enquiries | id, tenant_id, created_at, channel enum(`form,call,whatsapp`), name_enc bytea, phone_enc bytea, email_enc bytea, message_enc bytea, consent_at, idempotency_key | Lead API | 24 months (DECISION-NEEDED) |
 | lead_events | Delivery trail | id, lead_id, kind (`received,email_sent,wa_sent,failed`), at timestamptz default now() | Notifier | With lead |
-| subscriptions | Plan state | id, tenant_id, plan enum(`basic,growth`), status, current_period_end date, renewal_price_paise int (299900 for basic, 599900 for growth; See 01_PRD.md § 2) | Billing | 8 years (tax) |
+| appointments | Clinic booking requests | id, tenant_id, created_at, patient_name_enc bytea, patient_phone_enc bytea, patient_email_enc bytea, service_name text, preferred_date date, preferred_time_slot text, status enum(`pending,confirmed,completed,cancelled`) default `pending`, notes text, consent_at timestamptz, idempotency_key text unique, ip_hash text | Appointments API | 24 months, then archive |
+| appointment_events | Status audit trail | id, appointment_id, tenant_id, actor_id, from_status text, to_status text, note text, created_at timestamptz | Appointments API | With appointment |
+| enquiries | Patient clinic messages | id, tenant_id, created_at, name_enc bytea, phone_enc bytea, email_enc bytea, message_enc bytea, service text, status enum(`pending,confirmed,completed,cancelled`) default `pending`, consent_at timestamptz, idempotency_key text unique | Enquiries API | 24 months |
+| posts | Clinic blog articles | id, tenant_id, title text, slug text, excerpt text, content_json jsonb, cover_image_url text, published_at timestamptz, is_published bool default false, seo_title text, seo_description text, created_at timestamptz, updated_at timestamptz, `unique(tenant_id, slug)` | Blog CMS | With tenant |
+| faqs | Clinic Q&A items | id, tenant_id, question text, answer text, category text, display_order int, is_active bool default true, created_at timestamptz | FAQ CMS | With tenant |
+| testimonials | Patient reviews & consent | id, tenant_id, patient_initials text, review_text text, rating int, treatment text, consent_recorded bool default false, moderation_status enum(`draft,approved,archived`) default `draft`, display_order int, created_at timestamptz | Reviews CMS | With tenant |
+| clinic_settings | Operating config | id, tenant_id unique, operating_hours jsonb, slot_interval_minutes int default 30, max_daily_slots int default 40, notification_emails text[], spam_threshold int default 5, enabled_pages text[], created_at timestamptz, updated_at timestamptz | Settings CMS | With tenant |
+| usage_counters | Quota meters | tenant_id pk, period_start date, appointment_count int default 0, enquiry_count int default 0, storage_bytes bigint default 0, content_updates_used int default 0, updated_at timestamptz | Metering | 8 years |
+| subscriptions | Plan state | id, tenant_id, plan enum(`basic,growth,professional`), status, current_period_end date, renewal_price_paise int (299900 for basic, 599900 for growth, 999900 for professional; See 01_PRD.md § 2) | Billing | 8 years (tax) |
 | payments | Money records | id, subscription_id, razorpay_payment_id unique, amount_paise int, gst_paise int, status, idempotency_key unique | Billing | 8 years |
 | webhook_events | Inbound webhooks | id, provider, event_id, signature_ok bool, payload jsonb, received_at, processed_at, `unique(provider,event_id)` | Webhook route | 90 days |
 | outbox_events | Reliable events | id, tenant_id, type, payload jsonb, created_at, dispatched_at | Dispatcher | 30 days after dispatch |
@@ -55,6 +71,12 @@ Content sheet `data` is typed JSONB validated by `packages/content-schema` (zod)
 | Query | Index |
 |---|---|
 | Leads inbox by tenant, newest first | `CREATE INDEX leads_tenant_created_idx ON leads (tenant_id, created_at DESC, id DESC)` |
+| Appointments inbox by tenant, created desc | `CREATE INDEX appointments_tenant_created_idx ON appointments (tenant_id, created_at DESC, id DESC)` |
+| Appointments by date and status (Today OPD) | `CREATE INDEX appointments_tenant_date_idx ON appointments (tenant_id, preferred_date, status)` |
+| Enquiries inbox by tenant, created desc | `CREATE INDEX enquiries_tenant_created_idx ON enquiries (tenant_id, created_at DESC, id DESC)` |
+| Blog posts by slug | `CREATE UNIQUE INDEX posts_tenant_slug_idx ON posts (tenant_id, slug)` |
+| FAQs by display order | `CREATE INDEX faqs_tenant_order_idx ON faqs (tenant_id, display_order) WHERE is_active = true` |
+| Testimonials approved by order | `CREATE INDEX testimonials_tenant_idx ON testimonials (tenant_id, display_order) WHERE moderation_status = 'approved'` |
 | Active-tenant lookups | `CREATE INDEX tenants_active_idx ON tenants (slug) WHERE status = 'active'` (partial) |
 | Domain expiry sweep | `CREATE INDEX domains_expiry_idx ON domains (expires_on) WHERE ssl_status <> 'removed'` |
 | Content lookups inside JSONB (operator search by city) | `CREATE INDEX content_data_gin ON content_sheets USING GIN (data jsonb_path_ops)` |
@@ -116,12 +138,22 @@ v1.1.0 MINOR bump (Practice Growth support): introduces optional `plan` (`basic`
 | Column | Data | Treatment |
 |---|---|---|
 | leads.name_enc, phone_enc, email_enc, message_enc | Patient personal data | AES-256-GCM app-level (10 § SD-050) |
+| appointments.patient_name_enc, patient_phone_enc, patient_email_enc | Patient appointment contact | AES-256-GCM app-level |
+| enquiries.name_enc, phone_enc, email_enc, message_enc | Patient enquiry message | AES-256-GCM app-level |
 | users.email | Staff/doctor contact | Plain, access-controlled |
+| users.totp_secret_enc | 2FA secret | AES-256-GCM encrypted |
 | payments.* | Amounts only; no card data (Razorpay holds it) | Plain |
 | audit_log | Actions, no PII bodies | Append-only |
 
-Retention default 24 months for leads (DECISION-NEEDED: legal review; recommendation 24 months, doctor-configurable shorter). Deletion workflow: request logged → job overwrites `*_enc` with NULL, keeps `id, created_at`, writes audit entry → confirmation within 30 days. Audit immutability: role has INSERT/SELECT only, plus a trigger raising on UPDATE/DELETE.
+Retention default 24 months for leads, appointments, and enquiries (DECISION-NEEDED: legal review; recommendation 24 months, doctor-configurable shorter). Deletion workflow: request logged → job overwrites `*_enc` with NULL, keeps `id, created_at`, writes audit entry → confirmation within 30 days. Audit immutability: role has INSERT/SELECT only, plus a trigger raising on UPDATE/DELETE.
 
 ## 9. Data-source ownership
 
 See 05_DATA_SOURCES.md § 1 (owner per input) and § 3 (source-of-truth rules).
+
+## 10. Quotas & Resource Allowances (ADR-204)
+
+Tracked via `usage_counters` per tenant and enforced on mutations:
+- **Submissions quota:** 5,000 appointment + enquiry records per subscription year. At 4,000 (80%), warning banner appears on CMS dashboard. At 5,000 (100%), new public submissions reject with `E-1602` and fall back to `wa.me`/`tel:`.
+- **Media storage quota:** 1 GB total storage in Cloudflare R2 bucket (`assets/{tenant_id}/`). Checked on `POST /v1/cms/media/upload`. Warning banner at 800 MB (80%); blocked at 1 GB with `E-1602`.
+- **Content updates allowance:** 3 updates per month included in Professional Clinic plan. SLA tracker resets counter on 1st of every month. Additional updates billed as add-on.
