@@ -74,28 +74,84 @@
       </a>
 
       <nav class="nav-links" aria-label="Main Navigation">
-        <a href="#hero" class="nav-link active">Home</a>
-        <a href="#about" class="nav-link">Doctor Credentials</a>
-        <a href="#features" class="nav-link">Why Choose Us</a>
+        <a href="#hero" class="nav-link active" aria-current="page">Home</a>
+        <a href="#about" class="nav-link">About Doctor</a>
         <a href="#services" class="nav-link">Clinical Services</a>
-        <a href="#clinic" class="nav-link">Clinic & Timings</a>
-        <a href="#reviews" class="nav-link">Patient Reviews</a>
-        <a href="#contact" class="nav-link">Contact & Enquiry</a>
+        <a href="#features" class="nav-link">Doctors &amp; Roster</a>
+        <a href="#reviews" class="nav-link">Reviews &amp; FAQ</a>
+        <a href="#blog" class="nav-link">Clinical Blog</a>
+        <a href="#contact" class="nav-link">Contact &amp; Appointment</a>
       </nav>
 
       <div class="header-actions">
-        <a href="https://wa.me/919876543210" class="btn btn-secondary btn-sm" target="_blank" rel="noopener noreferrer">
+        <a href="https://wa.me/919876543210" class="btn btn-secondary btn-sm" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp Clinic">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+          </svg>
           WhatsApp Clinic
         </a>
-        <a href="tel:+919876543210" class="btn btn-primary btn-sm" id="header-call-btn">
-          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <a href="tel:+919876543210" class="btn btn-primary btn-sm" id="header-call-btn" aria-label="Call Doctor at +91 98765 43210">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
           </svg>
           Call Doctor
         </a>
       </div>
+
+      <button type="button" class="mobile-nav-toggle" id="mobile-nav-toggle" onclick="toggleMobileDrawer()" aria-expanded="false" aria-controls="mobile-nav-drawer" aria-label="Open navigation menu">
+        <svg class="toggle-icon-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true">
+          <line x1="4" x2="20" y1="12" y2="12" />
+          <line x1="4" x2="20" y1="6" y2="6" />
+          <line x1="4" x2="20" y1="18" y2="18" />
+        </svg>
+      </button>
     </div>
   </header>
+  <!-- Responsive Mobile Navigation Drawer (< 768px) -->
+  <div id="drawer-backdrop" class="drawer-backdrop" onclick="closeMobileDrawer()" aria-hidden="true"></div>
+  <div id="mobile-nav-drawer" class="mobile-drawer" role="dialog" aria-modal="true" aria-label="Mobile Navigation Drawer">
+    <div class="drawer-header">
+      <div class="drawer-brand">
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="width:26px;height:26px;color:var(--brand);">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          <path d="M7 12h2l1-3 2 6 1-3h4" />
+        </svg>
+        <span class="drawer-title"><strong>Health</strong>Consult</span>
+      </div>
+      <button type="button" class="drawer-close-btn" id="drawer-close-btn" onclick="closeMobileDrawer()" aria-label="Close navigation menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" width="22" height="22">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <nav class="drawer-nav" aria-label="Mobile Navigation Links">
+      <ul class="drawer-nav-list">
+        <li class="drawer-nav-item"><a href="#hero" class="drawer-nav-link active" onclick="closeMobileDrawer()">Home</a></li>
+        <li class="drawer-nav-item"><a href="#about" class="drawer-nav-link" onclick="closeMobileDrawer()">About Doctor</a></li>
+        <li class="drawer-nav-item"><a href="#services" class="drawer-nav-link" onclick="closeMobileDrawer()">Clinical Services</a></li>
+        <li class="drawer-nav-item"><a href="#features" class="drawer-nav-link" onclick="closeMobileDrawer()">Doctors &amp; Roster</a></li>
+        <li class="drawer-nav-item"><a href="#reviews" class="drawer-nav-link" onclick="closeMobileDrawer()">Reviews &amp; FAQ</a></li>
+        <li class="drawer-nav-item"><a href="#blog" class="drawer-nav-link" onclick="closeMobileDrawer()">Clinical Blog</a></li>
+        <li class="drawer-nav-item"><a href="#contact" class="drawer-nav-link" onclick="closeMobileDrawer()">Contact &amp; Appointment</a></li>
+      </ul>
+    </nav>
+    <div class="drawer-footer-actions">
+      <a href="tel:+919876543210" class="btn btn-primary btn-block" onclick="closeMobileDrawer()" aria-label="Call Doctor Directly">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+        </svg>
+        Call Doctor Directly
+      </a>
+      <a href="https://wa.me/919876543210" class="btn btn-secondary btn-block" target="_blank" rel="noopener noreferrer" onclick="closeMobileDrawer()" aria-label="WhatsApp Clinic Desk">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+        </svg>
+        WhatsApp Clinic Desk
+      </a>
+    </div>
+  </div>
+
 
   <main id="main-content">
     <!-- Section 3: Hero (Split Layout matching Screenshot 1 & 2) -->
@@ -153,21 +209,21 @@
           <!-- Poster-style Contact Highlights from Screenshot 2 -->
           <div class="hero-contact-strip">
             <div class="contact-pill">
-              <span class="pill-icon">📞</span>
+              <span class="pill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
               <div>
                 <span class="pill-label">Call directly:</span>
                 <a href="tel:+919876543210" class="pill-val">+91 98765 43210</a>
               </div>
             </div>
             <div class="contact-pill">
-              <span class="pill-icon">📍</span>
+              <span class="pill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
               <div>
                 <span class="pill-label">Clinic Location:</span>
                 <span class="pill-val">Sector 18, Noida</span>
               </div>
             </div>
             <div class="contact-pill">
-              <span class="pill-icon">🕒</span>
+              <span class="pill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
               <div>
                 <span class="pill-label">Clinic Timings:</span>
                 <span class="pill-val">Mon-Sat: 9 AM – 8 PM</span>
@@ -213,25 +269,25 @@
 
         <div class="credentials-grid">
           <div class="credential-card">
-            <div class="cred-icon">🎓</div>
+            <div class="cred-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><circle cx="12" cy="8" r="6"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg></div>
             <h3 class="cred-title">Medical Degrees</h3>
             <p class="cred-val">MBBS, MD (General Medicine)</p>
             <span class="cred-sub">Maulana Azad Medical College, New Delhi</span>
           </div>
           <div class="credential-card">
-            <div class="cred-icon">📜</div>
+            <div class="cred-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg></div>
             <h3 class="cred-title">Council Registration</h3>
             <p class="cred-val">Reg. No: DMC/R/28491</p>
             <span class="cred-sub">Delhi Medical Council (Active &amp; Verified)</span>
           </div>
           <div class="credential-card">
-            <div class="cred-icon">🩺</div>
+            <div class="cred-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><path d="M4.5 3v5a3.5 3.5 0 0 0 7 0V3"/><path d="M8 11.5v3.5a4 4 0 0 0 8 0V11"/><circle cx="18" cy="10" r="2"/><path d="M2 3h5"/><path d="M9 3h5"/></svg></div>
             <h3 class="cred-title">Clinical Experience</h3>
             <p class="cred-val">14+ Years Active Practice</p>
             <span class="cred-sub">Over 25,000+ Family &amp; Adult Consultations</span>
           </div>
           <div class="credential-card">
-            <div class="cred-icon">💬</div>
+            <div class="cred-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
             <h3 class="cred-title">Languages Spoken</h3>
             <p class="cred-val">English &amp; Hindi</p>
             <span class="cred-sub">Fluent consultation in native language</span>
@@ -241,28 +297,28 @@
         <!-- Accreditations & Standards Banner (Filling the width) -->
         <div class="accreditations-banner">
           <div class="accreditation-item">
-            <span class="accreditation-icon">🛡️</span>
+            <span class="accreditation-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
             <div class="accreditation-text">
               <strong>NABH Safety Standards</strong>
               <span>Sterilized clinic environment &amp; protocols</span>
             </div>
           </div>
           <div class="accreditation-item">
-            <span class="accreditation-icon">💊</span>
+            <span class="accreditation-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg></span>
             <div class="accreditation-text">
               <strong>Transparent Consultation</strong>
               <span>Complimentary 7-day follow-up included</span>
             </div>
           </div>
           <div class="accreditation-item">
-            <span class="accreditation-icon">⚡</span>
+            <span class="accreditation-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
             <div class="accreditation-text">
               <strong>Digital WhatsApp Reports</strong>
               <span>Instant prescription &amp; diagnostic delivery</span>
             </div>
           </div>
           <div class="accreditation-item">
-            <span class="accreditation-icon">🔒</span>
+            <span class="accreditation-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
             <div class="accreditation-text">
               <strong>DPDP Act 2023 Compliant</strong>
               <span>100% encrypted &amp; private health records</span>
@@ -283,22 +339,22 @@
 
         <div class="features-grid">
           <div class="feature-card">
-            <div class="feature-icon-wrapper">⏱️</div>
+            <div class="feature-icon-wrapper"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
             <h3 class="feature-title">Minimal Waiting Time</h3>
             <p class="feature-desc">WhatsApp slot coordination ensures you spend minimal time in the waiting area, receiving prompt doctor attention.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon-wrapper">🩺</div>
+            <div class="feature-icon-wrapper"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><path d="M4.5 3v5a3.5 3.5 0 0 0 7 0V3"/><path d="M8 11.5v3.5a4 4 0 0 0 8 0V11"/><circle cx="18" cy="10" r="2"/><path d="M2 3h5"/><path d="M9 3h5"/></svg></div>
             <h3 class="feature-title">Evidence-Based Medicine</h3>
             <p class="feature-desc">Rational clinical diagnoses with zero unnecessary lab investigations or heavy over-prescription of antibiotics.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon-wrapper">📲</div>
+            <div class="feature-icon-wrapper"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
             <h3 class="feature-title">Digital Health Records</h3>
             <p class="feature-desc">Clear digital prescriptions delivered instantly to your WhatsApp, accessible whenever you need them.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon-wrapper">🤝</div>
+            <div class="feature-icon-wrapper"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg></div>
             <h3 class="feature-title">Dedicated Consultation</h3>
             <p class="feature-desc">Thorough 15+ minute consultation sessions allowing ample time to address your symptoms, queries, and lifestyle concerns.</p>
           </div>
@@ -317,55 +373,55 @@
 
         <div class="services-grid">
           <article class="service-card">
-            <div class="service-icon">🔬</div>
+            <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"/><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/></svg></div>
             <h3 class="service-title">General Health Checkup</h3>
             <p class="service-desc">Complete physical examination, baseline vital assessments, blood pressure screening, and personalized preventive health roadmaps.</p>
             <a href="#contact" class="service-link">Consult Doctor &rarr;</a>
           </article>
           <article class="service-card">
-            <div class="service-icon">🩸</div>
+            <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/></svg></div>
             <h3 class="service-title">Diabetes &amp; Hypertension</h3>
             <p class="service-desc">Careful blood sugar monitoring, HbA1c review, blood pressure stabilization, diet counseling, and long-term kidney &amp; heart protection.</p>
             <a href="#contact" class="service-link">Consult Doctor &rarr;</a>
           </article>
           <article class="service-card">
-            <div class="service-icon">🌡️</div>
+            <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></svg></div>
             <h3 class="service-title">Fevers &amp; Seasonal Illnesses</h3>
             <p class="service-desc">Rapid diagnostic assessment for dengue, malaria, typhoid, viral flu, bronchitis, seasonal allergies, and acute throat infections.</p>
             <a href="#contact" class="service-link">Consult Doctor &rarr;</a>
           </article>
           <article class="service-card">
-            <div class="service-icon">💊</div>
+            <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg></div>
             <h3 class="service-title">Thyroid &amp; Endocrine Care</h3>
             <p class="service-desc">Expert clinical evaluation of hypothyroidism, hyperthyroidism, metabolic shifts, chronic fatigue, and hormone stabilization.</p>
             <a href="#contact" class="service-link">Consult Doctor &rarr;</a>
           </article>
           <article class="service-card">
-            <div class="service-icon">👵</div>
+            <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
             <h3 class="service-title">Geriatric &amp; Elderly Care</h3>
             <p class="service-desc">Compassionate healthcare for senior citizens, routine medication interaction reviews, arthritis pain support, and mobility advice.</p>
             <a href="#contact" class="service-link">Consult Doctor &rarr;</a>
           </article>
           <article class="service-card">
-            <div class="service-icon">💉</div>
+            <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><path d="m18 2 4 4"/><path d="m17 7 3-3"/><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/><path d="m9 11 4 4"/><path d="m5 19-3 3"/><path d="m14 4 6 6"/></svg></div>
             <h3 class="service-title">Adult Vaccinations</h3>
             <p class="service-desc">Annual influenza shots, pneumococcal protection, hepatitis B boosters, tetanus prophylaxis, and adult immunization schedules.</p>
             <a href="#contact" class="service-link">Consult Doctor &rarr;</a>
           </article>
           <article class="service-card">
-            <div class="service-icon">🫁</div>
+            <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
             <h3 class="service-title">Respiratory &amp; Asthma Care</h3>
             <p class="service-desc">Management of chronic wheezing, asthma flare-ups, seasonal allergic rhinitis, smoker's cough, and post-viral lung recovery.</p>
             <a href="#contact" class="service-link">Consult Doctor &rarr;</a>
           </article>
           <article class="service-card">
-            <div class="service-icon">🥣</div>
+            <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div>
             <h3 class="service-title">Gastrointestinal &amp; Acidity</h3>
             <p class="service-desc">Treatment of GERD, acid reflux, peptic ulcers, IBS, chronic constipation, liver sluggishness, and dietary intolerance.</p>
             <a href="#contact" class="service-link">Consult Doctor &rarr;</a>
           </article>
           <article class="service-card">
-            <div class="service-icon">🥗</div>
+            <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
             <h3 class="service-title">Preventive Lifestyle Medicine</h3>
             <p class="service-desc">Evidence-based guidance on weight management, uric acid reduction, cholesterol balance, and cardiac risk factor reduction.</p>
             <a href="#contact" class="service-link">Consult Doctor &rarr;</a>
@@ -389,14 +445,14 @@
 
             <div class="clinic-info-list">
               <div class="clinic-info-item">
-                <span class="item-icon">📍</span>
+                <span class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
                 <div>
                   <strong>Clinic Address:</strong>
                   <p>Plot 14, Health Plaza, Central Market, Sector 18, Noida, Uttar Pradesh – 201301</p>
                 </div>
               </div>
               <div class="clinic-info-item">
-                <span class="item-icon">🕒</span>
+                <span class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
                 <div>
                   <strong>Consultation Schedule:</strong>
                   <table class="hours-table">
@@ -407,23 +463,23 @@
                 </div>
               </div>
               <div class="clinic-info-item">
-                <span class="item-icon">💵</span>
+                <span class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg></span>
                 <div>
                   <strong>Consultation Fee &amp; Policy:</strong>
                   <p>₹600 regular consultation. Includes a <strong>7-day complimentary follow-up</strong> visit for the same medical issue.</p>
                 </div>
               </div>
               <div class="clinic-info-item">
-                <span class="item-icon">🏥</span>
+                <span class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M12 6h.01M8 10h.01M16 10h.01M12 10h.01M8 14h.01M16 14h.01M12 14h.01"/></svg></span>
                 <div>
                   <strong>Clinic Amenities:</strong>
                   <div class="amenities-grid">
-                    <span class="amenity-tag">✓ In-house Pharmacy Partner</span>
-                    <span class="amenity-tag">✓ Home Sample Collection</span>
-                    <span class="amenity-tag">✓ Wheelchair Accessible</span>
-                    <span class="amenity-tag">✓ AC Waiting Lounge</span>
-                    <span class="amenity-tag">✓ Digital Payments Accepted</span>
-                    <span class="amenity-tag">✓ Dedicated Car Parking</span>
+                    <span class="amenity-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13" aria-hidden="true" style="margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>In-house Pharmacy Partner</span>
+                    <span class="amenity-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13" aria-hidden="true" style="margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>Home Sample Collection</span>
+                    <span class="amenity-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13" aria-hidden="true" style="margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>Wheelchair Accessible</span>
+                    <span class="amenity-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13" aria-hidden="true" style="margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>AC Waiting Lounge</span>
+                    <span class="amenity-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13" aria-hidden="true" style="margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>Digital Payments Accepted</span>
+                    <span class="amenity-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13" aria-hidden="true" style="margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>Dedicated Car Parking</span>
                   </div>
                 </div>
               </div>
@@ -435,8 +491,8 @@
             <div class="map-facade-container" id="map-container">
               <div class="map-facade" onclick="loadMap()">
                 <div class="map-facade-content">
-                  <span class="map-pin">📍</span>
-                  <h4>HealthConsult Clinic Location</h4>
+                  <span class="map-pin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+                  <h3>HealthConsult Clinic Location</h3>
                   <p>Sector 18 Central Market, Noida</p>
                   <button type="button" class="btn btn-secondary btn-sm">Click to Load Interactive Google Map</button>
                 </div>
@@ -462,7 +518,7 @@
         <div class="reviews-grid">
           <div class="review-card">
             <span class="review-treatment-tag">Senior Citizen Diabetes Care</span>
-            <div class="review-stars">★★★★★</div>
+            <div class="review-stars" role="img" aria-label="5 out of 5 stars"><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
             <p class="review-text">"Dr. Maanvita is exceptionally patient and thorough. She explained my mother's blood tests in simple Hindi and adjusted her medications smoothly without piling on unnecessary drugs."</p>
             <div class="review-author">
               <span class="author-avatar">R</span>
@@ -475,7 +531,7 @@
 
           <div class="review-card">
             <span class="review-treatment-tag">Dengue Fever Recovery</span>
-            <div class="review-stars">★★★★★</div>
+            <div class="review-stars" role="img" aria-label="5 out of 5 stars"><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
             <p class="review-text">"Very clean clinic and minimal waiting time. When I had high viral fever, doctor monitored my platelet counts daily on WhatsApp. Highly empathetic and knowledgeable!"</p>
             <div class="review-author">
               <span class="author-avatar">A</span>
@@ -488,7 +544,7 @@
 
           <div class="review-card">
             <span class="review-treatment-tag">Hypertension Management</span>
-            <div class="review-stars">★★★★★</div>
+            <div class="review-stars" role="img" aria-label="5 out of 5 stars"><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
             <p class="review-text">"Quick WhatsApp reply for consultation hours and excellent bedside manner. My blood pressure is now well controlled within 3 weeks with simple lifestyle tweaks."</p>
             <div class="review-author">
               <span class="author-avatar">P</span>
@@ -501,7 +557,7 @@
 
           <div class="review-card">
             <span class="review-treatment-tag">Thyroid Balance Treatment</span>
-            <div class="review-stars">★★★★★</div>
+            <div class="review-stars" role="img" aria-label="5 out of 5 stars"><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
             <p class="review-text">"Diagnosed my chronic thyroid fatigue after multiple other clinics dismissed it as stress. Her dosage guidance was spot-on and my energy levels have bounced back."</p>
             <div class="review-author">
               <span class="author-avatar">S</span>
@@ -514,7 +570,7 @@
 
           <div class="review-card">
             <span class="review-treatment-tag">Family Health &amp; Allergy</span>
-            <div class="review-stars">★★★★★</div>
+            <div class="review-stars" role="img" aria-label="5 out of 5 stars"><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
             <p class="review-text">"Our entire family consults Dr. Maanvita for any fever or seasonal illness. She listens carefully for 15+ minutes and never rushes the patient out of the room."</p>
             <div class="review-author">
               <span class="author-avatar">M</span>
@@ -527,7 +583,7 @@
 
           <div class="review-card">
             <span class="review-treatment-tag">Preventive Executive Checkup</span>
-            <div class="review-stars">★★★★★</div>
+            <div class="review-stars" role="img" aria-label="5 out of 5 stars"><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
             <p class="review-text">"Very sensible medical approach. She reviewed my annual lipid profile and gave practical diet guidance instead of prescribing statins straight away. Truly trustworthy."</p>
             <div class="review-author">
               <span class="author-avatar">V</span>
@@ -610,6 +666,73 @@
       </div>
     </section>
 
+        <!-- Section 6: Clinical Blog & Healthcare Insights -->
+    <section id="blog" class="section blog-section">
+      <div class="container">
+        <div class="section-header text-center">
+          <span class="section-tag">Clinical Blog</span>
+          <h2 class="section-title">Health Insights &amp; Prevention Guides</h2>
+          <p class="section-desc">Evidence-based advice on metabolic health, seasonal illness prevention, and family wellness.</p>
+        </div>
+
+        <div class="blog-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:28px;">
+          <article class="blog-card" style="background:#FFFFFF; border:1px solid var(--border); border-radius:16px; overflow:hidden; display:flex; flex-direction:column;">
+            <div style="padding:24px; flex:1; display:flex; flex-direction:column;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <span style="font-size:12px; font-weight:700; color:var(--brand); text-transform:uppercase;">Diabetes Care</span>
+                <span style="font-size:12px; color:var(--muted);">4 min read</span>
+              </div>
+              <h3 style="font-size:18px; font-weight:700; color:var(--ink); margin-bottom:10px;">Managing Fasting Blood Sugar in Early Stages</h3>
+              <p style="font-size:14px; color:var(--muted); line-height:1.6; flex:1; margin-bottom:16px;">Practical dietary timing, carbohydrate spacing, and physical routine guidelines for pre-diabetic and newly diagnosed patients.</p>
+              <div style="border-top:1px solid var(--border); padding-top:12px; display:flex; align-items:center; gap:10px;">
+                <span style="width:32px; height:32px; border-radius:50%; background:var(--mint); color:var(--brand); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;">MK</span>
+                <div>
+                  <strong style="display:block; font-size:13px; color:var(--ink);">Dr. Maanvita Kumari</strong>
+                  <span style="font-size:11px; color:var(--muted);">MD (General Medicine)</span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="blog-card" style="background:#FFFFFF; border:1px solid var(--border); border-radius:16px; overflow:hidden; display:flex; flex-direction:column;">
+            <div style="padding:24px; flex:1; display:flex; flex-direction:column;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <span style="font-size:12px; font-weight:700; color:var(--brand); text-transform:uppercase;">Seasonal Illness</span>
+                <span style="font-size:12px; color:var(--muted);">5 min read</span>
+              </div>
+              <h3 style="font-size:18px; font-weight:700; color:var(--ink); margin-bottom:10px;">Dengue Fever: Warning Signs You Must Not Ignore</h3>
+              <p style="font-size:14px; color:var(--muted); line-height:1.6; flex:1; margin-bottom:16px;">Recognizing the critical phase between day 3 and 7, critical hydration guidelines, and when urgent hospital admission is needed.</p>
+              <div style="border-top:1px solid var(--border); padding-top:12px; display:flex; align-items:center; gap:10px;">
+                <span style="width:32px; height:32px; border-radius:50%; background:var(--mint); color:var(--brand); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;">MK</span>
+                <div>
+                  <strong style="display:block; font-size:13px; color:var(--ink);">Dr. Maanvita Kumari</strong>
+                  <span style="font-size:11px; color:var(--muted);">MD (General Medicine)</span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="blog-card" style="background:#FFFFFF; border:1px solid var(--border); border-radius:16px; overflow:hidden; display:flex; flex-direction:column;">
+            <div style="padding:24px; flex:1; display:flex; flex-direction:column;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <span style="font-size:12px; font-weight:700; color:var(--brand); text-transform:uppercase;">Hypertension</span>
+                <span style="font-size:12px; color:var(--muted);">3 min read</span>
+              </div>
+              <h3 style="font-size:18px; font-weight:700; color:var(--ink); margin-bottom:10px;">Sodium Reduction &amp; Blood Pressure Control</h3>
+              <p style="font-size:14px; color:var(--muted); line-height:1.6; flex:1; margin-bottom:16px;">Simple culinary swaps in Indian household diets that reliably reduce systolic pressure without sacrificing flavor or nutrition.</p>
+              <div style="border-top:1px solid var(--border); padding-top:12px; display:flex; align-items:center; gap:10px;">
+                <span style="width:32px; height:32px; border-radius:50%; background:var(--mint); color:var(--brand); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;">MK</span>
+                <div>
+                  <strong style="display:block; font-size:13px; color:var(--ink);">Dr. Maanvita Kumari</strong>
+                  <span style="font-size:11px; color:var(--muted);">MD (General Medicine)</span>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
     <!-- Section 9: Contact & Enquiry Section (Balanced 2-Column Split) -->
     <section id="contact" class="section contact-section">
       <div class="container">
@@ -627,17 +750,17 @@
               <p>Speak directly with our clinic desk to check walk-in wait times or book consultation slots.</p>
               <div class="direct-actions-list">
                 <a href="tel:+919876543210" class="direct-action-btn">
-                  <div class="action-icon-circle">📞</div>
+                  <div class="action-icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
                   <div>
                     <span style="display:block; font-size:12px; color:var(--muted)">Direct Call:</span>
                     <span style="font-size:16px; color:var(--brand)">+91 98765 43210</span>
                   </div>
                 </a>
                 <a href="https://wa.me/919876543210?text=Hello%20Dr.%20Maanvita%2C%20I%20would%20like%20to%20consult%20you" class="direct-action-btn" target="_blank" rel="noopener noreferrer">
-                  <div class="action-icon-circle" style="background:#E1F9EB; color:#25D366;">💬</div>
+                  <div class="action-icon-circle" style="background:#E1F9EB; color:#25D366;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
                   <div>
                     <span style="display:block; font-size:12px; color:var(--muted)">WhatsApp Desk:</span>
-                    <span style="font-size:16px; color:#10B981">Chat on WhatsApp (Instant Reply)</span>
+                    <span style="font-size:16px; color:#047857">Chat on WhatsApp (Instant Reply)</span>
                   </div>
                 </a>
               </div>
@@ -738,20 +861,20 @@
         </div>
 
         <div class="footer-col">
-          <h4>Quick Navigation</h4>
+          <h3 class="footer-heading">Clinic Navigation</h3>
           <ul class="footer-links">
-            <li><a href="#hero">Home &amp; Doctor Overview</a></li>
-            <li><a href="#about">Verified Credentials</a></li>
-            <li><a href="#features">Why Choose Our Clinic</a></li>
+            <li><a href="#hero">Home</a></li>
+            <li><a href="#about">About Doctor</a></li>
             <li><a href="#services">Clinical Services</a></li>
-            <li><a href="#clinic">Consultation Hours &amp; Location</a></li>
-            <li><a href="#reviews">Patient Testimonials</a></li>
-            <li><a href="#contact">Direct Contact &amp; Enquiry</a></li>
+            <li><a href="#features">Doctors &amp; Roster</a></li>
+            <li><a href="#reviews">Reviews &amp; FAQ</a></li>
+            <li><a href="#blog">Clinical Blog</a></li>
+            <li><a href="#contact">Contact &amp; Appointment</a></li>
           </ul>
         </div>
 
         <div class="footer-col">
-          <h4>Clinical Specialties</h4>
+          <h3 class="footer-heading">Clinical Specialties</h3>
           <ul class="footer-links">
             <li><a href="#services">Diabetes &amp; Blood Pressure Care</a></li>
             <li><a href="#services">Fever &amp; Dengue Management</a></li>
@@ -763,22 +886,22 @@
         </div>
 
         <div class="footer-col">
-          <h4>Clinic Contact &amp; Hours</h4>
+          <h3 class="footer-heading">Clinic Contact &amp; Hours</h3>
           <div class="footer-contact-item">
-            <span>📍</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="18" height="18" class="footer-icon" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
             <span>Plot 14, Health Plaza, Central Market, Sector 18, Noida – 201301</span>
           </div>
           <div class="footer-contact-item">
-            <span>📞</span>
-            <span>Phone: +91 98765 43210</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="18" height="18" class="footer-icon" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <span>Phone: <a href="tel:+919876543210" style="color:inherit;text-decoration:none;">+91 98765 43210</a></span>
           </div>
           <div class="footer-contact-item">
-            <span>🕒</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="18" height="18" class="footer-icon" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             <span>Mon – Sat: 09:00 AM – 08:00 PM</span>
           </div>
           <div class="footer-contact-item">
-            <span>✉️</span>
-            <span>Email: contact@healthconsult.in</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="18" height="18" class="footer-icon" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            <span>Email: <a href="mailto:contact@healthconsult.in" style="color:inherit;text-decoration:none;">contact@healthconsult.in</a></span>
           </div>
         </div>
       </div>
@@ -797,23 +920,25 @@
   <!-- Section 1: Sticky Bottom Mobile CTA Bar (< 768px, 48px Touch Targets) -->
   <aside class="sticky-mobile-bar" aria-label="Quick Actions">
     <a href="tel:+919876543210" class="mobile-cta-btn cta-call" aria-label="Call Dr. Maanvita Kumari">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mobile-cta-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mobile-cta-icon" aria-hidden="true">
         <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
       </svg>
       <span>Call</span>
     </a>
-    <a href="https://wa.me/919876543210?text=Hello%20Dr.%20Maanvita%2C%20I%20would%20like%20to%20consult%20you" class="mobile-cta-btn cta-wa" aria-label="WhatsApp Dr. Maanvita Kumari">
-      <svg viewBox="0 0 24 24" fill="currentColor" class="mobile-cta-icon">
-        <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.41a8.17 8.17 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.25-.75-.67-1.26-1.5-1.41-1.75-.14-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44s-.56-1.36-.77-1.86c-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.71 4.3 3.8.6.26 1.07.41 1.43.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.1-.23-.17-.48-.29z"/>
+    <a href="https://wa.me/919876543210?text=Hello%20Dr.%20Maanvita%2C%20I%20would%20like%20to%20consult%20you" class="mobile-cta-btn cta-wa" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp Dr. Maanvita Kumari">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mobile-cta-icon" aria-hidden="true">
+        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
       </svg>
       <span>WhatsApp</span>
     </a>
-    <a href="#contact" class="mobile-cta-btn cta-form" aria-label="Book or Inquire via Form">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mobile-cta-icon">
-        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-        <polyline points="22,6 12,13 2,6"/>
+    <a href="#contact" class="mobile-cta-btn cta-form" aria-label="Book Visit with Clinic">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mobile-cta-icon" aria-hidden="true">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
       </svg>
-      <span>Enquire</span>
+      <span>Book Visit</span>
     </a>
   </aside>
 

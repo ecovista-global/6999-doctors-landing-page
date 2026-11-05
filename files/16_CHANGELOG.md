@@ -23,6 +23,25 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added (Milestone PA: Design System & Shells — MT-105)
+
+- **MT-105 (Public 7-page template shell):**
+  - Created shared React template shell components in `apps/site-template/src/`:
+    - `Header.tsx`: Clinical branding (`LogoMark`), click-to-call phone CTA, WhatsApp CTA, 7-page fixed navigation slots (`Home`, `About`, `Services`, `Doctors`, `Testimonials & FAQ`, `Blog`, `Contact & Appointment`), mobile toggle button, and responsive nav drawer with smooth 200ms cubic-bezier transition, backdrop overlay, and Escape key dismissal.
+    - `MobileCtaBar.tsx`: Sticky bottom mobile CTA bar (< 768px) with 3 touch targets (Call, WhatsApp, Book Visit) exceeding 48px touch target requirements and zero emojis.
+    - `Footer.tsx`: Structured NAP (Name, Address, Phone) matching JSON-LD schema, medical registration credentials, 7-page navigation links, clinical care specialties, DPDP Act 2023 compliance notice, and clean SVG Lucide icons.
+    - `layout.tsx`: Base public layout wrapping Header, main content with skip link (`#main-content`), Footer, and MobileCtaBar.
+  - Refactored `apps/site-template/index.html`, `src/styles.css`, and `src/main.js`:
+    - Cleaned all legacy emojis (71 instances) across hero pills, credentials, accreditations, features, services, clinic details, review stars, and footer contact lines, replacing them with Lucide SVGs.
+    - Implemented `.mobile-nav-toggle`, `.mobile-drawer`, `.drawer-backdrop`, and added `#blog` preview section and updated heading hierarchies.
+    - Fixed contrast tokens in `packages/ui` (`--color-text-muted: #475569`) and `.cta-wa` (`#047857`) ensuring WCAG 2.1 AA text contrast ≥ 4.5:1 across both Green and Teal themes.
+  - Built comprehensive automated Playwright and Axe test suite in `apps/site-template/test/template-shell.test.ts`:
+    - Verified responsive mobile drawer opens/closes, updates `aria-expanded`, and traps focus (Escape close).
+    - Verified sticky mobile CTA bar is visible on mobile (< 768px), hidden on desktop (≥ 768px), and meets 48px minimum touch targets.
+    - Executed Axe accessibility audit verifying 0 critical and 0 serious accessibility violations across both desktop (1280px) and mobile (360px) viewports.
+    - Captured automated visual evidence screenshots across 360, 768, and 1280px in both Green and Teal clinical themes.
+    - Verified strict R7 zero-emoji compliance across built production HTML.
+
 ### Added (Milestone PA: Design System & Shells — MT-104)
 
 - **MT-104 (CMS app shell):**

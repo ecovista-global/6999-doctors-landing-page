@@ -18,6 +18,58 @@ window.setTheme = function (theme) {
   }
 };
 
+// Responsive Mobile Drawer Logic (< 768px)
+window.toggleMobileDrawer = function () {
+  const drawer = document.getElementById('mobile-nav-drawer');
+  if (!drawer) return;
+  const isOpen = drawer.classList.contains('open');
+  if (isOpen) {
+    window.closeMobileDrawer();
+  } else {
+    window.openMobileDrawer();
+  }
+};
+
+window.openMobileDrawer = function () {
+  const drawer = document.getElementById('mobile-nav-drawer');
+  const backdrop = document.getElementById('drawer-backdrop');
+  const toggleBtn = document.getElementById('mobile-nav-toggle');
+  if (!drawer) return;
+
+  drawer.classList.add('open');
+  backdrop?.classList.add('open');
+  toggleBtn?.setAttribute('aria-expanded', 'true');
+  toggleBtn?.setAttribute('aria-label', 'Close navigation menu');
+  document.body.style.overflow = 'hidden';
+
+  const closeBtn = document.getElementById('drawer-close-btn');
+  closeBtn?.focus();
+};
+
+window.closeMobileDrawer = function () {
+  const drawer = document.getElementById('mobile-nav-drawer');
+  const backdrop = document.getElementById('drawer-backdrop');
+  const toggleBtn = document.getElementById('mobile-nav-toggle');
+  if (!drawer) return;
+
+  drawer.classList.remove('open');
+  backdrop?.classList.remove('open');
+  toggleBtn?.setAttribute('aria-expanded', 'false');
+  toggleBtn?.setAttribute('aria-label', 'Open navigation menu');
+  document.body.style.overflow = '';
+};
+
+// Keyboard Accessibility: Escape key closes mobile navigation drawer
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') {
+    const drawer = document.getElementById('mobile-nav-drawer');
+    if (drawer && drawer.classList.contains('open')) {
+      window.closeMobileDrawer();
+      document.getElementById('mobile-nav-toggle')?.focus();
+    }
+  }
+});
+
 // Click-to-load Google Maps facade per SD-045 (prevents slow external network requests on initial paint)
 window.loadMap = function () {
   const container = document.getElementById('map-container');

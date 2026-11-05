@@ -23,7 +23,7 @@ export const THEMES: Record<'green' | 'teal' | 'dark', ThemeColors> = {
     mint: '#E6F4F1',
     mintLight: '#F4FAF6',
     ink: '#0F172A',
-    muted: '#64748B',
+    muted: '#475569',
     border: '#E2E8F0',
     surface: '#F8FAFC',
     cardBg: '#FFFFFF',

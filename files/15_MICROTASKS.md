@@ -188,7 +188,7 @@ Every task is ≤ 2 h and executable in ONE agent session using only this task +
 
 **MT-104 CMS app shell.** tags: [F-03, F-05]. reads: 00 § R7, 18 § 1, 19 § 5. touches: `apps/platform/src/app/cms/layout.tsx`, `components/cms/Sidebar.tsx`, `Header.tsx`. steps: (1) desktop collapsible sidebar with icon+label; (2) clinic name badge; (3) top bar breadcrumbs, user avatar, and light/dark theme switcher. accept: [x] sidebar collapses smoothly [x] active nav state highlighted [x] accessible keyboard focus styles. depends: MT-102. est: 2 h.
 
-**MT-105 Public 7-page template shell.** tags: [F-01]. reads: 00 § R7, 08 § 1, 19 § 6. touches: `apps/site-template/src/app/layout.tsx`, `components/{Header,Footer,MobileCtaBar}.tsx`. steps: (1) shared header with clinical logo, phone CTA, 7-page navigation dropdown/drawer; (2) sticky bottom CTA bar (call/WhatsApp/appointment) < 768px; (3) footer with NAP + DPDP notice. accept: [ ] responsive nav drawer opens/closes [ ] sticky CTA bar active on mobile [ ] axe clean (zero violations). depends: MT-101, MT-102. est: 2 h.
+**MT-105 Public 7-page template shell.** tags: [F-01]. reads: 00 § R7, 08 § 1, 19 § 6. touches: `apps/site-template/src/app/layout.tsx`, `components/{Header,Footer,MobileCtaBar}.tsx`. steps: (1) shared header with clinical logo, phone CTA, 7-page navigation dropdown/drawer; (2) sticky bottom CTA bar (call/WhatsApp/appointment) < 768px; (3) footer with NAP + DPDP notice. accept: [x] responsive nav drawer opens/closes [x] sticky CTA bar active on mobile [x] axe clean (zero violations). depends: MT-101, MT-102. est: 2 h.
 
 ### Milestone PB — Backend and data
 
