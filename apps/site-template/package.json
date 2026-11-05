@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && tsx scripts/check-css.ts",
     "preview": "vite preview",
+    "check:css": "tsx scripts/check-css.ts",
+    "test": "node --import tsx --test test/check-css.test.ts",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },

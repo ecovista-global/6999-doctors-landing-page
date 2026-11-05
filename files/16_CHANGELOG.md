@@ -23,6 +23,14 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added (Milestone PA: Design System & Shells — MT-103)
+
+- **MT-103 (CSS pipeline & anti-FOUC verification):**
+  - Created automated verification script `apps/site-template/scripts/check-css.ts` checking built output in `dist/`, verifying the compiled stylesheet (`assets/index-*.css`) is linked in `index.html`, exists on disk, and has non-empty size (22.7 KB).
+  - Implemented headless Playwright computed style inspection verifying on initial render that body font family contains Plus Jakarta Sans/system-ui, primary buttons use clinical green (`rgb(13, 92, 70)`), and border radii adhere to design tokens (`10px`).
+  - Implemented deterministic negative-control anti-FOUC guard (`verifyFoucDetection`) asserting that unstyled HTML is caught and rejected by CI with an actionable diagnostic error.
+  - Added unit test suite `apps/site-template/test/check-css.test.ts` and wired `check:css` and Playwright dependency installation into `.github/workflows/pr.yml`.
+
 ### Added (Milestone PA: Design System & Shells — MT-102)
 
 - **MT-102 (Icon family & brand marks):**

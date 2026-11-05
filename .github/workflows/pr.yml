@@ -59,5 +59,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium || true
+
       - name: Turborepo execution (typecheck, lint, test, build)
         run: pnpm turbo run typecheck lint test build --cache-dir=.turbo
+
+      - name: Run CI gates
+        run: pnpm test:gates
+
+      - name: Verify CSS pipeline & anti-FOUC
+        run: pnpm --filter @ecodigitech/site-template run check:css
