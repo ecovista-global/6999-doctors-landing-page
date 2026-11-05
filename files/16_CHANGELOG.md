@@ -23,6 +23,26 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added (Milestone PB: Backend and Data — MT-107)
+
+- **MT-107 (RLS policies & two-clinic isolation suite):**
+  - Enabled and forced PostgreSQL Row-Level Security (`ALTER TABLE ... ENABLE ROW LEVEL SECURITY; ALTER TABLE ... FORCE ROW LEVEL SECURITY;`) across all 16 tenant tables:
+    - 8 Professional Clinic tables: `appointments`, `appointment_events`, `enquiries`, `posts`, `faqs`, `testimonials`, `clinic_settings`, `usage_counters`.
+    - 8 Core platform tenant-owned tables: `sites`, `domains`, `content_sheets`, `leads`, `lead_events`, `subscriptions`, `outbox_events`, `audit_log`.
+  - Implemented SQL migration `apps/platform/drizzle/0002_rls_policies.sql` defining tenant isolation policies:
+    - Tenant-keyed tables: `USING (NULLIF(current_setting('app.bypass_rls', true), '') = 'on' OR tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid OR (NULLIF(current_setting('app.tenant_id', true), '') IS NULL AND COALESCE(NULLIF(current_setting('app.enforce_rls', true), ''), 'off') <> 'on'))` with matching `WITH CHECK` clauses.
+    - Foreign-keyed tables (`domains`, `content_sheets` via `sites.tenant_id`, and `lead_events` via `leads.tenant_id`): scoped via subquery checks.
+  - Implemented comprehensive two-clinic isolation test suite in `apps/platform/test/rls-isolation.test.ts`:
+    - Asserted `rowsecurity = true` across all 16 tenant tables in `pg_tables`.
+    - Seeded two isolated test clinics (Clinic A and Clinic B) with appointments, enquiries, blog posts, FAQs, testimonials, settings, counters, sites, subscriptions, leads, and outbox events.
+    - Verified Clinic A reads only Clinic A records across all 13 queried tables (0 cross-reads).
+    - Verified direct cross-tenant queries for Clinic B records return EMPTY (0 rows).
+    - Verified cross-tenant mutation attempts (UPDATE/DELETE) affect 0 rows, and cross-tenant INSERT throws RLS check violation.
+    - Verified Clinic B reads only Clinic B records (0 cross-reads).
+    - Verified unauthenticated queries with enforced RLS return 0 rows.
+    - Verified operator bypass mode (`app.bypass_rls = 'on'`) can observe cross-clinic rows for background queue and backup processing.
+  - Updated `apps/platform/package.json` test runner to execute the RLS isolation test suite (22/22 tests green across platform suite).
+
 ### Added (Milestone PB: Backend and Data — MT-106)
 
 - **MT-106 (Database migrations for Professional Clinic):**
