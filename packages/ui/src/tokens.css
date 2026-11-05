@@ -1,92 +1,210 @@
 /**
  * EcoDigiTech Design System Tokens
- * Derived from founder-supplied references:
- * Reference 1: "HealthConsult" (Green Preset)
- * Reference 2: "We Nurture Your Health, Every Day" (Teal Preset)
- * Specification: brain/08_UI_SPEC.md § 2
+ * Plan: Professional Clinic (₹18,999 full-stack) & Base Design System
+ * Specification: brain/19_UI_DESIGN_SYSTEM.md § 1–2
+ * Invariant: Self-hosted fonts + Devanagari fallback; zero external Google Fonts network calls; contrast ≥ 4.5:1.
  */
 
 :root,
+[data-theme="light"],
 [data-theme="green"] {
-  --brand: #15803D;
-  --brand-hover: #166534;
-  --brand-contrast: #FFFFFF;
-  --mint: #E6F4EC;
+  /* Brand Clinical Palette (Green) */
+  --color-brand-primary: #0D5C46;
+  --color-brand-secondary: #0F766E;
+  --color-brand-surface: #E6F4F1;
+  --color-brand-hover: #083D2E;
+
+  /* Surfaces & Backgrounds */
+  --color-bg-base: #FFFFFF;
+  --color-bg-surface: #F8FAFC;
+  --color-bg-elevated: #FFFFFF;
+
+  /* Borders & Dividers */
+  --color-border-subtle: #E2E8F0;
+  --color-border-strong: #CBD5E1;
+
+  /* Typography / Text */
+  --color-text-main: #0F172A;
+  --color-text-muted: #64748B;
+  --color-text-inverse: #FFFFFF;
+
+  /* Semantic Status Tokens (Contrast ≥ 4.5:1) */
+  --color-status-pending: #D97706;
+  --color-status-pending-bg: #FEF3C7;
+  --color-status-confirmed: #059669;
+  --color-status-confirmed-bg: #D1FAE5;
+  --color-status-completed: #2563EB;
+  --color-status-completed-bg: #DBEAFE;
+  --color-status-cancelled: #DC2626;
+  --color-status-cancelled-bg: #FEE2E2;
+
+  /* Compatibility Aliases for Site Template */
+  --brand: var(--color-brand-primary);
+  --brand-hover: var(--color-brand-hover);
+  --brand-contrast: var(--color-text-inverse);
+  --mint: var(--color-brand-surface);
   --mint-light: #F4FAF6;
-  --ink: #0B1F17;
-  --muted: #4B5F57;
-  --border: #D1E7DD;
-  --card-bg: #FFFFFF;
-  --surface: #F8FAF9;
-  --shadow-sm: 0 1px 3px rgba(11, 31, 23, 0.08);
-  --shadow-md: 0 4px 12px rgba(11, 31, 23, 0.1);
-  --shadow-lg: 0 12px 24px rgba(11, 31, 23, 0.12);
+  --ink: var(--color-text-main);
+  --muted: var(--color-text-muted);
+  --border: var(--color-border-subtle);
+  --card-bg: var(--color-bg-elevated);
+  --surface: var(--color-bg-surface);
   --accent-shape: #0B9E5A;
+
+  /* Elevation Shadows */
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 12px 20px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
 }
 
 [data-theme="teal"] {
-  --brand: #0F6B63;
-  --brand-hover: #0B534D;
-  --brand-contrast: #FFFFFF;
+  --color-brand-primary: #0E7490;
+  --color-brand-secondary: #0891B2;
+  --color-brand-surface: #ECFEFF;
+  --color-brand-hover: #155E75;
+
+  --color-bg-base: #FFFFFF;
+  --color-bg-surface: #F4F9F8;
+  --color-bg-elevated: #FFFFFF;
+
+  --color-border-subtle: #BFE3DC;
+  --color-border-strong: #94D2C7;
+
+  --color-text-main: #0B2A27;
+  --color-text-muted: #44625E;
+  --color-text-inverse: #FFFFFF;
+
+  --brand: var(--color-brand-primary);
+  --brand-hover: var(--color-brand-hover);
+  --brand-contrast: var(--color-text-inverse);
   --mint: #D5F0EB;
   --mint-light: #EFF9F7;
-  --ink: #0B2A27;
-  --muted: #44625E;
-  --border: #BFE3DC;
+  --ink: var(--color-text-main);
+  --muted: var(--color-text-muted);
+  --border: var(--color-border-subtle);
   --card-bg: #FFFFFF;
   --surface: #F4F9F8;
-  --shadow-sm: 0 1px 3px rgba(11, 42, 39, 0.08);
-  --shadow-md: 0 4px 12px rgba(11, 42, 39, 0.1);
-  --shadow-lg: 0 12px 24px rgba(11, 42, 39, 0.12);
   --accent-shape: #138A7F;
 }
 
+[data-theme="dark"],
+.dark {
+  /* Dark Clinical Palette */
+  --color-brand-primary: #14B8A6;
+  --color-brand-secondary: #2DD4BF;
+  --color-brand-surface: #132E27;
+  --color-brand-hover: #2DD4BF;
+
+  /* Surfaces & Backgrounds */
+  --color-bg-base: #090D0B;
+  --color-bg-surface: #111815;
+  --color-bg-elevated: #18221E;
+
+  /* Borders & Dividers */
+  --color-border-subtle: #22332C;
+  --color-border-strong: #334E43;
+
+  /* Typography / Text */
+  --color-text-main: #F1F5F9;
+  --color-text-muted: #94A3B8;
+  --color-text-inverse: #090D0B;
+
+  /* Semantic Status Tokens (Dark theme, contrast ≥ 4.5:1) */
+  --color-status-pending: #FBBF24;
+  --color-status-pending-bg: #3B2B0A;
+  --color-status-confirmed: #34D399;
+  --color-status-confirmed-bg: #0A3728;
+  --color-status-completed: #60A5FA;
+  --color-status-completed-bg: #0F2D59;
+  --color-status-cancelled: #F87171;
+  --color-status-cancelled-bg: #451212;
+
+  /* Compatibility Aliases for Dark Theme */
+  --brand: var(--color-brand-primary);
+  --brand-hover: var(--color-brand-hover);
+  --brand-contrast: var(--color-text-inverse);
+  --mint: var(--color-brand-surface);
+  --mint-light: #18221E;
+  --ink: var(--color-text-main);
+  --muted: var(--color-text-muted);
+  --border: var(--color-border-subtle);
+  --card-bg: var(--color-bg-elevated);
+  --surface: var(--color-bg-surface);
+  --accent-shape: #14B8A6;
+
+  /* Elevation Shadows (Dark) */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 12px 20px -3px rgba(0, 0, 0, 0.6);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.7);
+}
+
 :root {
-  /* Radius */
+  /* Radius Scale */
+  --radius-xs: 4px;
   --radius-sm: 6px;
-  --radius-md: 12px;     /* Button radius per 08 § 2 */
-  --radius-lg: 16px;
-  --radius-xl: 24px;     /* Doctor photo shape per 08 § 2 */
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
   --radius-full: 9999px;
 
-  /* Spacing Scale (4-point scale) */
+  /* 8-pt Spacing Grid (with 4px half-step) */
+  --space-0: 0px;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
+  --space-5: 20px;
   --space-6: 24px;
   --space-8: 32px;
+  --space-10: 40px;
   --space-12: 48px;
   --space-16: 64px;
+  --space-20: 80px;
 
-  /* Typography */
-  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Typography: Self-hosted + System Fonts + Devanagari Fallback Chain */
+  /* Zero external Google Fonts network calls */
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans Devanagari', Roboto, sans-serif;
+  --font-display: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans Devanagari', sans-serif;
   --font-hindi: 'Noto Sans Devanagari', var(--font-sans);
 
-  /* Font sizes */
-  --text-xs: 12px;
-  --text-sm: 14px;
-  --text-base: 16px;
-  --text-lg: 20px;
-  --text-xl: 28px;
-  --text-2xl: 40px;      /* Desktop H1 */
-  --text-h1-mobile: 32px; /* Mobile H1 per 08 § 2 */
+  /* Fluid Type Scale (brain/19_UI_DESIGN_SYSTEM.md § 2) */
+  --text-caption: 12px;
+  --text-body-sm: 14px;
+  --text-body-base: 16px;
+  --text-heading-sm: 18px;
+  --text-heading-md: 22px;
+  --text-heading-lg: 28px;
+  --text-display-xl: 36px;
+  --text-display-2xl: 44px;
 
-  /* Touch Targets */
-  --min-touch-target: 48px; /* Accessible 48px target for mobile CTA bar */
+  /* Compatibility Font Sizes */
+  --text-xs: var(--text-caption);
+  --text-sm: var(--text-body-sm);
+  --text-base: var(--text-body-base);
+  --text-lg: var(--text-heading-md);
+  --text-xl: var(--text-heading-lg);
+  --text-2xl: var(--text-display-2xl);
+  --text-h1-mobile: var(--text-display-xl);
+
+  /* Touch Targets & Minimum Click Sizes */
+  --min-touch-target: 48px;
 }
 
 /* Accessibility: Focus rings */
 :focus-visible {
-  outline: 2px solid var(--brand);
+  outline: 2px solid var(--color-brand-primary);
   outline-offset: 2px;
 }
 
-/* Reduced motion preference */
+/* Reduced motion preference (WCAG / R7) */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

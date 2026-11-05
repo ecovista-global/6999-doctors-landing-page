@@ -172,3 +172,4 @@ Every page and screen must pass this checklist before shipping:
 - [ ] **NO unstyled flash (FOUC):** Computed CSS stylesheet verification passes in Playwright.
 - [ ] **Generous whitespace:** Spacing rhythm maintains breathing room between clinical sections (min 48–64 px between desktop sections).
 - [ ] **Professional typography:** High-contrast serif or geometric display headline paired with ultra-legible neutral body copy.
+

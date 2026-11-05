@@ -1,5 +1,5 @@
-/* Google Fonts: Plus Jakarta Sans & Noto Sans Devanagari */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
+/* Design System Tokens (Packages/UI) */
+@import "@ecodigitech/ui/tokens.css";
 
 /* Base Reset & Box Sizing */
 *, *::before, *::after {
@@ -9,7 +9,7 @@
 }
 
 :root {
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans Devanagari', Roboto, sans-serif;
   --font-hindi: 'Noto Sans Devanagari', var(--font-sans);
   
   /* Shared neutral scale */

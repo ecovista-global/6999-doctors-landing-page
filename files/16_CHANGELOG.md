@@ -23,6 +23,13 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added (Milestone PA: Design System & Shells — MT-101)
+
+- **MT-101 (Tokens & Typography Setup):**
+  - Configured `@ecodigitech/ui` tokens (`packages/ui/src/tokens.css` and `src/index.ts`) with clinical green/mint/teal palettes, dark mode tokens, neutral surfaces, semantic status badge tokens (`pending`, `confirmed`, `completed`, `cancelled`), 8-pt spacing grid, and fluid typography scale.
+  - Replaced external Google Fonts (`fonts.googleapis.com` / `fonts.gstatic.com`) with self-hosted / system font stack and Devanagari fallback chain (`'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans Devanagari', Roboto, sans-serif`).
+  - Added unit test suite `packages/ui/test/tokens.test.mjs` verifying light/dark token completeness, WCAG 2.1 AA text contrast ratio ≥ 4.5:1 across themes, and zero external Google Fonts network calls across all apps and packages.
+
 ### Added (Phase 0: Professional Clinic Plan — ₹18,999 Specification)
 
 - **New Plan Specification (`01_PRD.md`):**

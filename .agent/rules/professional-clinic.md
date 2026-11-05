@@ -21,3 +21,4 @@ R11 DOCS WITH CODE. Every behaviour change updates the doc it touches, appends t
 R12 DEFINITION OF DONE for a task: typecheck, lint, unit + integration tests green; E2E proof per R6 where applicable; screenshots per R8; Lighthouse mobile perf >= 90 and a11y >= 95 for the public site (LCP < 2.0 s, CLS < 0.1, JS <= 170 KB gz per page); API P99 < 300 ms; walkthrough artifact listing evidence for each acceptance checkbox.
 R13 IMMUTABLE COMMERCIAL FACTS. Basic Presence and any other existing plan facts in brain/01_PRD.md § 2 are not edited and not duplicated elsewhere. This plan is added as its own table.
 R14 HONESTY. If something cannot be verified, say so in the walkthrough. Never claim a test passed that was not run.
+

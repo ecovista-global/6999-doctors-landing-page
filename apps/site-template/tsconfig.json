@@ -3,7 +3,8 @@
   "compilerOptions": {
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "allowJs": true
   },
   "include": ["src/**/*"]
 }

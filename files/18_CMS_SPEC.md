@@ -170,3 +170,4 @@ The platform maintains an immutable, append-only `audit_log` table:
   - Clinic settings and operating hours updated.
   - Data export to CSV requested.
 - **Immutability:** PostgreSQL grants allow `INSERT` and `SELECT` only; `UPDATE` and `DELETE` trigger an immediate exception.
+
