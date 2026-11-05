@@ -23,6 +23,23 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added (Milestone PB: Backend and Data — MT-106)
+
+- **MT-106 (Database migrations for Professional Clinic):**
+  - Updated Drizzle PostgreSQL schema in `apps/platform/src/db/schema.ts` adding 8 Professional Clinic tables per `04_DATA_MODEL.md § 2`:
+    - `appointments`: Booking requests with encrypted PII (`patient_name_enc`, `patient_phone_enc`, `patient_email_enc`), service, preferred date/slot, status, consent timestamp, and idempotency key.
+    - `appointment_events`: Lifecycle audit trail tracking from/to status transitions and staff notes.
+    - `enquiries`: General clinic messages with encrypted PII (`name_enc`, `phone_enc`, `email_enc`, `message_enc`), consent, and idempotency.
+    - `posts`: Blog articles with unique tenant slug, rich-text AST, cover image, and SEO metadata.
+    - `faqs`: Categorized clinic Q&As with active toggle and display ordering.
+    - `testimonials`: Moderated patient reviews with mandatory recorded consent and star ratings.
+    - `clinic_settings`: Operating hours, slot intervals (default 30m), max daily slots (default 40), notification emails, spam threshold, and enabled pages.
+    - `usage_counters`: Quota metering for submissions (5,000 allowance), storage (1 GB R2 allowance), and monthly content updates.
+  - Added `'professional'` tier to `sites.plan` and `subscriptions.plan` enums, and added TOTP 2FA fields (`totp_secret_enc`, `totp_enabled`) to `users` table.
+  - Exported TypeScript schema types (`Appointment`, `NewAppointment`, `AppointmentEvent`, `NewAppointmentEvent`, `Enquiry`, `NewEnquiry`, `Post`, `NewPost`, `Faq`, `NewFaq`, `Testimonial`, `NewTestimonial`, `ClinicSettings`, `NewClinicSettings`, `UsageCounters`, `NewUsageCounters`).
+  - Created and applied plain SQL migration `apps/platform/drizzle/0001_professional_clinic.sql` with all core platform and professional tables, foreign keys with cascade delete, and performance indexes per `04 § 3`.
+  - Added test suite `apps/platform/test/professional-migrations.test.ts` (16/16 tests green across platform suite) verifying clean migration application, foreign key integrity, professional plan persistence, typed CRUD, and exported types.
+
 ### Added (Milestone PA: Design System & Shells — MT-105)
 
 - **MT-105 (Public 7-page template shell):**
