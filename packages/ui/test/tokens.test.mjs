@@ -126,7 +126,13 @@ describe('MT-101: Tokens & Typography Acceptance Tests', () => {
     function searchFiles(dir) {
       const entries = fs.readdirSync(dir, { withFileTypes: true });
       for (const entry of entries) {
-        if (entry.name === 'node_modules' || entry.name === 'dist' || entry.name === '.git') {
+        if (
+          entry.name === 'node_modules' ||
+          entry.name === 'dist' ||
+          entry.name === '.git' ||
+          entry.name === '.next' ||
+          entry.name === '.turbo'
+        ) {
           continue;
         }
         const fullPath = path.join(dir, entry.name);
@@ -150,3 +156,4 @@ describe('MT-101: Tokens & Typography Acceptance Tests', () => {
     searchFiles(packagesDir);
   });
 });
+

@@ -23,6 +23,15 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added (Milestone PA: Design System & Shells — MT-102)
+
+- **MT-102 (Icon family & brand marks):**
+  - Implemented Lucide SVG icon family components on 20/24px grid with stroke regular (1.75/2) and clinical brand marks (`LogoMark`, `StethoscopeMark`, `CredentialBadgeMark`) in `packages/ui/src/components/icons/*`.
+  - Exported SVG icon suite from `@ecodigitech/ui` root and dedicated subpath export `@ecodigitech/ui/icons` for clean tree-shaking.
+  - Re-exported icon family in `apps/platform/src/components/Icons.tsx` linking platform components to the unified UI package.
+  - Added unit test suite `packages/ui/test/icons.test.mjs` verifying clean SVG markup rendering, subpath export tree-shaking, and strict R7 zero-emoji enforcement across all UI components and platform icon definitions.
+  - Configured `tsconfig.typecheck.json` in `apps/platform` for isolated typechecking without interference from transient Next.js build types.
+
 ### Added (Milestone PA: Design System & Shells — MT-101)
 
 - **MT-101 (Tokens & Typography Setup):**

@@ -10,16 +10,33 @@
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
+    "./icons": {
+      "types": "./dist/components/icons/index.d.ts",
+      "import": "./dist/components/icons/index.js",
+      "default": "./dist/components/icons/index.js"
+    },
     "./tokens.css": "./src/tokens.css"
   },
   "scripts": {
     "build": "tsc",
-    "test": "node --test test/tokens.test.mjs",
+    "test": "node --test test/tokens.test.mjs test/icons.test.mjs",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@ecodigitech/config": "workspace:*",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "typescript": "^5.7.3"
   }
 }

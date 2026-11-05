@@ -144,3 +144,7 @@ export const TYPOGRAPHY = {
     display2Xl: '44px',
   },
 } as const;
+
+// Icons & Brand Marks (MT-102: Lucide SVG family & clinical brand marks)
+export * from './components/icons/index.js';
+
