@@ -23,6 +23,20 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added (Milestone PC: CMS — MT-118)
+
+- **MT-118 (CSV export & WhatsApp direct confirmation):**
+  - Implemented CSV export engine `apps/platform/src/lib/csv-export.ts` with strict RFC-4180 escaping (double-quoting values with commas, quotes, and newlines).
+  - Implemented CSV export endpoint `apps/platform/src/app/api/v1/cms/submissions/export/route.ts`:
+    - Streams decrypted submissions directly to browser with `Content-Disposition: attachment; filename="clinic-appointments-{date}.csv"`.
+    - Enforces tenant isolation under PostgreSQL RLS (benchmarked download latency < 3.0 s).
+    - Appends immutable audit entry to `audit_log` with action `submission.export_csv`.
+  - Implemented WhatsApp direct confirmation component and link generator `apps/platform/src/components/cms/WhatsAppLink.tsx`:
+    - Normalizes 10-digit Indian numbers to international `91` country code format.
+    - Generates prefilled `wa.me` URL per 18 § 3 template: `Dear {PatientName}, your appointment at {ClinicName} is Confirmed for {Date} at {Time}.`
+  - Wired `WhatsAppLink` into `SubmissionDrawer.tsx` quick actions and "Export CSV" button into `SubmissionsTable.tsx`.
+  - Added acceptance test suite `apps/platform/test/cms-export-whatsapp.test.ts` (5/5 passing) and updated test script (100/100 platform tests passing across 28 suites).
+
 ### Added (Milestone PC: CMS — MT-117)
 
 - **MT-117 (Status state machine & allowed transitions):**

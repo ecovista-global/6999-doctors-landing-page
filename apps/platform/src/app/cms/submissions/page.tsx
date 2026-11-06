@@ -108,6 +108,21 @@ function SubmissionsDashboardContent() {
     }
   };
 
+  const handleExportCsv = () => {
+    const params = new URLSearchParams();
+    if (statusFilter !== 'all') params.set('status', statusFilter);
+    if (serviceFilter !== 'all') params.set('service', serviceFilter);
+    if (startDate) params.set('startDate', startDate);
+    if (endDate) params.set('endDate', endDate);
+    const tenantId =
+      typeof window !== 'undefined'
+        ? localStorage.getItem('demo_tenant_id') || '00000000-0000-0000-0000-000000000001'
+        : '00000000-0000-0000-0000-000000000001';
+    params.set('tenantId', tenantId);
+
+    window.open(`/api/v1/cms/submissions/export?${params.toString()}`, '_blank');
+  };
+
   const handleStatusChanged = (id: string, newStatus: CmsAppointmentItem['status']) => {
     setItems((prev) =>
       prev.map((it) => (it.id === id ? { ...it, status: newStatus } : it))
@@ -157,6 +172,7 @@ function SubmissionsDashboardContent() {
         hasMore={hasMore}
         onLoadMore={handleLoadMore}
         onRefresh={handleRefresh}
+        onExportCsv={handleExportCsv}
         onSelectSubmission={(item) => setSelectedSubmission(item)}
         onQuickStatusChange={handleQuickStatusChange}
       />

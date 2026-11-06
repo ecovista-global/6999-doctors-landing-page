@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { CmsAppointmentItem } from '@/lib/cms-submissions';
 import { StatusBadge } from './SubmissionsTable';
 import { StatusTransitionBar } from './StatusTransitionBar';
+import { WhatsAppLink } from './WhatsAppLink';
 import { AppointmentStatus } from '@/lib/appointment-state-machine';
 import {
   XIcon,
@@ -235,6 +236,13 @@ export function SubmissionDrawer({
               <PhoneIcon size={13} />
               Call Patient
             </a>
+
+            <WhatsAppLink
+              phone={submission.patientPhone}
+              patientName={submission.patientName}
+              date={submission.preferredDate}
+              timeSlot={submission.preferredTimeSlot}
+            />
 
             <button
               type="button"

@@ -14,6 +14,7 @@ import {
   AlertCircleIcon,
   XCircleIcon,
   ActivityIcon,
+  DownloadIcon,
 } from '@/components/Icons';
 
 export interface SubmissionsTableProps {
@@ -34,6 +35,7 @@ export interface SubmissionsTableProps {
   hasMore: boolean;
   onLoadMore: () => void;
   onRefresh: () => void;
+  onExportCsv?: () => void;
   onSelectSubmission?: (item: CmsAppointmentItem) => void;
   onQuickStatusChange?: (id: string, newStatus: CmsAppointmentItem['status']) => void;
   servicesList?: string[];
@@ -148,6 +150,7 @@ export function SubmissionsTable({
   hasMore,
   onLoadMore,
   onRefresh,
+  onExportCsv,
   onSelectSubmission,
   onQuickStatusChange,
   servicesList = [
@@ -497,6 +500,30 @@ export function SubmissionsTable({
             >
               <RefreshCwIcon size={14} />
             </button>
+            {onExportCsv && (
+              <button
+                type="button"
+                data-testid="btn-export-csv"
+                aria-label="Export submissions to CSV"
+                onClick={onExportCsv}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid var(--color-border-subtle, #CBD5E1)',
+                  background: 'var(--color-bg-base, #FFFFFF)',
+                  color: 'var(--color-brand-primary, #0D5C46)',
+                  fontWeight: 600,
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                }}
+              >
+                <DownloadIcon size={14} />
+                <span>Export</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
