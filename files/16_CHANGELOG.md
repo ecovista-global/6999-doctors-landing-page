@@ -23,6 +23,27 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added (Milestone PB: Backend and Data — MT-109)
+
+- **MT-109 (Public appointments API & idempotency):**
+  - Implemented public appointment booking endpoint `POST /api/v1/public/appointments` in `apps/platform/src/app/api/v1/public/appointments/route.ts` with CORS preflight `OPTIONS` and standard RFC-7807 problem details error mapping.
+  - Implemented Zod input validation schema `appointmentSubmissionSchema` in `apps/platform/src/lib/appointment-schemas.ts` enforcing Indian phone format (`+91`), clinic identifier resolution (`tenantId` or `clinicSlug`), ISO date format (`YYYY-MM-DD`), and mandatory DPDP Act 2023 patient consent (`consent: true`).
+  - Implemented reusable sliding window IP rate limiter `checkRateLimit` in `apps/platform/src/lib/rate-limit.ts` enforcing 5 req/min/IP with `Retry-After`, `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `X-RateLimit-Reset` headers (HTTP 429 `E-1501`).
+  - Implemented reusable idempotency management engine in `apps/platform/src/lib/idempotency.ts` (`processIdempotency`, `saveIdempotencyResponse`, `clearIdempotency`) per SD-001:
+    - Enforces mandatory `Idempotency-Key` header on mutating requests (HTTP 400 `E-1304`).
+    - Exact replay with identical payload returns cached response with `X-Idempotent-Replay: true` (HTTP 202).
+    - Idempotency key reused with different payload returns conflict error (HTTP 422 `E-1302`).
+    - Concurrent duplicate requests return in-flight conflict with `Retry-After: 2` (HTTP 409 `E-1303`).
+  - Transactional database execution in PostgreSQL:
+    - Sets tenant isolation context (`set_config('app.tenant_id', ...)`).
+    - Encrypts patient PII (`patient_name_enc`, `patient_phone_enc`, `patient_email_enc`) via AES-256-GCM (`encrypt()` from `@/lib/crypto`).
+    - Hashes client IP using SHA-256 (`ip_hash`) for DPDP compliance.
+    - Inserts appointment row into `appointments` with DB-level idempotency backstop.
+    - Atomically creates transactional outbox event `appointment.created` in `outbox_events` for asynchronous notification dispatch.
+    - Logs initial audit lifecycle entry in `appointment_events`.
+  - Added test suite `apps/platform/test/public-appointments.test.ts` (7/7 tests passing) asserting 202 Accepted, replay header, conflict detection, validation failures, rate limiting, and CORS headers.
+  - Added `test/public-appointments.test.ts` to `apps/platform/package.json` test runner (36/36 tests green across platform suite).
+
 ### Added (Milestone PB: Backend and Data — MT-108)
 
 - **MT-108 (PII encryption & decryption engine):**
