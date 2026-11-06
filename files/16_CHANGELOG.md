@@ -23,6 +23,24 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added (Milestone PB: Backend and Data — MT-110)
+
+- **MT-110 (Public enquiries API & availability endpoint):**
+  - Implemented public enquiry submission endpoint `POST /api/v1/public/enquiries` in `apps/platform/src/app/api/v1/public/enquiries/route.ts` with CORS preflight `OPTIONS` and RFC-7807 problem details error mapping.
+  - Implemented Zod schema validation in `apps/platform/src/lib/enquiry-schemas.ts` enforcing patient name, Indian mobile format (`+91`), email, service query, message text, and mandatory DPDP Act 2023 patient consent (`consent: true`).
+  - Integrated sliding window rate limiter (5 req/min/IP) and idempotency engine (SD-001) with deduplication replay headers (`X-Idempotent-Replay: true`).
+  - Executed PostgreSQL transactional insert:
+    - Scoped transaction to tenant via `set_config('app.tenant_id', ...)` for RLS compliance.
+    - Encrypted contact PII (`name_enc`, `phone_enc`, `email_enc`, `message_enc`) via AES-256-GCM.
+    - Recorded patient consent timestamp `consent_at = now()`.
+    - Atomically generated transactional outbox event `enquiry.created` in `outbox_events` table.
+  - Implemented public availability check endpoint `GET /api/v1/public/availability` in `apps/platform/src/app/api/v1/public/availability/route.ts`:
+    - Rate limited at 60 req/min/IP per 07 § 1 with HTTP 429 `E-1501`.
+    - Dynamically evaluates tenant's `clinic_settings` (`operating_hours`, `slot_interval_minutes`, `max_daily_slots`).
+    - Computes weekday operating status (`isClosed`), calculates slot windows, and queries active bookings from `appointments` table to mark reserved vs available slots.
+  - Added test suite `apps/platform/test/public-enquiries-availability.test.ts` (9/9 tests passing).
+  - Added test file to `apps/platform/package.json` test runner (45/45 tests passing across 8 suites).
+
 ### Added (Milestone PB: Backend and Data — MT-109)
 
 - **MT-109 (Public appointments API & idempotency):**

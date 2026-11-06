@@ -40,3 +40,4 @@ export const appointmentSubmissionSchema = z.object({
 });
 
 export type AppointmentSubmissionInput = z.infer<typeof appointmentSubmissionSchema>;
+
