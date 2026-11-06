@@ -23,6 +23,23 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added (Milestone PC: CMS — MT-116)
+
+- **MT-116 (Submission detail drawer & staff notes):**
+  - Implemented CMS Submission Detail & Update API `apps/platform/src/app/api/v1/cms/submissions/appointments/[id]/route.ts`:
+    - GET returns decrypted patient PII, DPDP consent timestamp, and Turnstile score.
+    - Records immutable audit trail event `submission.view` via `recordAuditEvent`.
+    - PATCH updates internal staff notes and persists directly to PostgreSQL `appointments.notes`.
+    - Records immutable audit trail event `submission.note_update` with actor attribution.
+    - Strictly enforces tenant boundaries under RLS (returns 404 on cross-tenant attempts).
+  - Implemented sliding detail drawer component `apps/platform/src/components/cms/SubmissionDrawer.tsx`:
+    - Responsive sliding modal drawer with ESC key trap and focus management.
+    - Patient contact details card with quick action triggers (Call patient, Copy summary).
+    - DPDP compliance and Turnstile bot verification card.
+    - Internal staff notes textarea with live save feedback.
+  - Wired `SubmissionDrawer` into `SubmissionsDashboardContent` in `apps/platform/src/app/cms/submissions/page.tsx`.
+  - Added acceptance test suite `apps/platform/test/cms-detail-drawer.test.ts` (3/3 passing) and updated test script (89/89 platform tests passing).
+
 ### Added (Milestone PC: CMS — MT-115)
 
 - **MT-115 (Submissions dashboard: Today OPD & filters):**

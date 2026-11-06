@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { SubmissionsTable } from '@/components/cms/SubmissionsTable';
+import { SubmissionDrawer } from '@/components/cms/SubmissionDrawer';
 import { CmsAppointmentItem, FetchCmsAppointmentsResult } from '@/lib/cms-submissions';
 
 function SubmissionsDashboardContent() {
@@ -98,6 +99,15 @@ function SubmissionsDashboardContent() {
     loadSubmissions(false, null);
   };
 
+  const handleNoteSaved = (id: string, newNotes: string) => {
+    setItems((prev) =>
+      prev.map((it) => (it.id === id ? { ...it, notes: newNotes } : it))
+    );
+    if (selectedSubmission && selectedSubmission.id === id) {
+      setSelectedSubmission({ ...selectedSubmission, notes: newNotes });
+    }
+  };
+
   return (
     <div>
       <SubmissionsTable
@@ -119,6 +129,13 @@ function SubmissionsDashboardContent() {
         onLoadMore={handleLoadMore}
         onRefresh={handleRefresh}
         onSelectSubmission={(item) => setSelectedSubmission(item)}
+      />
+
+      <SubmissionDrawer
+        submission={selectedSubmission}
+        isOpen={!!selectedSubmission}
+        onClose={() => setSelectedSubmission(null)}
+        onNoteSaved={handleNoteSaved}
       />
     </div>
   );
