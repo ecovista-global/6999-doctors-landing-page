@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "node --import tsx --test test/db-typed-query.test.ts test/gateway.test.ts test/cms-shell.test.ts test/professional-migrations.test.ts test/rls-isolation.test.ts",
+    "test": "node --import tsx --test test/db-typed-query.test.ts test/gateway.test.ts test/cms-shell.test.ts test/professional-migrations.test.ts test/rls-isolation.test.ts test/crypto.test.ts",
     "typecheck": "tsc -p tsconfig.typecheck.json --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/db/migrate.ts"

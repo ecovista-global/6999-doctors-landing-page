@@ -23,6 +23,20 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added (Milestone PB: Backend and Data — MT-108)
+
+- **MT-108 (PII encryption & decryption engine):**
+  - Implemented application-level AES-256-GCM encryption/decryption engine in `apps/platform/src/lib/crypto.ts` for patient PII fields per SD-050, 04 § 8, and Rule R9.
+  - Implemented self-describing binary envelope `[version 0x01][keyIdLen][keyId][12-byte random IV][16-byte GCM tag][ciphertext]` with Additional Authenticated Data (AAD) binding metadata to authentication tag.
+  - Added multi-key ring management supporting zero-downtime key rotation (`registerKey`, `setActiveKeyId`, `getActiveKeyId`, `reencrypt`). Older records decrypt seamlessly via key ID in envelope header.
+  - Implemented deep PII scrubber for system loggers (`scrubPII`, `scrubString`, `createScrubbedLogger`):
+    - Redacts known sensitive fields (`patientName`, `patientPhone`, `patientEmail`, `notes`, `totpSecret`, etc.) to `[REDACTED_PII]`.
+    - Redacts binary bytea buffers to `[REDACTED_BINARY]` / `[ENCRYPTED_BYTEA]`.
+    - Harvests object-level patient identifiers and masks them across freeform log text.
+    - Pattern masks Indian mobile numbers (`[REDACTED_PHONE]`), emails (`[REDACTED_EMAIL]`), and Aadhaar formats (`[REDACTED_ID]`).
+  - Added test suite `apps/platform/test/crypto.test.ts` (7/7 tests passing) asserting roundtrip fidelity, 12-byte random IV uniqueness, tampering rejection, key rotation / re-encryption, and zero plaintext PII leaks in log sinks.
+  - Added `test/crypto.test.ts` to `apps/platform/package.json` test runner (29/29 tests green across platform suite).
+
 ### Added (Milestone PB: Backend and Data — MT-107)
 
 - **MT-107 (RLS policies & two-clinic isolation suite):**
