@@ -23,6 +23,30 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added (Milestone PC: CMS — MT-120)
+
+- **MT-120 (Page slots manager & 7-page limit enforcer):**
+  - Updated content schema in `packages/content-schema/src/schema.ts` and `src/index.ts`:
+    - Defined `ALLOWED_PAGE_SLOTS`: `['home', 'about', 'services', 'doctors', 'testimonials-faq', 'blog', 'contact']`.
+    - Added `PAGE_SLOTS_METADATA` with human-readable titles, paths, descriptions, and core-page indicators.
+    - Implemented `ProfessionalPageSlotsSchema` enforcing unique slot names and maximum length of 7.
+    - Implemented `validatePageSlots()` utility function rejecting invalid slot names, duplicates, and over-quota submissions.
+    - Added `'professional'` tier to `PlanEnum` and wired `enabledPages` into `ContentSheetSchema`.
+  - Implemented Page Slots Manager API `apps/platform/src/app/api/v1/cms/pages/route.ts`:
+    - `GET` returns currently enabled page slots, 7-page plan cap, and full slots metadata.
+    - `PUT` enforces the strict 7-page limit (Rule R1 / 18 § 2): rejects any request with > 7 pages returning HTTP 422 with registered code `E-1601`.
+    - `PUT` validates slot names: returns HTTP 422 with registered code `E-1101` on invalid or unauthorized slots.
+    - Transactionally upserts `enabled_pages` into `clinic_settings` and synchronizes `content_sheets` draft data under RLS tenant isolation.
+    - Emits immutable audit log entry `pages.update` into `audit_log`.
+  - Implemented CMS Page Slots UI in `apps/platform/src/app/cms/pages/page.tsx`:
+    - Visual quota counter badge showing current enabled count out of 7 (e.g. `7 / 7 Pages Allocated`).
+    - Slot toggle cards with status pill (`Active` / `Disabled`), description, URL path preview, and lock indicator for core pages.
+    - Dynamic alert notification when plan capacity limit of 7 pages is reached.
+    - Save action bar with toast confirmation and real-time validation.
+  - Added acceptance test suite `apps/platform/test/cms-page-slots.test.ts` (6/6 passing) covering schema validation, 8th page rejection with `E-1601`, invalid slot rejection with `E-1101`, and transactional draft synchronization.
+  - Added test run configuration in `apps/platform/package.json` bringing total platform test count to 111/111 passing across 32 suites.
+
+
 ### Added (Milestone PC: CMS — MT-119)
 
 - **MT-119 (Clinic settings CMS: Hours, slots & notifications):**
