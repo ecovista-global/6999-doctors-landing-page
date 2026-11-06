@@ -23,6 +23,16 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added (Milestone PB: Backend and Data — MT-114)
+
+- **MT-114 (Audit trail engine):**
+  - Added PostgreSQL migration `apps/platform/drizzle/0003_audit_immutability.sql` implementing append-only database triggers (`enforce_audit_log_immutable`) banning `UPDATE` and `DELETE` queries on `audit_log` per 04 § 2 and SD-048.
+  - Implemented immutable audit logging engine `apps/platform/src/lib/audit.ts` (`recordAuditEvent`, `getAuditTrail`):
+    - Automatically captures actor ID, action, target resource, diff JSON, SHA-256 IP hash, and user agent.
+    - Runs all details payloads through `scrubPII` to ensure that patient names, phone numbers, and emails are never leaked into audit records.
+  - Added test suite `apps/platform/test/audit.test.ts` (4/4 tests passing) verifying audit insertion, immutability trigger exceptions on UPDATE/DELETE, and PII scrubbing.
+  - Added test file to `apps/platform/package.json` test runner (79/79 tests passing across 12 suites).
+
 ### Added (Milestone PB: Backend and Data — MT-113)
 
 - **MT-113 (TOTP 2FA auth & session management):**

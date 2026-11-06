@@ -208,7 +208,7 @@ Every task is ≤ 2 h and executable in ONE agent session using only this task +
 
 **MT-113 TOTP 2FA auth & session management.** tags: [F-03]. reads: 10 § SD-056, 07 § 1. touches: `apps/platform/src/app/api/v1/auth/totp/*`, `src/lib/auth.ts`. steps: (1) RFC-6238 TOTP setup and QR code generation; (2) TOTP verification challenge on login; (3) brute-force lockout (5 attempts / 15 min); (4) 8 backup recovery codes. accept: [x] setup generates valid secret [x] valid code unlocks session [x] invalid code rejected E-1605. depends: MT-106. est: 2 h.
 
-**MT-114 Audit trail engine.** tags: [F-06]. reads: 04 § 2, 18 § 7. touches: `apps/platform/src/lib/audit.ts`, `test/audit.test.ts`. steps: (1) append-only audit logger capturing actor, action, resource, diff JSON, IP hash, user agent; (2) PostgreSQL triggers banning UPDATE/DELETE. accept: [ ] audit log entry recorded on mutations [ ] UPDATE/DELETE raises SQL exception [ ] no PII in audit bodies. depends: MT-106. est: 1.5 h.
+**MT-114 Audit trail engine.** tags: [F-06]. reads: 04 § 2, 18 § 7. touches: `apps/platform/src/lib/audit.ts`, `test/audit.test.ts`. steps: (1) append-only audit logger capturing actor, action, resource, diff JSON, IP hash, user agent; (2) PostgreSQL triggers banning UPDATE/DELETE. accept: [x] audit log entry recorded on mutations [x] UPDATE/DELETE raises SQL exception [x] no PII in audit bodies. depends: MT-106. est: 1.5 h.
 
 ### Milestone PC — CMS
 

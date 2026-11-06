@@ -235,9 +235,12 @@ describe('MT-107: PostgreSQL Row-Level Security (RLS) & Two-Clinic Isolation Sui
   after(async () => {
     const client = await pool.connect();
     try {
+      await client.query('BEGIN');
       await client.query("SELECT set_config('app.bypass_rls', 'on', true)");
+      await client.query("SELECT set_config('app.bypass_audit_immutability', 'on', true)");
       await client.query('DELETE FROM audit_log WHERE tenant_id IN ($1, $2)', [tenantAId, tenantBId]);
       await client.query('DELETE FROM tenants WHERE id IN ($1, $2)', [tenantAId, tenantBId]);
+      await client.query('COMMIT');
     } finally {
       client.release();
       await pool.end();
