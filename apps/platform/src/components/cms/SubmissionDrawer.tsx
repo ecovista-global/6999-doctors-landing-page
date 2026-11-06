@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { CmsAppointmentItem } from '@/lib/cms-submissions';
 import { StatusBadge } from './SubmissionsTable';
+import { StatusTransitionBar } from './StatusTransitionBar';
+import { AppointmentStatus } from '@/lib/appointment-state-machine';
 import {
   XIcon,
   PhoneIcon,
@@ -358,6 +360,14 @@ export function SubmissionDrawer({
               )}
             </div>
           </div>
+
+          {/* Workflow Status State Machine Bar (MT-117) */}
+          <StatusTransitionBar
+            appointmentId={submission.id}
+            tenantId={submission.tenantId}
+            currentStatus={submission.status}
+            onStatusChanged={(newStatus) => onStatusChanged?.(submission.id, newStatus)}
+          />
 
           {/* Internal Staff Notes Area with Auto-Save */}
           <div

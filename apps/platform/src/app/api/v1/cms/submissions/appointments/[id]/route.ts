@@ -4,6 +4,7 @@ import { decrypt } from '@/lib/crypto';
 import { recordAuditEvent } from '@/lib/audit';
 import { AppError } from '@/lib/errors';
 import { withGateway } from '@/lib/gateway';
+import { assertValidStatusTransition } from '@/lib/appointment-state-machine';
 
 interface RouteContext {
   params?: Promise<{ id: string }>;
@@ -205,6 +206,7 @@ export const PATCH = withGateway({ auth: 'none' }, async (req: NextRequest, ctx)
 
     let statusUpdated = false;
     if (status !== undefined && status !== current.status) {
+      assertValidStatusTransition(current.status, status);
       updates.push(`status = $${pIdx}`);
       values.push(status);
       pIdx++;
@@ -241,6 +243,8 @@ export const PATCH = withGateway({ auth: 'none' }, async (req: NextRequest, ctx)
       target: `appointment:${id}`,
       details: {
         appointmentId: id,
+        fromStatus: current.status,
+        toStatus: status || current.status,
         previousStatus: current.status,
         newStatus: status || current.status,
         noteUpdated,

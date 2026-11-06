@@ -108,6 +108,35 @@ function SubmissionsDashboardContent() {
     }
   };
 
+  const handleStatusChanged = (id: string, newStatus: CmsAppointmentItem['status']) => {
+    setItems((prev) =>
+      prev.map((it) => (it.id === id ? { ...it, status: newStatus } : it))
+    );
+    if (selectedSubmission && selectedSubmission.id === id) {
+      setSelectedSubmission({ ...selectedSubmission, status: newStatus });
+    }
+  };
+
+  const handleQuickStatusChange = async (id: string, newStatus: CmsAppointmentItem['status']) => {
+    try {
+      const item = items.find((it) => it.id === id);
+      const tenantId = item ? item.tenantId : '00000000-0000-0000-0000-000000000001';
+      const res = await fetch(`/api/v1/cms/submissions/appointments/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-tenant-id': tenantId,
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (res.ok) {
+        handleStatusChanged(id, newStatus);
+      }
+    } catch (err) {
+      console.error('Failed quick status change:', err);
+    }
+  };
+
   return (
     <div>
       <SubmissionsTable
@@ -129,6 +158,7 @@ function SubmissionsDashboardContent() {
         onLoadMore={handleLoadMore}
         onRefresh={handleRefresh}
         onSelectSubmission={(item) => setSelectedSubmission(item)}
+        onQuickStatusChange={handleQuickStatusChange}
       />
 
       <SubmissionDrawer
@@ -136,6 +166,7 @@ function SubmissionsDashboardContent() {
         isOpen={!!selectedSubmission}
         onClose={() => setSelectedSubmission(null)}
         onNoteSaved={handleNoteSaved}
+        onStatusChanged={handleStatusChanged}
       />
     </div>
   );

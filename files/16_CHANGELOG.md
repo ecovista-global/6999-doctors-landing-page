@@ -23,6 +23,23 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added (Milestone PC: CMS — MT-117)
+
+- **MT-117 (Status state machine & allowed transitions):**
+  - Implemented status state machine validator `apps/platform/src/lib/appointment-state-machine.ts`:
+    - Enforces permitted transitions: `pending -> confirmed | cancelled`, `confirmed -> completed | cancelled`, `cancelled -> pending`.
+    - Declares `completed` as a terminal state with zero outgoing transitions.
+    - Throws RFC-7807 problem details HTTP 422 with registered error code `E-1603` on illegal state transitions.
+  - Updated CMS Appointment Route `apps/platform/src/app/api/v1/cms/submissions/appointments/[id]/route.ts`:
+    - Enforces `assertValidStatusTransition` on status update requests.
+    - Inserts atomic history row into `appointment_events` (`from_status`, `to_status`, `actor_id`, `note`).
+    - Appends immutable audit entry to `audit_log` with action `appointment.status_change`.
+  - Implemented interactive component `apps/platform/src/components/cms/StatusTransitionBar.tsx`:
+    - Renders stage-dependent action buttons (`Confirm Appointment`, `Cancel Slot`, `Mark Completed`, `Reopen to Pending`).
+    - Integrated cancellation reason prompt and error feedback banner.
+  - Wired `StatusTransitionBar` into `SubmissionDrawer.tsx` and quick status change into `SubmissionsTable.tsx`.
+  - Added test suite `apps/platform/test/cms-status-machine.test.ts` (6/6 tests passing) and updated platform test runner (95/95 platform tests passing).
+
 ### Added (Milestone PC: CMS — MT-116)
 
 - **MT-116 (Submission detail drawer & staff notes):**
