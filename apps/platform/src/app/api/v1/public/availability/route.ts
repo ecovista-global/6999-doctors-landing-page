@@ -194,7 +194,13 @@ export const GET = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) =
     const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const dayOfWeek = dayNames[targetDate.getUTCDay()] || 'monday';
 
-    const dayHours = operatingHours[dayOfWeek] || 'closed';
+    let rawDayHours: any = operatingHours[dayOfWeek] || 'closed';
+    let dayHours = 'closed';
+    if (typeof rawDayHours === 'object' && rawDayHours !== null) {
+      dayHours = rawDayHours.closed ? 'closed' : `${rawDayHours.open || '09:00'}-${rawDayHours.close || '18:00'}`;
+    } else if (typeof rawDayHours === 'string') {
+      dayHours = rawDayHours;
+    }
     const isClosed = dayHours.toLowerCase() === 'closed';
 
     if (isClosed) {

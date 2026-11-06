@@ -23,6 +23,23 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added (Milestone PC: CMS — MT-119)
+
+- **MT-119 (Clinic settings CMS: Hours, slots & notifications):**
+  - Implemented Clinic Settings API `apps/platform/src/app/api/v1/cms/settings/route.ts`:
+    - GET returns clinic operating hours, slot interval, max daily slots, notification emails, and spam threshold.
+    - PUT validates and saves operating hours, slot interval (15/30/45/60 min), max daily slots, verified notification emails (max 3), and spam threshold (1-10).
+    - Throws HTTP 422 with registered error code `E-1101` on invalid email format, email overflow (> 3), or unsupported interval.
+    - Appends immutable audit log entry `settings.update` on mutations.
+  - Implemented interactive component `apps/platform/src/components/cms/OperatingHoursEditor.tsx`:
+    - Full Monday–Sunday schedule editor with open/close time pickers and "Closed" toggles.
+    - Slot interval duration dropdown (15, 30, 45, 60 minutes).
+    - Alert email recipients manager with email validation and removal buttons.
+    - Bot & spam protection sensitivity range slider.
+  - Implemented CMS Settings page `apps/platform/src/app/cms/settings/page.tsx`.
+  - Updated public availability endpoint `apps/platform/src/app/api/v1/public/availability/route.ts` to seamlessly handle structured operating hours objects and reflect changes in real time.
+  - Added acceptance test suite `apps/platform/test/cms-settings.test.ts` (5/5 passing) and updated test script (105/105 platform tests passing across 29 suites).
+
 ### Added (Milestone PC: CMS — MT-118)
 
 - **MT-118 (CSV export & WhatsApp direct confirmation):**
