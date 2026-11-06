@@ -68,8 +68,10 @@ describe('MT-112: Outbox Notifier Job with Resend Acceptance Suite', () => {
 
     const sent = getSentEmails();
     assert.strictEqual(sent.length, 1);
-    assert.strictEqual(sent[0].subject, 'Test Notification');
-    assert.deepStrictEqual(sent[0].to, [notificationEmail]);
+    const firstSent = sent[0];
+    assert.ok(firstSent);
+    assert.strictEqual(firstSent.subject, 'Test Notification');
+    assert.deepStrictEqual(firstSent.to, [notificationEmail]);
   });
 
   it('Acceptance: processOutboxEvents drains appointment.created events and sends email to clinic settings recipients', async () => {

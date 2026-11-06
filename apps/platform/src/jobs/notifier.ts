@@ -42,7 +42,7 @@ export async function processOutboxEvents(batchSize: number = 20): Promise<Proce
       return result;
     }
 
-    result.totalProcessed = pendingRes.rowCount;
+    result.totalProcessed = pendingRes.rowCount || 0;
 
     for (const event of pendingRes.rows) {
       try {

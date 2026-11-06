@@ -15,12 +15,12 @@ export interface TurnstileVerifyResponse {
 }
 
 export interface SpamProtectionParams {
-  honeypot?: string | null;
-  formRenderedAt?: number | string | null;
-  turnstileToken?: string | null;
-  clientIp?: string;
-  minDurationMs?: number;
-  skipTurnstileInDev?: boolean;
+  honeypot?: string | null | undefined;
+  formRenderedAt?: number | string | null | undefined;
+  turnstileToken?: string | null | undefined;
+  clientIp?: string | undefined;
+  minDurationMs?: number | undefined;
+  skipTurnstileInDev?: boolean | undefined;
 }
 
 /**

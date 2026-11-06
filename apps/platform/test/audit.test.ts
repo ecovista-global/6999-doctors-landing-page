@@ -59,12 +59,14 @@ describe('MT-114: Audit Trail Engine & Immutability Acceptance Suite', () => {
 
     const logs = await getAuditTrail({ tenantId: testTenantId, target });
     assert.strictEqual(logs.length, 1);
-    assert.strictEqual(logs[0].actorId, 'user_doctor_123');
-    assert.strictEqual(logs[0].action, 'appointment.status_change');
-    assert.strictEqual(logs[0].target, target);
-    assert.strictEqual(logs[0].details?.fromStatus, 'pending');
-    assert.strictEqual(logs[0].details?.toStatus, 'confirmed');
-    assert.ok(logs[0].details?.ipHash, 'IP must be recorded as SHA-256 hash');
+    const firstLog = logs[0];
+    assert.ok(firstLog);
+    assert.strictEqual(firstLog.actorId, 'user_doctor_123');
+    assert.strictEqual(firstLog.action, 'appointment.status_change');
+    assert.strictEqual(firstLog.target, target);
+    assert.strictEqual(firstLog.details?.fromStatus, 'pending');
+    assert.strictEqual(firstLog.details?.toStatus, 'confirmed');
+    assert.ok(firstLog.details?.ipHash, 'IP must be recorded as SHA-256 hash');
   });
 
   it('Acceptance: Immutability trigger raises SQL exception on UPDATE attempt', async () => {

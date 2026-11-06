@@ -212,7 +212,7 @@ Every task is ≤ 2 h and executable in ONE agent session using only this task +
 
 ### Milestone PC — CMS
 
-**MT-115 Submissions dashboard (Today OPD & filters).** tags: [F-05]. reads: 18 § 3, 19 § 4. touches: `apps/platform/src/app/cms/submissions/page.tsx`, `components/cms/SubmissionsTable.tsx`. steps: (1) submissions table with status badges; (2) Today's OPD tab (`preferred_date = CURRENT_DATE`); (3) date range and service filters; (4) keyset cursor pagination. accept: [ ] seeded 10k rows paginates < 300 ms P99 [ ] Today tab filters correctly [ ] search filters records. depends: MT-104, MT-109. est: 2 h.
+**MT-115 Submissions dashboard (Today OPD & filters).** tags: [F-05]. reads: 18 § 3, 19 § 4. touches: `apps/platform/src/app/cms/submissions/page.tsx`, `components/cms/SubmissionsTable.tsx`. steps: (1) submissions table with status badges; (2) Today's OPD tab (`preferred_date = CURRENT_DATE`); (3) date range and service filters; (4) keyset cursor pagination. accept: [x] seeded 10k rows paginates < 300 ms P99 [x] Today tab filters correctly [x] search filters records. depends: MT-104, MT-109. est: 2 h.
 
 **MT-116 Submission detail drawer & staff notes.** tags: [F-05]. reads: 18 § 3. touches: `apps/platform/src/components/cms/SubmissionDrawer.tsx`. steps: (1) sliding detail drawer showing decrypted patient contact info, consent details, Turnstile score; (2) internal staff notes textarea with auto-save. accept: [ ] drawer opens smoothly [ ] staff note persists to DB [ ] access logged in audit trail. depends: MT-115. est: 1.5 h.
 

@@ -23,6 +23,24 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added (Milestone PC: CMS — MT-115)
+
+- **MT-115 (Submissions dashboard: Today OPD & filters):**
+  - Implemented CMS Submissions Data Engine `apps/platform/src/lib/cms-submissions.ts`:
+    - Keyset cursor pagination `(created_at, id) < ($cursorCreatedAt, $cursorId)` running in < 30 ms (benchmark asserting P99 < 300 ms).
+    - Today's OPD Board filter `preferred_date = CURRENT_DATE`.
+    - Status filtering (`pending`, `confirmed`, `completed`, `cancelled`) and service filtering.
+    - Decrypts patient contact PII (`patient_name_enc`, `patient_phone_enc`, `patient_email_enc`) on-demand for authorized clinical staff.
+    - Search matching across patient name, phone number, and service.
+  - Implemented CMS Submissions API Route `apps/platform/src/app/api/v1/cms/submissions/appointments/route.ts` with tenant isolation and gateway tracing.
+  - Implemented responsive, accessible Submissions Table component `apps/platform/src/components/cms/SubmissionsTable.tsx`:
+    - Status badges (pending amber, confirmed teal, completed green, cancelled gray).
+    - Tab switch between Today's OPD Board and All Submissions.
+    - Search input, status select, service select, and date range filters.
+    - Keyset cursor pagination controls ("Load More (Next Page)").
+  - Implemented CMS Submissions Page `apps/platform/src/app/cms/submissions/page.tsx` within CMS Shell.
+  - Added test suite `apps/platform/test/cms-submissions.test.ts` (7/7 tests passing) and updated test script (86/86 platform tests passing).
+
 ### Added (Milestone PB: Backend and Data — MT-114)
 
 - **MT-114 (Audit trail engine):**
