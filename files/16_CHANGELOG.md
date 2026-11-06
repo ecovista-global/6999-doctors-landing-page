@@ -23,6 +23,20 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added (Milestone PB: Backend and Data — MT-111)
+
+- **MT-111 (Turnstile, honeypot & bot protection):**
+  - Registered Professional Clinic error taxonomy codes `E-1601` through `E-1607` in `apps/platform/src/lib/errors.ts`:
+    - `E-1601` (422 Page limit exceeded), `E-1602` (429 Quota exceeded), `E-1603` (422 Invalid status transition), `E-1604` (403 Turnstile / spam verification failed), `E-1605` (401 2FA code invalid), `E-1606` (422 Testimonial consent unrecorded), `E-1607` (422 Rich-text violation).
+  - Implemented anti-spam and bot mitigation engine in `apps/platform/src/lib/spam-protection.ts` per SD-055:
+    - Server-side Cloudflare Turnstile CAPTCHA token verification with 5s timeout budget and standard test mode tokens (`XXXX.DUMMY.TOKEN.PASS`, `XXXX.DUMMY.TOKEN.FAIL`).
+    - Hidden honeypot field detection (`checkHoneypot`).
+    - Human interaction time-trap guard (`checkTimeTrap`) rejecting submissions faster than 3.0 seconds (`< 3000 ms`).
+    - Unified validation coordinator `validateSpamProtection` throwing HTTP 403 `E-1604`.
+  - Integrated spam protection into public booking & enquiry APIs (`apps/platform/src/app/api/v1/public/appointments/route.ts` and `enquiries/route.ts`).
+  - Added comprehensive unit and end-to-end integration test suite `apps/platform/test/spam.test.ts` (16/16 tests passing).
+  - Added test file to `apps/platform/package.json` test runner (61/61 tests passing across 9 suites).
+
 ### Added (Milestone PB: Backend and Data — MT-110)
 
 - **MT-110 (Public enquiries API & availability endpoint):**

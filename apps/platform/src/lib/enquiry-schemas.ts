@@ -30,6 +30,8 @@ export const enquirySubmissionSchema = z.object({
     errorMap: () => ({ message: 'Patient consent is mandatory under India DPDP Act 2023' }),
   }),
   turnstileToken: z.string().optional(),
+  honeypot: z.string().optional(),
+  formRenderedAt: z.union([z.number(), z.string()]).optional(),
 });
 
 export type EnquirySubmissionInput = z.infer<typeof enquirySubmissionSchema>;

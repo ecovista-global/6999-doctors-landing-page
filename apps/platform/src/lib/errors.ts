@@ -9,6 +9,13 @@ export type ErrorCode =
   | 'E-1304'
   | 'E-1401'
   | 'E-1501'
+  | 'E-1601'
+  | 'E-1602'
+  | 'E-1603'
+  | 'E-1604'
+  | 'E-1605'
+  | 'E-1606'
+  | 'E-1607'
   | 'E-2101'
   | 'E-2201'
   | 'E-2301'
@@ -112,6 +119,76 @@ export const ERROR_REGISTRY: Record<ErrorCode, ErrorDefinition> = {
       hi: 'बहुत अधिक प्रयास, बाद में कोशिश करें।',
     },
     operatorAction: 'None',
+  },
+  'E-1601': {
+    code: 'E-1601',
+    status: 422,
+    title: 'Page limit exceeded (max 7 pages)',
+    userMessage: {
+      en: 'Up to 7 pages allowed on this plan.',
+      hi: 'इस प्लान पर अधिकतम 7 पेज की अनुमति है।',
+    },
+    operatorAction: 'Review page selection',
+  },
+  'E-1602': {
+    code: 'E-1602',
+    status: 429,
+    title: 'Quota exceeded (submissions or storage limit reached)',
+    userMessage: {
+      en: 'Plan volume quota reached.',
+      hi: 'प्लान कोटा सीमा समाप्त हो गई है।',
+    },
+    operatorAction: 'Offer quota add-on',
+  },
+  'E-1603': {
+    code: 'E-1603',
+    status: 422,
+    title: 'Invalid appointment status transition',
+    userMessage: {
+      en: 'Invalid appointment status transition.',
+      hi: 'अमान्य अपॉइंटमेंट स्थिति परिवर्तन।',
+    },
+    operatorAction: 'Check allowed transitions',
+  },
+  'E-1604': {
+    code: 'E-1604',
+    status: 403,
+    title: 'Turnstile or spam verification failed',
+    userMessage: {
+      en: 'Security verification failed.',
+      hi: 'सुरक्षा सत्यापन विफल रहा।',
+    },
+    operatorAction: 'Check spam logs',
+  },
+  'E-1605': {
+    code: 'E-1605',
+    status: 401,
+    title: '2FA code invalid or expired',
+    userMessage: {
+      en: 'Invalid or expired verification code.',
+      hi: 'अमान्य या समाप्त सत्यापन कोड।',
+    },
+    operatorAction: 'User retry / recovery',
+  },
+  'E-1606': {
+    code: 'E-1606',
+    status: 422,
+    title: 'Testimonial patient consent unrecorded',
+    userMessage: {
+      en: 'Patient consent must be recorded.',
+      hi: 'मरीज की सहमति दर्ज होनी चाहिए।',
+    },
+    operatorAction: 'Record patient consent',
+  },
+  'E-1607': {
+    code: 'E-1607',
+    status: 422,
+    title: 'Rich-text sanitization violation (disallowed HTML or script tags)',
+    userMessage: {
+      en: 'Disallowed HTML or script tags detected.',
+      hi: 'अस्वीकृत HTML या स्क्रिप्ट टैग पाए गए।',
+    },
+    operatorAction: 'Remove disallowed tags',
   },
   'E-2101': {
     code: 'E-2101',

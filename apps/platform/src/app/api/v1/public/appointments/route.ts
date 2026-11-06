@@ -10,6 +10,7 @@ import {
   saveIdempotencyResponse,
   clearIdempotency,
 } from '@/lib/idempotency';
+import { validateSpamProtection } from '@/lib/spam-protection';
 import { appointmentSubmissionSchema } from '@/lib/appointment-schemas';
 
 // ==============================================================================
@@ -106,6 +107,19 @@ export const POST = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) 
   }
 
   const data = validationResult.data;
+
+  // --- 3.1 Bot & Spam Protection (SD-055 / E-1604) ---
+  try {
+    await validateSpamProtection({
+      honeypot: data.honeypot,
+      formRenderedAt: data.formRenderedAt,
+      turnstileToken: data.turnstileToken,
+      clientIp,
+    });
+  } catch (err) {
+    clearIdempotency(idempotencyKey);
+    throw err;
+  }
 
   // --- 4. Database Transaction: Insert Encrypted Appointment + Outbox Event ---
   const client = await pool.connect();
