@@ -23,6 +23,19 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added (Milestone PB: Backend and Data — MT-112)
+
+- **MT-112 (Outbox notifier job with Resend):**
+  - Implemented transactional outbox worker `processOutboxEvents` in `apps/platform/src/jobs/notifier.ts` per 03 § 2 and 06 § 2:
+    - Runs with operator scope (`app.bypass_rls = on`) to drain `appointment.created` and `enquiry.created` events across clinic tenants.
+    - Resolves clinic recipients dynamically from `clinic_settings.notification_emails`.
+    - Decrypts patient contact PII to assemble structured clinic notification emails with service and schedule details.
+    - Updates `outbox_events.dispatched_at = now()` atomically upon successful dispatch.
+    - Records lifecycle audit entry in `appointment_events` under actor `worker_resend`.
+  - Implemented Resend email client integration in `apps/platform/src/lib/resend.ts` with 5s timeout budget (`09 § SD-010`), circuit breaker fallback, and hermetic mock buffer for testing.
+  - Added test suite `apps/platform/test/notifier.test.ts` (4/4 tests passing).
+  - Added test file to `apps/platform/package.json` test runner (65/65 tests passing across 10 suites).
+
 ### Added (Milestone PB: Backend and Data — MT-111)
 
 - **MT-111 (Turnstile, honeypot & bot protection):**
