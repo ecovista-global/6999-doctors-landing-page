@@ -23,6 +23,26 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added (Milestone PB: Backend and Data — MT-113)
+
+- **MT-113 (TOTP 2FA auth & session management):**
+  - Implemented RFC-6238 Time-Based One-Time Password engine in `apps/platform/src/lib/totp.ts`:
+    - Base32 encoding / decoding per RFC-4648.
+    - 20-byte (160-bit) cryptographically random Base32 secret generation.
+    - HMAC-SHA1 6-digit TOTP code generation with 30s step and +/- 1 step drift tolerance.
+    - `otpauth://totp/...` standard URI generator for mobile authenticator apps.
+    - 8 single-use alphanumeric backup recovery codes stored as SHA-256 hashes.
+    - Brute-force protection tracking failed verification attempts (5 attempts / 15 min triggers account lockout returning HTTP 429 `E-1501`).
+  - Implemented TOTP setup endpoint `POST /api/v1/auth/totp/setup` in `apps/platform/src/app/api/v1/auth/totp/setup/route.ts`:
+    - Stores TOTP secret and recovery code hashes encrypted via AES-256-GCM (`totp_secret_enc`).
+    - Returns secret, URI, and plaintext recovery codes.
+  - Implemented TOTP verification endpoint `POST /api/v1/auth/totp/verify` in `apps/platform/src/app/api/v1/auth/totp/verify/route.ts`:
+    - Validates TOTP code or burns single-use backup recovery code.
+    - Invalid code returns HTTP 401 `E-1605` ("Invalid or expired verification code.").
+    - Sets `totp_enabled = true` and updates `last_login_at`.
+  - Added test suite `apps/platform/test/totp.test.ts` (10/10 tests passing).
+  - Added test file to `apps/platform/package.json` test runner (75/75 tests passing across 11 suites).
+
 ### Added (Milestone PB: Backend and Data — MT-112)
 
 - **MT-112 (Outbox notifier job with Resend):**
