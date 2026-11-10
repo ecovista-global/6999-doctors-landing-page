@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useClinicContent } from '@/lib/useClinicContent';
 import { PublicHeader } from '@/components/public/PublicHeader';
@@ -14,21 +14,83 @@ import {
   ChevronRightIcon,
   ShieldCheckIcon,
 } from '@/components/Icons';
-import { CLINICAL_BLOG_POSTS } from '@/lib/blogPosts';
+import { CLINICAL_BLOG_POSTS, ClinicalBlogPost } from '@/lib/blogPosts';
 
 export default function BlogIndexPage() {
   const { content, theme } = useClinicContent();
+  const [allPosts, setAllPosts] = useState<ClinicalBlogPost[]>(CLINICAL_BLOG_POSTS);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
-  const categories = ['All', 'Diabetes & Endocrinology', 'Infectious Diseases', 'Cardiovascular Health', 'Endocrinology & Women Health'];
+  useEffect(() => {
+    async function loadDynamicPosts() {
+      try {
+        const res = await fetch('/api/v1/public/posts');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.posts && data.posts.length > 0) {
+            // Merge dynamic posts, avoiding duplicate slugs
+            const dynamicSlugs = new Set(data.posts.map((p: any) => p.slug));
+            const existingNonDuplicates = CLINICAL_BLOG_POSTS.filter((p) => !dynamicSlugs.has(p.slug));
+            setAllPosts([...data.posts, ...existingNonDuplicates]);
+            return;
+          }
+        }
+      } catch {
+        // Fallback
+      }
 
-  const filteredPosts = CLINICAL_BLOG_POSTS.filter((post) => {
+      // Check localStorage for offline demo posts
+      if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('demo_clinic_posts');
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            const published = parsed
+              .filter((p: any) => p.isPublished)
+              .map((p: any) => ({
+                slug: p.slug,
+                title: p.title,
+                excerpt: p.excerpt,
+                category: p.category,
+                readTime: p.readTime,
+                publishedDate: p.publishedAt || 'Recent',
+                author: 'Dr. Maanvita Kumari (MBBS, MD)',
+                tags: [p.category],
+              }));
+            if (published.length > 0) {
+              const pubSlugs = new Set(published.map((p: any) => p.slug));
+              const nonDups = CLINICAL_BLOG_POSTS.filter((p) => !pubSlugs.has(p.slug));
+              setAllPosts([...published, ...nonDups]);
+            }
+          } catch {
+            // ignore
+          }
+        }
+      }
+    }
+
+    loadDynamicPosts();
+  }, []);
+
+  const categories = [
+    'All',
+    'General Medicine',
+    'Diabetes & Endocrinology',
+    'Infectious Diseases',
+    'Cardiovascular Health',
+    'Endocrinology & Women Health',
+    'Preventive Care',
+  ];
+
+  const filteredPosts = allPosts.filter((post) => {
     const matchesSearch =
       post.title.toLowerCase().includes(search.toLowerCase()) ||
       post.excerpt.toLowerCase().includes(search.toLowerCase()) ||
-      post.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
-    const matchesCategory = selectedCategory === 'All' || post.category === selectedCategory;
+      (post.tags && post.tags.some((t) => t.toLowerCase().includes(search.toLowerCase())));
+    const matchesCategory =
+      selectedCategory === 'All' ||
+      post.category.toLowerCase().includes(selectedCategory.toLowerCase());
     return matchesSearch && matchesCategory;
   });
 
@@ -196,23 +258,25 @@ export default function BlogIndexPage() {
                 </p>
 
                 {/* Tags */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '18px' }}>
-                  {post.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      style={{
-                        background: '#F1F5F9',
-                        color: '#64748B',
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        fontSize: '11px',
-                        fontWeight: 600,
-                      }}
-                    >
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
+                {post.tags && post.tags.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '18px' }}>
+                    {post.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        style={{
+                          background: '#F1F5F9',
+                          color: '#64748B',
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                        }}
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div

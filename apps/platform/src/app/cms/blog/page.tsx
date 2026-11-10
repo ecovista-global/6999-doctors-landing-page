@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Edit3Icon,
   PlusIcon,
@@ -12,7 +12,12 @@ import {
   ExternalLinkIcon,
   FileTextIcon,
   XIcon,
+  EyeIcon,
+  ShieldCheckIcon,
+  SparklesIcon,
+  ImageIcon,
 } from '@/components/Icons';
+import { sanitizeHtml, generateSlug, calculateReadTime, extractPlainText } from '@/lib/htmlSanitizer';
 
 export interface BlogPost {
   id: string;
@@ -26,6 +31,7 @@ export interface BlogPost {
   isPublished: boolean;
   publishedAt?: string | undefined;
   createdAt: string;
+  updatedAt?: string | undefined;
 }
 
 const DEFAULT_POSTS: BlogPost[] = [
@@ -58,7 +64,7 @@ const DEFAULT_POSTS: BlogPost[] = [
     coverImageUrl: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&q=80&w=640',
     content: `<h2>Early Recognition of Atypical Viral Fevers</h2>
 <p>During the post-monsoon and early winter transition, viral fevers frequently overlap with Dengue and Chikungunya presentations.</p>
-<div class="clinical-callout"><strong>Emergency Red Flags:</strong> Persistent vomiting, mucosal bleeding, severe abdominal pain, and sudden lethargy warrant urgent hospital presentation.</div>
+<div class="clinical-callout emergency-alert"><strong>Emergency Red Flags:</strong> Persistent vomiting, mucosal bleeding, severe abdominal pain, and sudden lethargy warrant urgent hospital presentation.</div>
 <h3>Hydration Protocols</h3>
 <p>Avoid excessive reliance on home remedies that cause gastric irritation. Oral rehydration salts (ORS), coconut water, and adequate clear fluids remain the clinical cornerstone.</p>`,
     isPublished: true,
@@ -86,12 +92,14 @@ const DEFAULT_POSTS: BlogPost[] = [
 
 export default function BlogManagementPage() {
   const [posts, setPosts] = useState<BlogPost[]>(DEFAULT_POSTS);
-  const [loading, setLoading] = useState<boolean>(false);
   const [search, setSearch] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<'editor' | 'preview'>('editor');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [slugCollision, setSlugCollision] = useState<boolean>(false);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -99,27 +107,54 @@ export default function BlogManagementPage() {
     slug: '',
     excerpt: '',
     category: 'General Medicine',
-    readTime: '5 min read',
+    readTime: '4 min read',
     coverImageUrl: '',
     content: '',
     isPublished: true,
   });
 
-  useEffect(() => {
-    // Load from localStorage or default
+  const contentTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const getTenantId = () => {
+    return typeof window !== 'undefined'
+      ? localStorage.getItem('demo_tenant_id') || '00000000-0000-0000-0000-000000000001'
+      : '00000000-0000-0000-0000-000000000001';
+  };
+
+  const fetchPostsFromApi = async () => {
+    try {
+      const tenantId = getTenantId();
+      const res = await fetch(`/api/v1/cms/posts?tenantId=${tenantId}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.posts && data.posts.length > 0) {
+          setPosts(data.posts);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('demo_clinic_posts', JSON.stringify(data.posts));
+          }
+          return;
+        }
+      }
+    } catch {
+      // Fallback to localStorage
+    }
+
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('demo_clinic_posts');
       if (saved) {
         try {
           setPosts(JSON.parse(saved));
+          return;
         } catch {
-          setPosts(DEFAULT_POSTS);
+          // ignore
         }
-      } else {
-        setPosts(DEFAULT_POSTS);
       }
     }
-    setLoading(false);
+    setPosts(DEFAULT_POSTS);
+  };
+
+  useEffect(() => {
+    fetchPostsFromApi();
   }, []);
 
   const savePostsToStorage = (updated: BlogPost[]) => {
@@ -129,16 +164,28 @@ export default function BlogManagementPage() {
     }
   };
 
+  const checkSlugUniqueness = (slugToCheck: string, currentId?: string): boolean => {
+    const isTaken = posts.some(
+      (p) => p.slug.toLowerCase() === slugToCheck.toLowerCase() && p.id !== currentId
+    );
+    setSlugCollision(isTaken);
+    return !isTaken;
+  };
+
   const handleOpenNew = () => {
     setEditingPost(null);
+    setActiveTab('editor');
+    setSlugCollision(false);
+    const initialContent = `<p>Write your patient health education article here...</p>
+<div class="clinical-callout"><strong>Clinical Pearl:</strong> Highlight crucial clinical advice or dietary tips for patients.</div>`;
     setFormData({
       title: '',
       slug: '',
       excerpt: '',
       category: 'General Medicine',
-      readTime: '4 min read',
+      readTime: '3 min read',
       coverImageUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=640',
-      content: '<p>Write your patient education article here...</p>',
+      content: initialContent,
       isPublished: true,
     });
     setIsEditorOpen(true);
@@ -146,6 +193,8 @@ export default function BlogManagementPage() {
 
   const handleOpenEdit = (post: BlogPost) => {
     setEditingPost(post);
+    setActiveTab('editor');
+    setSlugCollision(false);
     setFormData({
       title: post.title,
       slug: post.slug,
@@ -160,57 +209,176 @@ export default function BlogManagementPage() {
   };
 
   const handleTitleChange = (val: string) => {
-    const derivedSlug = val
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
+    const derivedSlug = generateSlug(val);
     setFormData((prev) => ({
       ...prev,
       title: val,
       slug: derivedSlug,
     }));
+    checkSlugUniqueness(derivedSlug, editingPost?.id);
   };
 
-  const handleSavePost = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.title.trim()) return;
+  const handleSlugChange = (val: string) => {
+    const clean = generateSlug(val);
+    setFormData((prev) => ({ ...prev, slug: clean }));
+    checkSlugUniqueness(clean, editingPost?.id);
+  };
 
-    // Sanitize body (strip script tags per Rule R9)
-    const sanitizedContent = formData.content
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      .replace(/javascript:/gi, '')
-      .replace(/onload\s*=|onerror\s*=/gi, '');
+  const handleContentChange = (val: string) => {
+    const newReadTime = calculateReadTime(val);
+    setFormData((prev) => ({
+      ...prev,
+      content: val,
+      readTime: newReadTime,
+    }));
+  };
 
-    if (editingPost) {
-      const updated = posts.map((p) =>
-        p.id === editingPost.id
-          ? {
-              ...p,
-              ...formData,
-              content: sanitizedContent,
-              publishedAt: formData.isPublished ? p.publishedAt || new Date().toISOString().slice(0, 10) : undefined,
-            }
-          : p
-      );
-      savePostsToStorage(updated);
-      showToast('Article updated successfully.');
-    } else {
-      const newPost: BlogPost = {
-        id: `post-${Date.now()}`,
-        ...formData,
-        content: sanitizedContent,
-        createdAt: new Date().toISOString(),
-        publishedAt: formData.isPublished ? new Date().toISOString().slice(0, 10) : undefined,
-      };
-      savePostsToStorage([newPost, ...posts]);
-      showToast('New clinical article published.');
+  // Helper to insert formatting tags into textarea
+  const insertFormatting = (tagOrSnippet: string, wrapText?: string) => {
+    const textarea = contentTextareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const current = formData.content;
+    const selected = current.substring(start, end) || wrapText || 'formatted text';
+
+    let replacement = '';
+    if (tagOrSnippet === 'h2') {
+      replacement = `\n<h2>${selected}</h2>\n`;
+    } else if (tagOrSnippet === 'h3') {
+      replacement = `\n<h3>${selected}</h3>\n`;
+    } else if (tagOrSnippet === 'bold') {
+      replacement = `<strong>${selected}</strong>`;
+    } else if (tagOrSnippet === 'italic') {
+      replacement = `<em>${selected}</em>`;
+    } else if (tagOrSnippet === 'pearl') {
+      replacement = `\n<div class="clinical-callout"><strong>Clinical Pearl:</strong> ${selected}</div>\n`;
+    } else if (tagOrSnippet === 'emergency') {
+      replacement = `\n<div class="clinical-callout emergency-alert"><strong>Emergency Warning:</strong> ${selected}</div>\n`;
+    } else if (tagOrSnippet === 'ul') {
+      replacement = `\n<ul>\n  <li>${selected}</li>\n  <li>Second key point</li>\n</ul>\n`;
+    } else if (tagOrSnippet === 'ol') {
+      replacement = `\n<ol>\n  <li>${selected}</li>\n  <li>Next step in regimen</li>\n</ol>\n`;
+    } else if (tagOrSnippet === 'quote') {
+      replacement = `\n<blockquote>${selected}</blockquote>\n`;
+    } else if (tagOrSnippet === 'p') {
+      replacement = `\n<p>${selected}</p>\n`;
     }
 
-    setIsEditorOpen(false);
+    const updated = current.substring(0, start) + replacement + current.substring(end);
+    handleContentChange(updated);
+
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + replacement.length, start + replacement.length);
+    }, 50);
   };
 
-  const handleDeletePost = (id: string) => {
-    if (confirm('Are you sure you want to delete this article?')) {
+  const handleSavePost = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.title.trim()) {
+      showToast('Please enter an article title.');
+      return;
+    }
+
+    const finalSlug = formData.slug.trim() || generateSlug(formData.title);
+    if (!checkSlugUniqueness(finalSlug, editingPost?.id)) {
+      showToast('Slug conflict: this URL slug is already taken.');
+      return;
+    }
+
+    setIsSaving(true);
+    const sanitizedContent = sanitizeHtml(formData.content);
+    const autoReadTime = calculateReadTime(sanitizedContent);
+    const tenantId = getTenantId();
+
+    try {
+      if (editingPost) {
+        // PUT update
+        const res = await fetch(`/api/v1/cms/posts/${editingPost.id}?tenantId=${tenantId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...formData,
+            slug: finalSlug,
+            content: sanitizedContent,
+            readTime: autoReadTime,
+          }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          const updated = posts.map((p) => (p.id === editingPost.id ? data.post : p));
+          savePostsToStorage(updated);
+          showToast('Article updated successfully.');
+        } else {
+          // Offline fallback
+          const updated = posts.map((p) =>
+            p.id === editingPost.id
+              ? {
+                  ...p,
+                  ...formData,
+                  slug: finalSlug,
+                  content: sanitizedContent,
+                  readTime: autoReadTime,
+                  publishedAt: formData.isPublished ? p.publishedAt || new Date().toISOString().slice(0, 10) : undefined,
+                  updatedAt: new Date().toISOString(),
+                }
+              : p
+          );
+          savePostsToStorage(updated);
+          showToast('Article updated in local storage.');
+        }
+      } else {
+        // POST create
+        const res = await fetch(`/api/v1/cms/posts?tenantId=${tenantId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...formData,
+            slug: finalSlug,
+            content: sanitizedContent,
+            readTime: autoReadTime,
+          }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          savePostsToStorage([data.post, ...posts]);
+          showToast('New clinical article published.');
+        } else {
+          // Offline fallback
+          const newPost: BlogPost = {
+            id: `post-${Date.now()}`,
+            ...formData,
+            slug: finalSlug,
+            content: sanitizedContent,
+            readTime: autoReadTime,
+            createdAt: new Date().toISOString(),
+            publishedAt: formData.isPublished ? new Date().toISOString().slice(0, 10) : undefined,
+          };
+          savePostsToStorage([newPost, ...posts]);
+          showToast('New clinical article saved.');
+        }
+      }
+
+      setIsEditorOpen(false);
+    } catch {
+      showToast('Error saving article. Stored locally.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeletePost = async (id: string) => {
+    if (confirm('Are you sure you want to delete this clinical article?')) {
+      const tenantId = getTenantId();
+      try {
+        await fetch(`/api/v1/cms/posts/${id}?tenantId=${tenantId}`, { method: 'DELETE' });
+      } catch {
+        // ignore
+      }
       const updated = posts.filter((p) => p.id !== id);
       savePostsToStorage(updated);
       showToast('Article deleted.');
@@ -219,7 +387,7 @@ export default function BlogManagementPage() {
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
+    setTimeout(() => setToastMessage(null), 3500);
   };
 
   const categories = ['all', 'General Medicine', 'Infectious Disease', 'Preventive Care', 'Cardiology', 'Pediatrics'];
@@ -227,13 +395,14 @@ export default function BlogManagementPage() {
   const filteredPosts = posts.filter((p) => {
     const matchesSearch =
       p.title.toLowerCase().includes(search.toLowerCase()) ||
-      p.excerpt.toLowerCase().includes(search.toLowerCase());
+      p.excerpt.toLowerCase().includes(search.toLowerCase()) ||
+      p.slug.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
   return (
-    <div style={{ padding: '24px 32px', maxWidth: '1100px', margin: '0 auto' }}>
+    <div style={{ padding: '24px 32px', maxWidth: '1100px', margin: '0 auto', fontFamily: 'var(--font-sans, system-ui)' }}>
       {/* Header bar */}
       <div
         style={{
@@ -243,16 +412,32 @@ export default function BlogManagementPage() {
           flexWrap: 'wrap',
           gap: '16px',
           marginBottom: '24px',
-          borderBottom: '1px solid var(--color-border-subtle, #E2E8F0)',
+          borderBottom: '1px solid #E2E8F0',
           paddingBottom: '16px',
         }}
       >
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#0F172A', margin: '0 0 6px 0' }}>
-            Clinical Blog & Patient Education
-          </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+            <FileTextIcon size={20} color="#0D5C46" />
+            <h1 style={{ fontSize: '20px', fontWeight: 800, color: '#0F172A', margin: 0 }}>
+              Clinical Health Blog &amp; Education Guides
+            </h1>
+            <span
+              style={{
+                fontSize: '11px',
+                fontWeight: 700,
+                background: '#ECFDF5',
+                color: '#065F46',
+                padding: '2px 8px',
+                borderRadius: '6px',
+                border: '1px solid #A7F3D0',
+              }}
+            >
+              WYSIWYG &bull; MT-121
+            </span>
+          </div>
           <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
-            Author, publish, and manage verified patient health guides for the Health Blog page (/blog).
+            Author, sanitize, and publish evidence-backed patient guidance articles with clinical callout boxes and automatic XSS filtering.
           </p>
         </div>
 
@@ -260,10 +445,7 @@ export default function BlogManagementPage() {
           type="button"
           onClick={handleOpenNew}
           style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            background: 'var(--color-brand-primary, #0D5C46)',
+            background: '#0D5C46',
             color: '#FFFFFF',
             border: 'none',
             borderRadius: '8px',
@@ -271,11 +453,14 @@ export default function BlogManagementPage() {
             fontSize: '13px',
             fontWeight: 700,
             cursor: 'pointer',
-            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            boxShadow: '0 2px 4px rgba(13, 92, 70, 0.2)',
           }}
         >
-          <PlusIcon size={16} />
-          <span>New Article</span>
+          <PlusIcon size={16} color="#FFFFFF" />
+          <span>Write New Article</span>
         </button>
       </div>
 
@@ -285,18 +470,15 @@ export default function BlogManagementPage() {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          gap: '16px',
           flexWrap: 'wrap',
+          gap: '12px',
           marginBottom: '20px',
         }}
       >
+        {/* Search */}
         <div style={{ position: 'relative', width: '320px' }}>
-          <SearchIcon
-            size={16}
-            style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }}
-          />
           <input
-            type="text"
+            type="search"
             placeholder="Search articles by title or keyword..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -306,14 +488,16 @@ export default function BlogManagementPage() {
               borderRadius: '8px',
               border: '1px solid #CBD5E1',
               fontSize: '13px',
-              background: '#FFFFFF',
               boxSizing: 'border-box',
             }}
           />
+          <span style={{ position: 'absolute', left: '12px', top: '10px', color: '#94A3B8' }}>
+            <SearchIcon size={16} />
+          </span>
         </div>
 
-        {/* Category filters */}
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+        {/* Category Filter */}
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
           {categories.map((cat) => (
             <button
               key={cat}
@@ -321,9 +505,10 @@ export default function BlogManagementPage() {
               onClick={() => setSelectedCategory(cat)}
               style={{
                 padding: '6px 12px',
-                borderRadius: '999px',
-                border: `1px solid ${selectedCategory === cat ? '#0D5C46' : '#E2E8F0'}`,
-                background: selectedCategory === cat ? '#E6F4F1' : '#FFFFFF',
+                borderRadius: '6px',
+                border: '1px solid',
+                borderColor: selectedCategory === cat ? '#0D5C46' : '#E2E8F0',
+                background: selectedCategory === cat ? '#ECFDF5' : '#FFFFFF',
                 color: selectedCategory === cat ? '#0D5C46' : '#64748B',
                 fontSize: '12px',
                 fontWeight: selectedCategory === cat ? 700 : 500,
@@ -336,35 +521,39 @@ export default function BlogManagementPage() {
         </div>
       </div>
 
-      {/* Posts List */}
+      {/* Blog Posts List */}
       {filteredPosts.length === 0 ? (
         <div
           style={{
-            padding: '48px',
-            textAlign: 'center',
-            background: '#FFFFFF',
+            background: '#F8FAFC',
             borderRadius: '12px',
             border: '1px dashed #CBD5E1',
-            color: '#64748B',
+            padding: '48px 24px',
+            textAlign: 'center',
           }}
         >
-          <FileTextIcon size={32} style={{ marginBottom: '12px', opacity: 0.5 }} />
-          <h3 style={{ fontSize: '15px', color: '#0F172A', margin: '0 0 6px 0' }}>No articles found</h3>
-          <p style={{ fontSize: '13px', margin: '0 0 16px 0' }}>Try searching with different terms or create a new health article.</p>
+          <FileTextIcon size={32} color="#94A3B8" />
+          <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#334155', margin: '12px 0 6px 0' }}>
+            No clinical articles found
+          </h3>
+          <p style={{ fontSize: '13px', color: '#64748B', margin: '0 0 16px 0' }}>
+            No articles match the current filter. Write your first patient health education article.
+          </p>
           <button
             type="button"
             onClick={handleOpenNew}
             style={{
               padding: '8px 16px',
-              background: '#0D5C46',
-              color: '#FFFFFF',
-              border: 'none',
               borderRadius: '6px',
-              fontWeight: 600,
+              background: '#0D5C46',
+              color: '#FFF',
+              border: 'none',
+              fontSize: '13px',
+              fontWeight: 700,
               cursor: 'pointer',
             }}
           >
-            Create New Article
+            Create Article
           </button>
         </div>
       ) : (
@@ -373,19 +562,55 @@ export default function BlogManagementPage() {
             <div
               key={post.id}
               style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '18px 22px',
-                borderRadius: '10px',
                 background: '#FFFFFF',
+                borderRadius: '12px',
                 border: '1px solid #E2E8F0',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)',
+                padding: '18px 20px',
+                display: 'flex',
+                alignItems: 'center',
                 gap: '20px',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
               }}
             >
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+              {/* Cover thumbnail */}
+              {post.coverImageUrl ? (
+                <div
+                  style={{
+                    width: '100px',
+                    height: '75px',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    background: '#F1F5F9',
+                    flexShrink: 0,
+                  }}
+                >
+                  <img
+                    src={post.coverImageUrl}
+                    alt={post.title}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                </div>
+              ) : (
+                <div
+                  style={{
+                    width: '100px',
+                    height: '75px',
+                    borderRadius: '8px',
+                    background: '#F1F5F9',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#94A3B8',
+                    flexShrink: 0,
+                  }}
+                >
+                  <ImageIcon size={24} />
+                </div>
+              )}
+
+              {/* Main content */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                   <span
                     style={{
                       fontSize: '11px',
@@ -419,8 +644,18 @@ export default function BlogManagementPage() {
                 <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A', margin: '0 0 6px 0' }}>
                   {post.title}
                 </h3>
-                <p style={{ fontSize: '13px', color: '#64748B', margin: '0 0 8px 0', lineHeight: 1.5 }}>
-                  {post.excerpt}
+                <p
+                  style={{
+                    fontSize: '13px',
+                    color: '#64748B',
+                    margin: '0 0 8px 0',
+                    lineHeight: 1.5,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {post.excerpt || extractPlainText(post.content).slice(0, 120)}
                 </p>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: '#94A3B8' }}>
@@ -430,9 +665,9 @@ export default function BlogManagementPage() {
               </div>
 
               {/* Action buttons */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                 <a
-                  href={`http://localhost:5173#blog`}
+                  href={`/blog/${post.slug}`}
                   target="_blank"
                   rel="noreferrer"
                   title="View on patient site"
@@ -499,7 +734,7 @@ export default function BlogManagementPage() {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(15, 23, 42, 0.45)',
+            background: 'rgba(15, 23, 42, 0.5)',
             backdropFilter: 'blur(3px)',
             zIndex: 100,
             display: 'flex',
@@ -513,17 +748,30 @@ export default function BlogManagementPage() {
               background: '#FFFFFF',
               borderRadius: '14px',
               width: '100%',
-              maxWidth: '750px',
-              maxHeight: '90vh',
+              maxWidth: '860px',
+              maxHeight: '92vh',
               overflowY: 'auto',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)',
               padding: '24px 28px',
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0F172A', margin: 0 }}>
-                {editingPost ? 'Edit Clinical Article' : 'Compose New Patient Health Article'}
-              </h2>
+            {/* Modal Header */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '16px',
+                borderBottom: '1px solid #E2E8F0',
+                paddingBottom: '12px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Edit3Icon size={18} color="#0D5C46" />
+                <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0F172A', margin: 0 }}>
+                  {editingPost ? 'Edit Clinical Article' : 'Compose Patient Health Article'}
+                </h2>
+              </div>
               <button
                 type="button"
                 onClick={() => setIsEditorOpen(false)}
@@ -534,7 +782,7 @@ export default function BlogManagementPage() {
             </div>
 
             <form onSubmit={handleSavePost} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {/* Title & Slug */}
+              {/* Article Headline */}
               <div>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#0F172A', marginBottom: '6px' }}>
                   Article Headline *
@@ -542,7 +790,7 @@ export default function BlogManagementPage() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Managing Type-2 Diabetes in Urban Lifestyles"
+                  placeholder="e.g. Managing Type-2 Diabetes in Urban Lifestyles: A Clinician's Guide"
                   value={formData.title}
                   onChange={(e) => handleTitleChange(e.target.value)}
                   style={{
@@ -556,30 +804,60 @@ export default function BlogManagementPage() {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              {/* URL Slug & Category */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '16px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#0F172A', marginBottom: '6px' }}>
-                    URL Slug
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.slug}
-                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '6px',
-                      border: '1px solid #CBD5E1',
-                      fontSize: '12px',
-                      fontFamily: 'monospace',
-                      boxSizing: 'border-box',
-                    }}
-                  />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <label style={{ fontSize: '12px', fontWeight: 700, color: '#0F172A' }}>
+                      URL Slug *
+                    </label>
+                    {slugCollision ? (
+                      <span style={{ fontSize: '11px', color: '#DC2626', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '3px' }}>
+                        <AlertCircleIcon size={12} color="#DC2626" />
+                        Slug already taken
+                      </span>
+                    ) : (
+                      <span style={{ fontSize: '11px', color: '#065F46', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '3px' }}>
+                        <CheckCircleIcon size={12} color="#065F46" />
+                        Slug available
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <span
+                      style={{
+                        padding: '8px 10px',
+                        background: '#F1F5F9',
+                        border: '1px solid #CBD5E1',
+                        borderRight: 'none',
+                        borderRadius: '6px 0 0 6px',
+                        fontSize: '12px',
+                        color: '#64748B',
+                      }}
+                    >
+                      /blog/
+                    </span>
+                    <input
+                      type="text"
+                      required
+                      value={formData.slug}
+                      onChange={(e) => handleSlugChange(e.target.value)}
+                      style={{
+                        flex: 1,
+                        padding: '8px 12px',
+                        borderRadius: '0 6px 6px 0',
+                        border: `1px solid ${slugCollision ? '#EF4444' : '#CBD5E1'}`,
+                        fontSize: '12px',
+                        fontFamily: 'monospace',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </div>
                 </div>
 
                 <div>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#0F172A', marginBottom: '6px' }}>
-                    Category
+                    Clinical Category
                   </label>
                   <select
                     value={formData.category}
@@ -606,13 +884,13 @@ export default function BlogManagementPage() {
               {/* Excerpt */}
               <div>
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#0F172A', marginBottom: '6px' }}>
-                  Summary / Excerpt (Shows on search results & preview cards)
+                  Summary / Excerpt (Used in search cards and SEO previews)
                 </label>
                 <textarea
                   rows={2}
                   value={formData.excerpt}
                   onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-                  placeholder="Short 1-2 sentence overview for patients..."
+                  placeholder="Concise 1-2 sentence clinical summary for patients..."
                   style={{
                     width: '100%',
                     padding: '8px 12px',
@@ -624,71 +902,366 @@ export default function BlogManagementPage() {
                 />
               </div>
 
-              {/* Cover Image URL */}
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#0F172A', marginBottom: '6px' }}>
-                  Cover Photo URL
-                </label>
-                <input
-                  type="url"
-                  value={formData.coverImageUrl}
-                  onChange={(e) => setFormData({ ...formData, coverImageUrl: e.target.value })}
-                  placeholder="https://..."
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    borderRadius: '6px',
-                    border: '1px solid #CBD5E1',
-                    fontSize: '13px',
-                    boxSizing: 'border-box',
-                  }}
-                />
-              </div>
-
-              {/* Content Body Editor */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <label style={{ fontSize: '12px', fontWeight: 700, color: '#0F172A' }}>
-                    Article Body (Sanitized Rich HTML)
+              {/* Cover Image URL & Live Thumbnail */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '16px', alignItems: 'flex-start' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#0F172A', marginBottom: '6px' }}>
+                    Cover Photo URL
                   </label>
-                  <span style={{ fontSize: '11px', color: '#64748B' }}>
-                    Scripts/event handlers stripped automatically (Rule R9)
+                  <input
+                    type="url"
+                    value={formData.coverImageUrl}
+                    onChange={(e) => setFormData({ ...formData, coverImageUrl: e.target.value })}
+                    placeholder="https://images.unsplash.com/..."
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid #CBD5E1',
+                      fontSize: '13px',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                  <span style={{ fontSize: '11px', color: '#64748B', marginTop: '4px', display: 'block' }}>
+                    Tip: Use direct image link or choose from Media Library.
                   </span>
                 </div>
-                <textarea
-                  rows={8}
-                  required
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+
+                {/* Thumbnail Preview */}
+                {formData.coverImageUrl ? (
+                  <div
+                    style={{
+                      width: '90px',
+                      height: '60px',
+                      borderRadius: '6px',
+                      overflow: 'hidden',
+                      border: '1px solid #E2E8F0',
+                      background: '#F1F5F9',
+                    }}
+                  >
+                    <img
+                      src={formData.coverImageUrl}
+                      alt="Cover Preview"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
+                ) : null}
+              </div>
+
+              {/* Rich-Text Formatting Toolbar & Tab Switcher */}
+              <div>
+                <div
                   style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid #CBD5E1',
-                    fontSize: '13px',
-                    fontFamily: 'monospace',
-                    lineHeight: 1.5,
-                    boxSizing: 'border-box',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '8px',
+                    flexWrap: 'wrap',
+                    gap: '8px',
                   }}
-                />
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <label style={{ fontSize: '12px', fontWeight: 700, color: '#0F172A' }}>
+                      Article Body (Rich HTML with Clinical Callouts)
+                    </label>
+                    <span style={{ fontSize: '11px', color: '#64748B', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <ClockIcon size={12} />
+                      {formData.readTime}
+                    </span>
+                  </div>
+
+                  {/* Tabs */}
+                  <div style={{ display: 'flex', gap: '4px', background: '#F1F5F9', padding: '3px', borderRadius: '6px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('editor')}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: '4px',
+                        border: 'none',
+                        background: activeTab === 'editor' ? '#FFFFFF' : 'transparent',
+                        color: activeTab === 'editor' ? '#0F172A' : '#64748B',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        boxShadow: activeTab === 'editor' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}
+                    >
+                      <Edit3Icon size={12} />
+                      <span>Editor</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('preview')}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: '4px',
+                        border: 'none',
+                        background: activeTab === 'preview' ? '#FFFFFF' : 'transparent',
+                        color: activeTab === 'preview' ? '#0F172A' : '#64748B',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        boxShadow: activeTab === 'preview' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}
+                    >
+                      <EyeIcon size={12} />
+                      <span>Live Preview</span>
+                    </button>
+                  </div>
+                </div>
+
+                {activeTab === 'editor' ? (
+                  <div>
+                    {/* WYSIWYG / HTML Quick Action Toolbar */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '4px',
+                        background: '#F8FAFC',
+                        border: '1px solid #CBD5E1',
+                        borderBottom: 'none',
+                        borderRadius: '8px 8px 0 0',
+                        padding: '6px 8px',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting('h2', 'Main Clinical Section')}
+                        title="Add Section Heading (H2)"
+                        style={{
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          border: '1px solid #CBD5E1',
+                          background: '#FFFFFF',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        H2
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting('h3', 'Sub-heading')}
+                        title="Add Sub-heading (H3)"
+                        style={{
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          border: '1px solid #CBD5E1',
+                          background: '#FFFFFF',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        H3
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting('bold', 'key clinical term')}
+                        title="Bold Text"
+                        style={{
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          border: '1px solid #CBD5E1',
+                          background: '#FFFFFF',
+                          fontSize: '11px',
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        B
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting('italic', 'emphasized note')}
+                        title="Italic Text"
+                        style={{
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          border: '1px solid #CBD5E1',
+                          background: '#FFFFFF',
+                          fontSize: '11px',
+                          fontStyle: 'italic',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        I
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting('ul', 'Key symptom to observe')}
+                        title="Bulleted List"
+                        style={{
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          border: '1px solid #CBD5E1',
+                          background: '#FFFFFF',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        &bull; List
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting('ol', 'Initial evaluation step')}
+                        title="Numbered List"
+                        style={{
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          border: '1px solid #CBD5E1',
+                          background: '#FFFFFF',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        1. 2. Steps
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting('quote', 'Clinical citation or advisory')}
+                        title="Quote Block"
+                        style={{
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          border: '1px solid #CBD5E1',
+                          background: '#FFFFFF',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Quote
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting('pearl', 'Take medications 30 minutes before breakfast for optimal absorption.')}
+                        title="Insert Medical Pearl Callout Box"
+                        style={{
+                          padding: '4px 10px',
+                          borderRadius: '4px',
+                          border: '1px solid #A7F3D0',
+                          background: '#ECFDF5',
+                          color: '#065F46',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                        }}
+                      >
+                        <ShieldCheckIcon size={12} color="#065F46" />
+                        <span>+ Clinical Pearl</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting('emergency', 'Persistent high fever exceeding 103 F or sudden breathlessness requires emergency admission.')}
+                        title="Insert Emergency Warning Box"
+                        style={{
+                          padding: '4px 10px',
+                          borderRadius: '4px',
+                          border: '1px solid #FECACA',
+                          background: '#FEF2F2',
+                          color: '#991B1B',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                        }}
+                      >
+                        <AlertCircleIcon size={12} color="#991B1B" />
+                        <span>+ Red Flag</span>
+                      </button>
+                    </div>
+
+                    <textarea
+                      ref={contentTextareaRef}
+                      rows={10}
+                      required
+                      value={formData.content}
+                      onChange={(e) => handleContentChange(e.target.value)}
+                      placeholder="Write your article in structured HTML with clinical callouts..."
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        borderRadius: '0 0 8px 8px',
+                        border: '1px solid #CBD5E1',
+                        fontSize: '13px',
+                        fontFamily: 'monospace',
+                        lineHeight: 1.6,
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '11px', color: '#64748B' }}>
+                      <span>HTML tags sanitized per Rule R9: scripts, iframes, and onclick handlers are stripped.</span>
+                      <span>Word count: {extractPlainText(formData.content).split(/\s+/).filter(Boolean).length} words</span>
+                    </div>
+                  </div>
+                ) : (
+                  /* Live Preview Tab */
+                  <div
+                    style={{
+                      border: '1px solid #CBD5E1',
+                      borderRadius: '8px',
+                      padding: '24px',
+                      background: '#FFFFFF',
+                      minHeight: '260px',
+                      maxHeight: '380px',
+                      overflowY: 'auto',
+                    }}
+                  >
+                    <style>{`
+                      .live-preview-box h2 { font-size: 20px; font-weight: 800; color: #0F172A; margin: 16px 0 8px 0; }
+                      .live-preview-box h3 { font-size: 16px; font-weight: 700; color: #0F172A; margin: 14px 0 6px 0; }
+                      .live-preview-box p { font-size: 14px; color: #334155; line-height: 1.7; margin: 0 0 12px 0; }
+                      .live-preview-box ul, .live-preview-box ol { margin: 0 0 14px 0; padding-left: 20px; font-size: 14px; color: #334155; line-height: 1.6; }
+                      .live-preview-box blockquote { border-left: 4px solid #0D5C46; background: #F8FAFC; margin: 12px 0; padding: 10px 16px; font-style: italic; color: #475569; }
+                      .live-preview-box .clinical-callout { background: #ECFDF5; border-left: 4px solid #059669; padding: 12px 16px; border-radius: 6px; margin: 14px 0; color: #065F46; font-size: 13px; line-height: 1.6; }
+                      .live-preview-box .clinical-callout.emergency-alert { background: #FEF2F2; border-left-color: #DC2626; color: #991B1B; }
+                    `}</style>
+                    <div
+                      className="live-preview-box"
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(formData.content) }}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Status checkbox */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0' }}>
                 <input
                   type="checkbox"
                   id="isPublished"
                   checked={formData.isPublished}
                   onChange={(e) => setFormData({ ...formData, isPublished: e.target.checked })}
-                  style={{ width: '16px', height: '16px' }}
+                  style={{ width: '16px', height: '16px', accentColor: '#0D5C46' }}
                 />
                 <label htmlFor="isPublished" style={{ fontSize: '13px', fontWeight: 600, color: '#0F172A' }}>
-                  Publish immediately (Visible on live patient site)
+                  Publish immediately (Visible on live patient health blog)
                 </label>
               </div>
 
               {/* Form buttons */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '8px' }}>
                 <button
                   type="button"
                   onClick={() => setIsEditorOpen(false)}
@@ -707,18 +1280,28 @@ export default function BlogManagementPage() {
                 </button>
                 <button
                   type="submit"
+                  disabled={isSaving || slugCollision}
                   style={{
-                    padding: '9px 20px',
+                    padding: '9px 22px',
                     borderRadius: '6px',
                     border: 'none',
-                    background: '#0D5C46',
+                    background: slugCollision ? '#94A3B8' : '#0D5C46',
                     color: '#FFFFFF',
                     fontSize: '13px',
                     fontWeight: 700,
-                    cursor: 'pointer',
+                    cursor: slugCollision ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
                   }}
                 >
-                  {editingPost ? 'Save Changes' : 'Publish Article'}
+                  {isSaving ? (
+                    <span>Saving...</span>
+                  ) : editingPost ? (
+                    <span>Save Changes</span>
+                  ) : (
+                    <span>Publish Article</span>
+                  )}
                 </button>
               </div>
             </form>
