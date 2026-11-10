@@ -23,6 +23,29 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added & Fixed (CMS Navigation & Functional Dedicated Routes)
+
+- **Dedicated Sidebar Navigation & Routing:**
+  - Added dedicated navigation button for "Page Slots (7 Pages)" in the CMS sidebar (`/cms/pages`) with active count badge (`7 Active`).
+  - Converted all sidebar navigation items from static buttons to Next.js `Link` components with direct `href` mappings across all sections:
+    - Clinical Operations: Dashboard (`/cms`), Today's OPD Board (`/cms/submissions?tab=today`), Appointments (`/cms/submissions`), Patient Enquiries (`/cms/submissions?tab=enquiries`).
+    - 7-Page Site CMS: Page Slots (`/cms/pages`), Site Block Editor (`/cms/editor`), Blog Posts (`/cms/blog`), FAQs & Reviews (`/cms/reviews-faqs`), Media Library (`/cms/media`).
+    - Governance & Audit: Settings & Security (`/cms/settings`), Version History (`/cms/versions`).
+  - Added automatic route-based active state detection and dynamic breadcrumbs in `CmsLayoutContent` via `usePathname()`.
+- **Page Slots Manager (`/cms/pages`):**
+  - Enhanced all 7 page slot cards with detailed clinical component features, route configuration, and direct in-context management links.
+  - Added expandable SEO & Route details accordion showing meta title, meta description, and canonical path.
+- **Dedicated Functional CMS Routes:**
+  - **`/cms/blog` (Blog Posts Manager):** Complete clinical blog manager with search, category filtering, create/edit modal with title, slug generator, excerpt, cover image, and HTML-sanitized body editor stripping script tags and dangerous event handlers.
+  - **`/cms/reviews-faqs` (FAQs & Testimonials):** Dual-tab manager for clinical FAQs (categorized Q&A, active toggle, reordering) and patient testimonials (initials format, 1-5 star ratings, treatment tags, and mandatory DPDP Act 2023 patient consent confirmation).
+  - **`/cms/media` (Media & Asset Library):** R2 storage quota meter (24.5 MB / 1 GB), file upload form, and image card gallery with 1-click CDN URL copying and per-card role assignment (Hero Doctor Portrait, Clinic Facade, Brand Logo).
+  - **`/cms/editor` (Site Block Editor):** In-context editor for doctor credentials, clinic information, fee policy, and multi-device live preview frame (Desktop, Tablet 768px, Mobile 360px).
+  - **`/cms/versions` (Version History):** Timeline of deployments with active edge version pill, checksums, operator notes, and 1-click rollback trigger.
+- **Route Validation & Error Verification:**
+  - Verified 100% of CMS routes (`/cms`, `/cms/submissions`, `/cms/submissions?tab=today`, `/cms/submissions?tab=enquiries`, `/cms/pages`, `/cms/editor`, `/cms/blog`, `/cms/reviews-faqs`, `/cms/faqs`, `/cms/media`, `/cms/settings`, `/cms/versions`, and public template `:5173`) return HTTP 200 OK.
+  - Verified 111/111 platform tests, 12/12 template tests, 8/8 UI tests, 3/3 schema tests, and 2/2 CI gates pass cleanly (136/136 tests green).
+
+
 ### Added (Milestone PC: CMS — MT-120)
 
 - **MT-120 (Page slots manager & 7-page limit enforcer):**

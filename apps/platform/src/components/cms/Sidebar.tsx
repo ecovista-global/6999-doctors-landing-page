@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   LogoMark,
   LayoutDashboardIcon,
@@ -18,6 +19,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ShieldCheckIcon,
+  GlobeIcon,
 } from '@/components/Icons';
 
 export interface NavItem {
@@ -50,26 +52,27 @@ export const defaultSidebarGroups: NavGroup[] = [
   {
     groupTitle: 'Clinical Operations',
     items: [
-      { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboardIcon size={18} /> },
-      { id: 'opd_board', label: "Today's OPD Board", icon: <ActivityIcon size={18} /> },
-      { id: 'appointments', label: 'Appointments', icon: <CalendarIcon size={18} /> },
-      { id: 'enquiries', label: 'Patient Enquiries', icon: <MessageCircleIcon size={18} /> },
+      { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboardIcon size={18} />, href: '/cms' },
+      { id: 'opd_board', label: "Today's OPD Board", icon: <ActivityIcon size={18} />, href: '/cms/submissions?tab=today' },
+      { id: 'appointments', label: 'Appointments', icon: <CalendarIcon size={18} />, href: '/cms/submissions' },
+      { id: 'enquiries', label: 'Patient Enquiries', icon: <MessageCircleIcon size={18} />, href: '/cms/submissions?tab=enquiries' },
     ],
   },
   {
     groupTitle: '7-Page Site CMS',
     items: [
-      { id: 'editor', label: 'Site Block Editor', icon: <FileTextIcon size={18} /> },
-      { id: 'blog', label: 'Blog Posts', icon: <Edit3Icon size={18} /> },
-      { id: 'faqs', label: 'FAQs & Reviews', icon: <HelpCircleIcon size={18} /> },
-      { id: 'media', label: 'Media Library', icon: <ImageIcon size={18} /> },
+      { id: 'pages', label: 'Page Slots (7 Pages)', icon: <GlobeIcon size={18} />, href: '/cms/pages', badge: '7 Active', badgeColor: '#059669' },
+      { id: 'editor', label: 'Site Block Editor', icon: <FileTextIcon size={18} />, href: '/cms/editor' },
+      { id: 'blog', label: 'Blog Posts', icon: <Edit3Icon size={18} />, href: '/cms/blog' },
+      { id: 'faqs', label: 'FAQs & Reviews', icon: <HelpCircleIcon size={18} />, href: '/cms/reviews-faqs' },
+      { id: 'media', label: 'Media Library', icon: <ImageIcon size={18} />, href: '/cms/media' },
     ],
   },
   {
     groupTitle: 'Governance & Audit',
     items: [
-      { id: 'settings', label: 'Settings & Security', icon: <SettingsIcon size={18} /> },
-      { id: 'versions', label: 'Version History', icon: <RefreshCwIcon size={18} /> },
+      { id: 'settings', label: 'Settings & Security', icon: <SettingsIcon size={18} />, href: '/cms/settings' },
+      { id: 'versions', label: 'Version History', icon: <RefreshCwIcon size={18} />, href: '/cms/versions' },
     ],
   },
 ];
@@ -85,6 +88,33 @@ export function Sidebar({
   staffName = 'Front Desk (Aarti)',
   newAppointmentsCount = 0,
 }: SidebarProps) {
+  const pathname = usePathname() || '';
+
+  // Determine active item from current route pathname
+  let resolvedActiveNav = activeNav;
+  if (pathname.startsWith('/cms/pages')) {
+    resolvedActiveNav = 'pages';
+  } else if (pathname.startsWith('/cms/editor')) {
+    resolvedActiveNav = 'editor';
+  } else if (pathname.startsWith('/cms/blog')) {
+    resolvedActiveNav = 'blog';
+  } else if (pathname.startsWith('/cms/reviews-faqs') || pathname.startsWith('/cms/faqs')) {
+    resolvedActiveNav = 'faqs';
+  } else if (pathname.startsWith('/cms/media')) {
+    resolvedActiveNav = 'media';
+  } else if (pathname.startsWith('/cms/settings')) {
+    resolvedActiveNav = 'settings';
+  } else if (pathname.startsWith('/cms/versions')) {
+    resolvedActiveNav = 'versions';
+  } else if (pathname.startsWith('/cms/submissions')) {
+    if (activeNav === 'opd_board' || activeNav === 'enquiries') {
+      resolvedActiveNav = activeNav;
+    } else {
+      resolvedActiveNav = 'appointments';
+    }
+  } else if (pathname === '/cms' || pathname === '/cms/') {
+    resolvedActiveNav = activeNav || 'dashboard';
+  }
   return (
     <aside
       aria-label="CMS Navigation Sidebar"
@@ -256,16 +286,16 @@ export function Sidebar({
               )}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                 {group.items.map((item) => {
-                  const isActive = activeNav === item.id;
+                  const isActive = resolvedActiveNav === item.id;
                   const itemBadge =
                     item.id === 'appointments' && newAppointmentsCount > 0
                       ? `${newAppointmentsCount} New`
                       : item.badge;
 
                   return (
-                    <button
+                    <Link
                       key={item.id}
-                      type="button"
+                      href={item.href || '/cms'}
                       onClick={() => onSelectNav && onSelectNav(item.id)}
                       aria-current={isActive ? 'page' : undefined}
                       title={collapsed ? item.label : undefined}
@@ -288,6 +318,8 @@ export function Sidebar({
                         fontSize: '13px',
                         cursor: 'pointer',
                         textAlign: 'left',
+                        textDecoration: 'none',
+                        boxSizing: 'border-box',
                         transition: 'background-color 150ms ease, color 150ms ease',
                       }}
                     >
@@ -333,7 +365,7 @@ export function Sidebar({
                           {itemBadge}
                         </span>
                       )}
-                    </button>
+                    </Link>
                   );
                 })}
               </div>
