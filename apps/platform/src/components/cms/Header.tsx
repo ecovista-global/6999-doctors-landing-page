@@ -1,12 +1,14 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import {
   SearchIcon,
   ExternalLinkIcon,
   ChevronRightIcon,
   PaletteIcon,
   ShieldCheckIcon,
+  GlobeIcon,
 } from '@/components/Icons';
 
 export interface BreadcrumbItem {
@@ -160,6 +162,43 @@ export function Header({
 
       {/* Right: Actions, Theme Switcher & Doctor Avatar */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+        {/* Dedicated Navbar Button for Page Slots (7 Pages) */}
+        <Link
+          href="/cms/pages"
+          className="cms-focus-ring"
+          title="Open Page Slots Manager (7-Page Architecture)"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '7px',
+            padding: '7px 13px',
+            borderRadius: 'var(--radius-md, 10px)',
+            background: 'var(--color-bg-surface, #F1F5F9)',
+            color: 'var(--color-brand-primary, #0D5C46)',
+            fontSize: '12px',
+            fontWeight: 700,
+            textDecoration: 'none',
+            border: '1px solid var(--color-border-subtle, #CBD5E1)',
+            transition: 'all 150ms ease',
+          }}
+        >
+          <GlobeIcon size={14} color="var(--color-brand-primary, #0D5C46)" />
+          <span>Page Slots</span>
+          <span
+            style={{
+              padding: '2px 6px',
+              borderRadius: '999px',
+              fontSize: '10px',
+              fontWeight: 800,
+              background: 'var(--color-brand-surface, #E6F4F1)',
+              color: 'var(--color-brand-primary, #0D5C46)',
+              border: '1px solid var(--color-border-subtle, #BFE3DC)',
+            }}
+          >
+            7 Active
+          </span>
+        </Link>
+
         {/* View Live Patient Website */}
         <a
           href="/"

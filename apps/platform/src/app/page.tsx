@@ -294,30 +294,31 @@ export default function PatientLandingPage() {
         </div>
 
         {/* Desktop Navigation */}
-        <nav className="desktop-nav" style={{ fontSize: '14px', fontWeight: '600' }}>
-          <a href="#about" className="nav-link" style={{ color: '#334155' }}>Credentials</a>
-          <a href="#features" className="nav-link" style={{ color: '#334155' }}>Why Choose Us</a>
-          <a href="#services" className="nav-link" style={{ color: '#334155' }}>Services</a>
-          <a href="#clinic" className="nav-link" style={{ color: '#334155' }}>Clinic &amp; Timings</a>
-          <a href="#reviews" className="nav-link" style={{ color: '#334155' }}>Reviews</a>
-          <a href="#faq" className="nav-link" style={{ color: '#334155' }}>FAQ</a>
-          <a href="#booking" className="nav-link" style={{ color: theme.primary, fontWeight: '700' }}>Book Slot</a>
+        <nav className="desktop-nav" style={{ fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Link href="/" className="nav-link" style={{ color: theme.primary, fontWeight: '700' }}>Home</Link>
+          <Link href="/about" className="nav-link" style={{ color: '#334155' }}>About Doctor</Link>
+          <Link href="/services" className="nav-link" style={{ color: '#334155' }}>Treatments &amp; Services</Link>
+          <Link href="/doctors" className="nav-link" style={{ color: '#334155' }}>Doctors &amp; Specialists</Link>
+          <Link href="/testimonials-faq" className="nav-link" style={{ color: '#334155' }}>Reviews &amp; FAQs</Link>
+          <Link href="/blog" className="nav-link" style={{ color: '#334155' }}>Health Blog</Link>
+          <Link href="/contact" className="nav-link" style={{ color: theme.primary, fontWeight: '700' }}>Contact &amp; Booking</Link>
           <a
             href={`tel:${content.doctor.phone.replace(/[^0-9+]/g, '')}`}
             className="ux-btn"
             style={{
               background: theme.primary,
               color: '#FFFFFF',
-              padding: '8px 18px',
+              padding: '7px 16px',
               borderRadius: '8px',
               textDecoration: 'none',
               fontWeight: '700',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
+              marginLeft: '6px',
             }}
           >
-            <PhoneIcon size={16} color="#FFFFFF" />
+            <PhoneIcon size={14} color="#FFFFFF" />
             <span>Call Clinic</span>
           </a>
         </nav>
@@ -380,13 +381,13 @@ export default function PatientLandingPage() {
             boxShadow: '0 10px 20px rgba(0,0,0,0.08)',
           }}
         >
-          <a href="#about" onClick={() => setMobileMenuOpen(false)} style={{ color: '#334155', fontWeight: '600', textDecoration: 'none', padding: '6px 0' }}>Credentials</a>
-          <a href="#features" onClick={() => setMobileMenuOpen(false)} style={{ color: '#334155', fontWeight: '600', textDecoration: 'none', padding: '6px 0' }}>Why Choose Us</a>
-          <a href="#services" onClick={() => setMobileMenuOpen(false)} style={{ color: '#334155', fontWeight: '600', textDecoration: 'none', padding: '6px 0' }}>Services</a>
-          <a href="#clinic" onClick={() => setMobileMenuOpen(false)} style={{ color: '#334155', fontWeight: '600', textDecoration: 'none', padding: '6px 0' }}>Clinic &amp; Timings</a>
-          <a href="#reviews" onClick={() => setMobileMenuOpen(false)} style={{ color: '#334155', fontWeight: '600', textDecoration: 'none', padding: '6px 0' }}>Reviews</a>
-          <a href="#faq" onClick={() => setMobileMenuOpen(false)} style={{ color: '#334155', fontWeight: '600', textDecoration: 'none', padding: '6px 0' }}>FAQ</a>
-          <a href="#booking" onClick={() => setMobileMenuOpen(false)} style={{ color: theme.primary, fontWeight: '700', textDecoration: 'none', padding: '6px 0' }}>Book Consultation Slot</a>
+          <Link href="/" onClick={() => setMobileMenuOpen(false)} style={{ color: theme.primary, fontWeight: '700', textDecoration: 'none', padding: '6px 0' }}>Home</Link>
+          <Link href="/about" onClick={() => setMobileMenuOpen(false)} style={{ color: '#334155', fontWeight: '600', textDecoration: 'none', padding: '6px 0' }}>About Doctor</Link>
+          <Link href="/services" onClick={() => setMobileMenuOpen(false)} style={{ color: '#334155', fontWeight: '600', textDecoration: 'none', padding: '6px 0' }}>Treatments &amp; Services</Link>
+          <Link href="/doctors" onClick={() => setMobileMenuOpen(false)} style={{ color: '#334155', fontWeight: '600', textDecoration: 'none', padding: '6px 0' }}>Doctors &amp; Specialists</Link>
+          <Link href="/testimonials-faq" onClick={() => setMobileMenuOpen(false)} style={{ color: '#334155', fontWeight: '600', textDecoration: 'none', padding: '6px 0' }}>Reviews &amp; FAQs</Link>
+          <Link href="/blog" onClick={() => setMobileMenuOpen(false)} style={{ color: '#334155', fontWeight: '600', textDecoration: 'none', padding: '6px 0' }}>Health Blog</Link>
+          <Link href="/contact" onClick={() => setMobileMenuOpen(false)} style={{ color: theme.primary, fontWeight: '700', textDecoration: 'none', padding: '6px 0' }}>Contact &amp; Booking</Link>
         </div>
       )}
 
@@ -1321,7 +1322,7 @@ export default function PatientLandingPage() {
                       >
                         <span style={{ fontSize: '13px', fontWeight: '800' }}>{slot.time}</span>
                         <span style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: '600', color: isSelected ? theme.primary : slot.available ? '#16A34A' : '#94A3B8' }}>
-                          {isSelected ? '✓ Selected' : slot.available ? slot.period : 'Reserved'}
+                          {isSelected ? 'Selected' : slot.available ? slot.period : 'Reserved'}
                         </span>
                       </button>
                     );
@@ -1470,6 +1471,18 @@ export default function PatientLandingPage() {
               &bull; 7-day complimentary follow-up<br />
               &bull; Zero unsolicited medicine promotion
             </p>
+          </div>
+
+          <div>
+            <div style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: '14px', marginBottom: '12px' }}>7-Page Directory</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px' }}>
+              <Link href="/about" style={{ color: '#94A3B8', textDecoration: 'none' }}>About Doctor</Link>
+              <Link href="/services" style={{ color: '#94A3B8', textDecoration: 'none' }}>Treatments &amp; Services</Link>
+              <Link href="/doctors" style={{ color: '#94A3B8', textDecoration: 'none' }}>Doctors &amp; Specialists</Link>
+              <Link href="/testimonials-faq" style={{ color: '#94A3B8', textDecoration: 'none' }}>Reviews &amp; FAQs</Link>
+              <Link href="/blog" style={{ color: '#94A3B8', textDecoration: 'none' }}>Health Blog</Link>
+              <Link href="/contact" style={{ color: '#94A3B8', textDecoration: 'none' }}>Contact &amp; Booking</Link>
+            </div>
           </div>
 
           <div>

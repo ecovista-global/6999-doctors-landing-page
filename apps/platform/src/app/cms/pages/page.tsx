@@ -26,6 +26,7 @@ interface SlotExtraInfo {
   manageUrl: string;
   manageLabel: string;
   previewHash: string;
+  routePath: string;
   metaTitle: string;
   metaDescription: string;
 }
@@ -36,6 +37,7 @@ const SLOT_EXTRAS: Record<AllowedPageSlot, SlotExtraInfo> = {
     manageUrl: '/cms/editor',
     manageLabel: 'Edit in Site Editor',
     previewHash: '#hero',
+    routePath: '/',
     metaTitle: 'Dr. Maanvita Kumari | Best General Physician in Sector 18 Noida',
     metaDescription: 'Consult Dr. Maanvita Kumari (MBBS, MD) at HealthConsult Family Clinic, Sector 18 Noida. Compassionate general medicine, diabetes & infection care.',
   },
@@ -44,6 +46,7 @@ const SLOT_EXTRAS: Record<AllowedPageSlot, SlotExtraInfo> = {
     manageUrl: '/cms/editor',
     manageLabel: 'Edit Doctor Profile',
     previewHash: '#about',
+    routePath: '/about',
     metaTitle: 'About Dr. Maanvita Kumari | MBBS, MD (General Medicine) MAMC',
     metaDescription: 'Learn about Dr. Maanvita Kumari, senior physician at HealthConsult Clinic with 12+ years of clinical excellence in internal medicine and diabetology.',
   },
@@ -52,6 +55,7 @@ const SLOT_EXTRAS: Record<AllowedPageSlot, SlotExtraInfo> = {
     manageUrl: '/cms/editor',
     manageLabel: 'Manage Services',
     previewHash: '#services',
+    routePath: '/services',
     metaTitle: 'Clinical Treatments & Services | HealthConsult Family Clinic',
     metaDescription: 'Expert care for Type-2 Diabetes, Hypertension, Seasonal Fevers, Thyroid, and Preventive Health Checks at Sector 18 Noida.',
   },
@@ -60,6 +64,7 @@ const SLOT_EXTRAS: Record<AllowedPageSlot, SlotExtraInfo> = {
     manageUrl: '/cms/editor',
     manageLabel: 'Manage Specialists',
     previewHash: '#features',
+    routePath: '/doctors',
     metaTitle: 'Specialist Doctors & Clinical Schedule | HealthConsult Clinic',
     metaDescription: 'Meet our consulting physicians and specialists. Check OPD timings and book priority consultations.',
   },
@@ -68,6 +73,7 @@ const SLOT_EXTRAS: Record<AllowedPageSlot, SlotExtraInfo> = {
     manageUrl: '/cms/reviews-faqs',
     manageLabel: 'Manage FAQs & Reviews',
     previewHash: '#reviews',
+    routePath: '/testimonials-faq',
     metaTitle: 'Patient Reviews & FAQs | HealthConsult Family Clinic',
     metaDescription: 'Read verified patient experiences and find answers to common questions about appointments, fees, and reports at HealthConsult Clinic.',
   },
@@ -76,6 +82,7 @@ const SLOT_EXTRAS: Record<AllowedPageSlot, SlotExtraInfo> = {
     manageUrl: '/cms/blog',
     manageLabel: 'Manage Blog Articles',
     previewHash: '#blog',
+    routePath: '/blog',
     metaTitle: 'Health & Wellness Blog | Dr. Maanvita Kumari',
     metaDescription: 'Evidence-backed patient education articles on managing diabetes, seasonal fevers, and adult immunization in Delhi NCR.',
   },
@@ -84,6 +91,7 @@ const SLOT_EXTRAS: Record<AllowedPageSlot, SlotExtraInfo> = {
     manageUrl: '/cms/settings',
     manageLabel: 'Configure Clinic Settings',
     previewHash: '#contact',
+    routePath: '/contact',
     metaTitle: 'Contact & Book Appointment | HealthConsult Family Clinic Noida',
     metaDescription: 'Visit HealthConsult Clinic at Plot 14, Health Plaza, Sector 18 Noida. Book in-person or call +91 98765 43210.',
   },
@@ -353,22 +361,26 @@ export default function PageSlotsManager() {
                       </Link>
 
                       <a
-                        href={`http://localhost:5173${extra.previewHash}`}
+                        href={extra.routePath}
                         target="_blank"
                         rel="noreferrer"
-                        title="Preview on live patient site"
+                        title={`Preview live page (${extra.routePath})`}
                         style={{
                           display: 'inline-flex',
                           alignItems: 'center',
-                          padding: '7px',
+                          gap: '4px',
+                          padding: '7px 10px',
                           borderRadius: '6px',
                           border: '1px solid #CBD5E1',
                           background: '#FFFFFF',
-                          color: '#64748B',
+                          color: '#0D5C46',
+                          fontSize: '12px',
+                          fontWeight: 700,
                           textDecoration: 'none',
                         }}
                       >
-                        <ExternalLinkIcon size={14} />
+                        <ExternalLinkIcon size={13} />
+                        <span>Preview Page</span>
                       </a>
                     </div>
                   )}
