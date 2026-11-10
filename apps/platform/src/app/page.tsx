@@ -39,6 +39,8 @@ import {
   Share2Icon,
   CopyIcon,
 } from '@/components/Icons';
+import { AppointmentSlipModal } from '@/components/public/AppointmentSlipModal';
+import { getGoogleCalendarUrl, downloadIcsFile } from '@/lib/calendarExport';
 
 const DEFAULT_PALETTE = { primary: '#0F766E', primaryDark: '#115E59', accent: '#047857', bg: '#F0FDF4', text: '#0F172A' };
 
@@ -73,6 +75,7 @@ export default function PatientLandingPage() {
   const [loading, setLoading] = useState(false);
   const [showInteractiveMap, setShowInteractiveMap] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showSlipModal, setShowSlipModal] = useState(false);
 
   // Appointment Form State
   const [formData, setFormData] = useState({
@@ -1149,12 +1152,68 @@ export default function PatientLandingPage() {
 
                 <button
                   type="button"
+                  onClick={() => setShowSlipModal(true)}
+                  className="ux-btn"
+                  style={{
+                    background: '#0D5C46',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    padding: '10px 18px',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 2px 4px rgba(13,92,70,0.25)',
+                  }}
+                >
+                  <PrinterIcon size={16} color="#FFFFFF" />
+                  <span>Print Appointment Slip</span>
+                </button>
+
+                <a
+                  href={getGoogleCalendarUrl({
+                    patientName: confirmedDetails.patientName,
+                    doctorName: content.doctor.name,
+                    clinicName: content.clinic.name,
+                    service: confirmedDetails.service,
+                    date: confirmedDetails.date || new Date().toISOString().split('T')[0] || '',
+                    time: confirmedDetails.time,
+                    tokenNumber: confirmedToken,
+                    clinicAddress: `${content.clinic.street}, ${content.clinic.area}, ${content.clinic.city}`,
+                    phone: content.doctor.phone,
+                  })}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ux-btn"
+                  style={{
+                    background: '#FFFFFF',
+                    color: '#0284C7',
+                    border: '1px solid #BAE6FD',
+                    padding: '10px 16px',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    fontWeight: '700',
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  <CalendarIcon size={16} color="#0284C7" />
+                  <span>Google Calendar</span>
+                </a>
+
+                <button
+                  type="button"
                   onClick={downloadIcsCalendar}
                   className="ux-btn"
                   style={{
                     background: '#FFFFFF',
-                    color: '#0F766E',
-                    border: '1px solid #0F766E',
+                    color: '#334155',
+                    border: '1px solid #CBD5E1',
                     padding: '10px 16px',
                     borderRadius: '8px',
                     fontSize: '13px',
@@ -1165,8 +1224,8 @@ export default function PatientLandingPage() {
                     gap: '6px',
                   }}
                 >
-                  <CalendarIcon size={16} color="#0F766E" />
-                  <span>Add to Calendar (.ics)</span>
+                  <ClockIcon size={16} color="#D97706" />
+                  <span>Apple / .ics</span>
                 </button>
 
                 <a
@@ -1571,6 +1630,25 @@ export default function PatientLandingPage() {
           <span>Book Slot</span>
         </a>
       </aside>
+
+      {/* Appointment Slip Modal */}
+      {showSlipModal && confirmedDetails && (
+        <AppointmentSlipModal
+          isOpen={showSlipModal}
+          onClose={() => setShowSlipModal(false)}
+          appointment={{
+            tokenNumber: confirmedToken,
+            patientName: confirmedDetails.patientName,
+            phone: confirmedDetails.phone,
+            service: confirmedDetails.service,
+            date: confirmedDetails.date || new Date().toISOString().split('T')[0] || '',
+            time: confirmedDetails.time,
+            shift: confirmedDetails.shift,
+            id: submittedAptId,
+          }}
+          content={content}
+        />
+      )}
 
     </div>
   );

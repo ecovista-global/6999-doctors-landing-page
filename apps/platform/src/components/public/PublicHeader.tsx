@@ -13,7 +13,12 @@ import {
   XIcon,
   LockIcon as KeyIcon,
   ChevronRightIcon,
+  ActivityIcon,
+  GlobeIcon,
+  BellIcon,
+  AlertTriangleIcon,
 } from '@/components/Icons';
+import { TRANSLATIONS, type Locale } from '@/lib/translations';
 
 export interface PublicHeaderProps {
   content: DoctorContent;
@@ -39,10 +44,28 @@ export const PUBLIC_NAV_LINKS = [
 export function PublicHeader({ content, theme }: PublicHeaderProps) {
   const pathname = usePathname() || '/';
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [locale, setLocale] = useState<Locale>('en');
+  const [showAnnouncement, setShowAnnouncement] = useState(true);
+
+  const t = TRANSLATIONS[locale] || TRANSLATIONS.en;
+
+  const navLinks = [
+    { label: t.home, href: '/' },
+    { label: t.aboutDoctor, href: '/about' },
+    { label: t.services, href: '/services' },
+    { label: t.specialists, href: '/doctors' },
+    { label: t.reviewsFaq, href: '/testimonials-faq' },
+    { label: t.healthBlog, href: '/blog' },
+    { label: t.contactBooking, href: '/contact' },
+  ];
 
   const isLinkActive = (href: string) => {
     if (href === '/') return pathname === '/';
     return pathname.startsWith(href);
+  };
+
+  const toggleLocale = () => {
+    setLocale((prev) => (prev === 'en' ? 'hi' : 'en'));
   };
 
   return (
@@ -77,28 +100,92 @@ export function PublicHeader({ content, theme }: PublicHeaderProps) {
             <strong>Live Clinical Edge:</strong> Theme: <strong>{content.theme}</strong> &bull; Synced with DoctorSite Pro CMS
           </span>
         </div>
-        <Link
-          href="/cms"
-          style={{
-            background: theme.primary,
-            color: '#FFFFFF',
-            padding: '5px 14px',
-            borderRadius: '6px',
-            textDecoration: 'none',
-            fontWeight: '700',
-            fontSize: '12px',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-          }}
-        >
-          <KeyIcon size={14} color="#FFFFFF" />
-          <span>Staff CMS Control Panel (Edit All Content &amp; Manage Appointments) &rarr;</span>
-        </Link>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Bilingual Switcher */}
+          <button
+            type="button"
+            onClick={toggleLocale}
+            aria-label="Toggle Language English / Hindi"
+            style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.25)',
+              borderRadius: '6px',
+              color: '#FFFFFF',
+              padding: '4px 10px',
+              fontSize: '11px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
+            }}
+          >
+            <GlobeIcon size={12} color="#FFFFFF" />
+            <span>{locale === 'en' ? 'हिंदी' : 'English'}</span>
+          </button>
+
+          <Link
+            href="/cms"
+            style={{
+              background: theme.primary,
+              color: '#FFFFFF',
+              padding: '5px 14px',
+              borderRadius: '6px',
+              textDecoration: 'none',
+              fontWeight: '700',
+              fontSize: '12px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+            }}
+          >
+            <KeyIcon size={14} color="#FFFFFF" />
+            <span>Staff CMS Control Panel &rarr;</span>
+          </Link>
+        </div>
       </div>
 
-      {/* 2. MAIN CLINICAL HEADER */}
+      {/* 2. CLINIC EMERGENCY / BROADCAST ADVISORY BANNER */}
+      {content.announcement && showAnnouncement && (
+        <div
+          style={{
+            background: '#0284C7',
+            color: '#FFFFFF',
+            padding: '7px 24px',
+            fontSize: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontWeight: 600,
+            gap: '12px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <BellIcon size={14} color="#FFFFFF" />
+            <span>
+              <strong>{locale === 'hi' ? 'क्लीनिक परामर्श सूचना:' : 'Clinic Notice:'}</strong> {content.announcement}
+            </span>
+          </div>
+          <button
+            onClick={() => setShowAnnouncement(false)}
+            aria-label="Dismiss clinic announcement"
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: '#FFFFFF',
+              cursor: 'pointer',
+              padding: '2px 4px',
+              opacity: 0.85,
+            }}
+          >
+            <XIcon size={14} />
+          </button>
+        </div>
+      )}
+
+      {/* 3. MAIN CLINICAL HEADER */}
       <header
         style={{
           position: 'sticky',
@@ -167,7 +254,7 @@ export function PublicHeader({ content, theme }: PublicHeaderProps) {
             fontWeight: '600',
           }}
         >
-          {PUBLIC_NAV_LINKS.map((link) => {
+          {navLinks.map((link) => {
             const active = isLinkActive(link.href);
             return (
               <Link
@@ -208,7 +295,7 @@ export function PublicHeader({ content, theme }: PublicHeaderProps) {
             }}
           >
             <PhoneIcon size={14} color="#FFFFFF" />
-            <span>Call Clinic</span>
+            <span>{t.callClinic}</span>
           </a>
         </nav>
 
@@ -217,6 +304,22 @@ export function PublicHeader({ content, theme }: PublicHeaderProps) {
           className="mobile-nav-toggle"
           style={{ display: 'none', alignItems: 'center', gap: '8px' }}
         >
+          <button
+            type="button"
+            onClick={toggleLocale}
+            style={{
+              background: '#F1F5F9',
+              border: '1px solid #CBD5E1',
+              borderRadius: '6px',
+              color: '#334155',
+              padding: '6px 10px',
+              fontSize: '11px',
+              fontWeight: 700,
+              cursor: 'pointer',
+            }}
+          >
+            {locale === 'en' ? 'हिंदी' : 'EN'}
+          </button>
           <a
             href={`tel:${content.doctor.phone.replace(/[^0-9+]/g, '')}`}
             style={{
@@ -257,6 +360,97 @@ export function PublicHeader({ content, theme }: PublicHeaderProps) {
         </div>
       </header>
 
+      {/* 4. LIVE OPD QUEUE TRACKER STRIP */}
+      <div
+        data-testid="live-opd-queue-strip"
+        style={{
+          background: 'linear-gradient(90deg, #F0FDF4 0%, #ECFDF5 100%)',
+          borderBottom: '1px solid #BBF7D0',
+          padding: '8px 24px',
+          fontSize: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '10px',
+          zIndex: 40,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 800, color: '#065F46' }}>
+            <span
+              style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                backgroundColor: '#059669',
+                display: 'inline-block',
+                boxShadow: '0 0 0 3px rgba(16, 185, 129, 0.25)',
+              }}
+            />
+            <span>{locale === 'hi' ? 'लाइव ओपीडी टोकन:' : 'Live OPD Serving:'}</span>
+            <span
+              style={{
+                background: '#059669',
+                color: '#FFFFFF',
+                padding: '2px 8px',
+                borderRadius: '12px',
+                fontWeight: 900,
+                fontSize: '12px',
+              }}
+            >
+              #{content.availability.currentServingToken || 4}
+            </span>
+          </div>
+
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#166534', fontWeight: 600 }}>
+            {content.availability.runningLateMinutes > 0 ? (
+              <span style={{ color: '#D97706', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 700 }}>
+                <AlertTriangleIcon size={14} color="#D97706" />
+                <span>
+                  {locale === 'hi'
+                    ? `विलंब: ${content.availability.runningLateMinutes} मिनट (${content.availability.runningLateReason || 'आपातकालीन मरीज'})`
+                    : `Delay: ${content.availability.runningLateMinutes} mins (${content.availability.runningLateReason || 'Emergency acute review'})`}
+                </span>
+              </span>
+            ) : (
+              <span style={{ color: '#059669', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <ActivityIcon size={14} color="#059669" />
+                <span>{locale === 'hi' ? 'चिकित्सक समय पर उपस्थित' : 'Doctor On Time'}</span>
+              </span>
+            )}
+          </div>
+
+          <div style={{ color: '#475569', fontSize: '12px' }}>
+            <span>
+              {locale === 'hi' ? 'अगला स्लॉट:' : 'Next Slot:'}{' '}
+              <strong style={{ color: '#0F172A' }}>{content.availability.nextAvailableSlot || 'Today, 05:30 PM'}</strong>
+            </span>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Link
+            href="/contact#book"
+            style={{
+              background: '#047857',
+              color: '#FFFFFF',
+              padding: '5px 12px',
+              borderRadius: '6px',
+              textDecoration: 'none',
+              fontSize: '11px',
+              fontWeight: 700,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              boxShadow: '0 1px 2px rgba(4,120,87,0.2)',
+            }}
+          >
+            <span>{locale === 'hi' ? 'टोकन बुक करें' : 'Book Next Slot'} &rarr;</span>
+          </Link>
+        </div>
+      </div>
+
       {/* Mobile Drawer Dropdown */}
       {mobileMenuOpen && (
         <div
@@ -271,7 +465,7 @@ export function PublicHeader({ content, theme }: PublicHeaderProps) {
           }}
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {PUBLIC_NAV_LINKS.map((link) => {
+            {navLinks.map((link) => {
               const active = isLinkActive(link.href);
               return (
                 <Link
@@ -317,7 +511,7 @@ export function PublicHeader({ content, theme }: PublicHeaderProps) {
                 }}
               >
                 <PhoneIcon size={16} color="#FFFFFF" />
-                <span>Call Clinic</span>
+                <span>{t.callClinic}</span>
               </a>
               <a
                 href={`https://wa.me/${content.doctor.whatsappNumber.replace(/[^0-9]/g, '')}`}

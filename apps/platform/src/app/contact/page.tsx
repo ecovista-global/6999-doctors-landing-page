@@ -18,9 +18,12 @@ import {
   BuildingIcon,
   SendIcon,
 } from '@/components/Icons';
+import { AppointmentSlipModal } from '@/components/public/AppointmentSlipModal';
+import { getGoogleCalendarUrl, downloadIcsFile } from '@/lib/calendarExport';
 
 export default function ContactAndBookingPage() {
   const { content, theme } = useClinicContent();
+  const [showSlipModal, setShowSlipModal] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -35,6 +38,7 @@ export default function ContactAndBookingPage() {
   const [selectedSlot, setSelectedSlot] = useState<string>('05:30 PM');
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submittedAptId, setSubmittedAptId] = useState('');
   const [confirmedToken, setConfirmedToken] = useState<number>(8);
   const [mapLoaded, setMapLoaded] = useState(false);
 
@@ -68,6 +72,7 @@ export default function ContactAndBookingPage() {
       if (res.ok) {
         const data = await res.json();
         const apt = data.appointment;
+        setSubmittedAptId(apt?.id || '');
         setConfirmedToken(apt?.tokenNumber || (content?.availability?.currentServingToken ? content.availability.currentServingToken + 4 : 8));
         setSubmitSuccess(true);
       } else {
@@ -229,12 +234,12 @@ export default function ContactAndBookingPage() {
                   <div><strong>OPD Consultation Fee:</strong> ₹{content.doctor.consultationFee} (Payable at clinic desk)</div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
                   <button
                     type="button"
-                    onClick={downloadIcs}
+                    onClick={() => setShowSlipModal(true)}
                     style={{
-                      background: theme.primary,
+                      background: '#0D5C46',
                       color: '#FFFFFF',
                       padding: '10px 18px',
                       borderRadius: '8px',
@@ -245,11 +250,76 @@ export default function ContactAndBookingPage() {
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '6px',
+                      boxShadow: '0 2px 4px rgba(13,92,70,0.25)',
                     }}
                   >
-                    <CalendarIcon size={15} color="#FFFFFF" />
-                    <span>Add to Calendar (.ics)</span>
+                    <PrinterIcon size={15} color="#FFFFFF" />
+                    <span>Print Appointment Slip</span>
                   </button>
+
+                  <a
+                    href={getGoogleCalendarUrl({
+                      patientName: formData.patientName,
+                      doctorName: content.doctor.name,
+                      clinicName: content.clinic.name,
+                      service: formData.service,
+                      date: formData.preferredDate || new Date().toISOString().split('T')[0] || '',
+                      time: selectedSlot,
+                      tokenNumber: confirmedToken,
+                      clinicAddress: `${content.clinic.street}, ${content.clinic.area}, ${content.clinic.city}`,
+                      phone: content.doctor.phone,
+                    })}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      background: '#FFFFFF',
+                      color: '#0284C7',
+                      padding: '10px 16px',
+                      borderRadius: '8px',
+                      border: '1px solid #BAE6FD',
+                      fontWeight: 700,
+                      fontSize: '13px',
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                    }}
+                  >
+                    <CalendarIcon size={15} color="#0284C7" />
+                    <span>Google Calendar</span>
+                  </a>
+
+                  <button
+                    type="button"
+                    onClick={() => downloadIcsFile({
+                      patientName: formData.patientName,
+                      doctorName: content.doctor.name,
+                      clinicName: content.clinic.name,
+                      service: formData.service,
+                      date: formData.preferredDate || new Date().toISOString().split('T')[0] || '',
+                      time: selectedSlot,
+                      tokenNumber: confirmedToken,
+                      clinicAddress: `${content.clinic.street}, ${content.clinic.area}, ${content.clinic.city}`,
+                      phone: content.doctor.phone,
+                    })}
+                    style={{
+                      background: '#FFFFFF',
+                      color: '#334155',
+                      padding: '10px 16px',
+                      borderRadius: '8px',
+                      border: '1px solid #CBD5E1',
+                      fontWeight: 700,
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                    }}
+                  >
+                    <ClockIcon size={15} color="#D97706" />
+                    <span>Apple / .ics</span>
+                  </button>
+
                   <button
                     type="button"
                     onClick={() => {
@@ -638,6 +708,25 @@ export default function ContactAndBookingPage() {
           </div>
         </div>
       </section>
+
+      {/* Printable Appointment Slip Modal */}
+      {showSlipModal && (
+        <AppointmentSlipModal
+          isOpen={showSlipModal}
+          onClose={() => setShowSlipModal(false)}
+          appointment={{
+            tokenNumber: confirmedToken,
+            patientName: formData.patientName,
+            phone: formData.phone,
+            service: formData.service,
+            date: formData.preferredDate || new Date().toISOString().split('T')[0] || '',
+            time: selectedSlot,
+            shift: formData.shift,
+            id: submittedAptId,
+          }}
+          content={content}
+        />
+      )}
 
       {/* Shared Public Footer */}
       <PublicFooter content={content} theme={theme} />

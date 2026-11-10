@@ -23,6 +23,19 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added (Live OPD Queue Tracker, Printable Slip Modal, Calendar Export & Bilingual Engine)
+
+- **Live OPD Queue & Real-Time Token Tracker:**
+  - Added live OPD queue tracker widget (`data-testid="live-opd-queue-strip"`) displaying currently served token number (`#4`), doctor delay/on-time status indicator, next available slot (`Today, 05:30 PM`), and quick booking trigger.
+  - Added top broadcast advisory banner in `PublicHeader.tsx` for clinic announcements with dismiss control.
+- **Calendar Export & Printable Appointment Slip:**
+  - Implemented RFC-5545 iCalendar (`.ics`) generator and direct Google Calendar URL builder (`apps/platform/src/lib/calendarExport.ts`).
+  - Added modal component `AppointmentSlipModal.tsx` for printing standardized A5 / thermal clinic appointment slips with isolated print CSS (`@media print`), token callout, doctor credentials, and clinical instructions.
+  - Connected calendar export and appointment slip actions on booking confirmation screens in `apps/platform/src/app/page.tsx` and `apps/platform/src/app/contact/page.tsx`.
+- **Bilingual Localization Engine (English & Hindi):**
+  - Added clinical dictionary in `apps/platform/src/lib/translations.ts` with 1-click `EN | हिंदी` toggle in `PublicHeader.tsx`.
+  - Added unit test suite `test/opd-queue-calendar-i18n.test.ts` verifying calendar parameters, token formatting, and Hindi translations (5/5 tests passing).
+
 ### Added & Changed (Apple San Francisco, Poppins, and Helvetica Typography Stack)
 
 - **Self-Hosted Poppins Font Integration:**
