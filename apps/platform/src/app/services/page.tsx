@@ -36,16 +36,8 @@ function getServiceIcon(id: string, color: string) {
 }
 
 export default function ServicesPage() {
-  const { content, theme, loading } = useClinicContent();
+  const { content, theme } = useClinicContent();
   const [search, setSearch] = useState('');
-
-  if (loading && !content) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p>Loading Clinical Services...</p>
-      </div>
-    );
-  }
 
   const filteredServices = content.services.filter(
     (s) =>

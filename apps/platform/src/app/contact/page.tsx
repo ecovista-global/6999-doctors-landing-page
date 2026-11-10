@@ -20,7 +20,7 @@ import {
 } from '@/components/Icons';
 
 export default function ContactAndBookingPage() {
-  const { content, theme, loading } = useClinicContent();
+  const { content, theme } = useClinicContent();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -43,14 +43,6 @@ export default function ContactAndBookingPage() {
   const [enquiryName, setEnquiryName] = useState('');
   const [enquiryPhone, setEnquiryPhone] = useState('');
   const [enquiryMessage, setEnquiryMessage] = useState('');
-
-  if (loading && !content) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p>Loading Contact &amp; Booking...</p>
-      </div>
-    );
-  }
 
   const handleBook = async (e: React.FormEvent) => {
     e.preventDefault();

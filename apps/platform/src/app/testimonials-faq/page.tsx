@@ -17,16 +17,8 @@ import {
 import { CLINICAL_FAQS_CATEGORIZED } from '@/lib/clinicalFaqs';
 
 export default function TestimonialsFaqPage() {
-  const { content, theme, loading } = useClinicContent();
+  const { content, theme } = useClinicContent();
   const [activeTab, setActiveTab] = useState<'reviews' | 'faqs'>('reviews');
-
-  if (loading && !content) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p>Loading Reviews &amp; FAQs...</p>
-      </div>
-    );
-  }
 
   return (
     <div style={{ minHeight: '100vh', background: '#FFFFFF', color: theme.text, fontFamily: 'var(--font-sans, system-ui)' }}>

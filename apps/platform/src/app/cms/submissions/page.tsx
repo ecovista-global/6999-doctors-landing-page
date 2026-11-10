@@ -192,8 +192,17 @@ export default function SubmissionsDashboardPage() {
   return (
     <Suspense
       fallback={
-        <div style={{ padding: '32px', textAlign: 'center', color: '#64748B' }}>
-          Loading Submissions Dashboard...
+        <div style={{ padding: '24px 32px', maxWidth: '1400px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+            <div>
+              <h1 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--color-text-main, #0F172A)', margin: '0 0 6px 0' }}>
+                Appointments &amp; Patient Submissions
+              </h1>
+              <p style={{ fontSize: '13px', color: 'var(--color-text-muted, #64748B)', margin: 0 }}>
+                Unified patient inbox with audit trail and DPDP Act 2023 compliance.
+              </p>
+            </div>
+          </div>
         </div>
       }
     >

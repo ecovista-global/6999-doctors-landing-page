@@ -19,20 +19,12 @@ import {
 import { CLINICAL_BLOG_POSTS, POST_CONTENTS } from '@/lib/blogPosts';
 
 export default function BlogDetailPage() {
-  const { content, theme, loading } = useClinicContent();
+  const { content, theme } = useClinicContent();
   const params = useParams();
   const slug = (params?.slug as string) || 'managing-type-2-diabetes-in-summer';
 
   const postMeta = CLINICAL_BLOG_POSTS.find((p) => p.slug === slug) || CLINICAL_BLOG_POSTS[0]!;
   const postData = POST_CONTENTS[slug] || POST_CONTENTS['managing-type-2-diabetes-in-summer']!;
-
-  if (loading && !content) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p>Loading Clinical Article...</p>
-      </div>
-    );
-  }
 
   return (
     <div style={{ minHeight: '100vh', background: '#FFFFFF', color: theme.text, fontFamily: 'var(--font-sans, system-ui)' }}>

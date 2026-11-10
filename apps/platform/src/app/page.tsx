@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { DoctorContent } from '@/lib/contentStore';
+import { FALLBACK_CONTENT } from '@/lib/useClinicContent';
 import {
   StethoscopeIcon,
   PhoneIcon,
@@ -68,8 +69,8 @@ function renderServiceIcon(iconName: string, color: string) {
 }
 
 export default function PatientLandingPage() {
-  const [content, setContent] = useState<DoctorContent | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [content, setContent] = useState<DoctorContent>(FALLBACK_CONTENT);
+  const [loading, setLoading] = useState(false);
   const [showInteractiveMap, setShowInteractiveMap] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -197,18 +198,6 @@ export default function PatientLandingPage() {
       setSubmitting(false);
     }
   };
-
-  if (loading || !content) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F8FAFC' }}>
-        <div style={{ textAlign: 'center', color: '#0F766E' }}>
-          <StethoscopeIcon size={48} color="#0F766E" style={{ marginBottom: '14px' }} />
-          <div style={{ fontSize: '20px', fontWeight: 'bold' }}>Loading Clinical Presence...</div>
-          <div style={{ fontSize: '13px', color: '#64748B', marginTop: '6px' }}>Connecting to DoctorSite Pro Control Plane...</div>
-        </div>
-      </div>
-    );
-  }
 
   const theme = (content?.theme && THEME_PALETTES[content.theme]) ? THEME_PALETTES[content.theme]! : DEFAULT_PALETTE;
 

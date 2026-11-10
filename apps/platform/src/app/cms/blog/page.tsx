@@ -85,8 +85,8 @@ const DEFAULT_POSTS: BlogPost[] = [
 ];
 
 export default function BlogManagementPage() {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [posts, setPosts] = useState<BlogPost[]>(DEFAULT_POSTS);
+  const [loading, setLoading] = useState<boolean>(false);
   const [search, setSearch] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);

@@ -17,17 +17,9 @@ import {
 import { CLINICAL_BLOG_POSTS } from '@/lib/blogPosts';
 
 export default function BlogIndexPage() {
-  const { content, theme, loading } = useClinicContent();
+  const { content, theme } = useClinicContent();
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
-
-  if (loading && !content) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p>Loading Clinical Health Blog...</p>
-      </div>
-    );
-  }
 
   const categories = ['All', 'Diabetes & Endocrinology', 'Infectious Diseases', 'Cardiovascular Health', 'Endocrinology & Women Health'];
 

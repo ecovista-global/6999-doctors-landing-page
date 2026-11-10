@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useCmsShell } from '@/components/cms/CmsShellContext';
 import { DoctorContent, AppointmentRecord } from '@/lib/contentStore';
+import { FALLBACK_CONTENT } from '@/lib/useClinicContent';
 import {
   StethoscopeIcon,
   PhoneIcon,
@@ -173,8 +174,8 @@ export default function CmsPanelPage() {
   const [previewKey, setPreviewKey] = useState<number>(1);
 
   // Live Content Store
-  const [content, setContent] = useState<DoctorContent | null>(null);
-  const [loadingContent, setLoadingContent] = useState(true);
+  const [content, setContent] = useState<DoctorContent>(FALLBACK_CONTENT);
+  const [loadingContent, setLoadingContent] = useState(false);
 
   // Live Appointments Store
   const [appointments, setAppointments] = useState<AppointmentRecord[]>([]);
@@ -1135,18 +1136,6 @@ export default function CmsPanelPage() {
 
   const newAppointmentsCount = appointments.filter((a) => a.status === 'new').length;
 
-  if (loadingContent || !content) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F8FAFC', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
-        <div style={{ textAlign: 'center', color: '#0F766E' }}>
-          <StethoscopeIcon size={48} color="#0F766E" style={{ marginBottom: '14px' }} />
-          <div style={{ fontSize: '20px', fontWeight: 'bold' }}>Loading DoctorSite Pro Control Plane...</div>
-          <div style={{ fontSize: '13px', color: '#64748B', marginTop: '6px' }}>Connecting to Control Plane API (/api/content)...</div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div style={{ padding: '24px 28px', minWidth: 0 }}>
       {/* Top Page Action & Publish Controls */}
@@ -1489,7 +1478,7 @@ export default function CmsPanelPage() {
                     {searchQuery.trim() && (
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 12px', background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '6px', fontSize: '12px', color: '#166534', marginBottom: '10px' }}>
                         <span>Search filter active: <strong>&quot;{searchQuery}&quot;</strong></span>
-                        <button onClick={() => setSearchQuery('')} style={{ background: 'none', border: 'none', color: '#166534', cursor: 'pointer', fontWeight: 'bold' }}>✕ Clear</button>
+                        <button onClick={() => setSearchQuery('')} style={{ background: 'none', border: 'none', color: '#166534', cursor: 'pointer', fontWeight: 'bold' }}>Clear</button>
                       </div>
                     )}
 
@@ -1914,7 +1903,7 @@ export default function CmsPanelPage() {
                           cursor: 'pointer',
                         }}
                       >
-                        ✓ On Time (Clear)
+                        On Time (Clear)
                       </button>
                       <button
                         onClick={() => handleBroadcastLate(15)}
@@ -2188,7 +2177,7 @@ export default function CmsPanelPage() {
                               }}
                             >
                               <MessageCircleIcon size={12} color="#166534" />
-                              <span>{apt.whatsappConfirmationSent ? '✓ Sent' : 'WA Confirm'}</span>
+                              <span>{apt.whatsappConfirmationSent ? 'Sent' : 'WA Confirm'}</span>
                             </button>
 
                             <button
@@ -2444,7 +2433,7 @@ export default function CmsPanelPage() {
                               }}
                             >
                               <StarIcon size={14} color={apt.googleReviewSent ? '#166534' : '#D97706'} />
-                              <span>{apt.googleReviewSent ? '✓ Google Review Sent' : '★ Request Google Review on WhatsApp'}</span>
+                              <span>{apt.googleReviewSent ? 'Google Review Sent' : 'Request Google Review on WhatsApp'}</span>
                             </button>
 
                             <button
@@ -2691,7 +2680,7 @@ export default function CmsPanelPage() {
                                 style={{ background: '#F0FDF4', color: '#166534', border: '1px solid #BBF7D0', padding: '5px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                               >
                                 <MessageCircleIcon size={12} color="#166534" />
-                                <span>{apt.whatsappConfirmationSent ? '✓ WA' : 'WA Confirm'}</span>
+                                <span>{apt.whatsappConfirmationSent ? 'WA Sent' : 'WA Confirm'}</span>
                               </button>
 
                               <button
@@ -4389,7 +4378,7 @@ export default function CmsPanelPage() {
                             }}
                           >
                             <UserCheckIcon size={13} color="#166534" />
-                            <span>{isDoctorPortrait ? '✓ Current Doctor Portrait' : '★ Set as Doctor Portrait'}</span>
+                            <span>{isDoctorPortrait ? 'Current Doctor Portrait' : 'Set as Doctor Portrait'}</span>
                           </button>
 
                           <button
@@ -4412,7 +4401,7 @@ export default function CmsPanelPage() {
                             }}
                           >
                             <BuildingIcon size={13} color="#0369A1" />
-                            <span>{isClinicPhoto ? '✓ Current Clinic Photo' : '★ Set as Clinic Photo'}</span>
+                            <span>{isClinicPhoto ? 'Current Clinic Photo' : 'Set as Clinic Photo'}</span>
                           </button>
 
                           <div style={{ display: 'flex', gap: '6px', marginTop: '2px' }}>

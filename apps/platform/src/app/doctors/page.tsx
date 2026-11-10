@@ -18,15 +18,7 @@ import {
 import { CLINICAL_DOCTORS } from '@/lib/doctorsRoster';
 
 export default function DoctorsRosterPage() {
-  const { content, theme, loading } = useClinicContent();
-
-  if (loading && !content) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p>Loading Clinical Doctors Roster...</p>
-      </div>
-    );
-  }
+  const { content, theme } = useClinicContent();
 
   return (
     <div style={{ minHeight: '100vh', background: '#FFFFFF', color: theme.text, fontFamily: 'var(--font-sans, system-ui)' }}>
