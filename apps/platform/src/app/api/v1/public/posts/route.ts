@@ -51,3 +51,4 @@ export const GET = withGateway({ auth: 'none' }, async (req: NextRequest) => {
     client.release();
   }
 });
+

@@ -144,28 +144,73 @@ export default function ReviewsFaqsPage() {
     status: 'approved' as 'approved' | 'draft' | 'archived',
   });
 
+  const [isSaving, setIsSaving] = useState(false);
+
+  const getTenantId = () =>
+    typeof window !== 'undefined'
+      ? localStorage.getItem('demo_tenant_id') || '00000000-0000-0000-0000-000000000001'
+      : '00000000-0000-0000-0000-000000000001';
+
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedFaqs = localStorage.getItem('demo_clinic_faqs');
-      const savedReviews = localStorage.getItem('demo_clinic_reviews');
-      setFaqs(savedFaqs ? JSON.parse(savedFaqs) : DEFAULT_FAQS);
-      setReviews(savedReviews ? JSON.parse(savedReviews) : DEFAULT_REVIEWS);
+    async function loadData() {
+      const tenantId = getTenantId();
+      try {
+        const faqRes = await fetch(`/api/v1/cms/faqs?tenantId=${tenantId}`);
+        if (faqRes.ok) {
+          const data = await faqRes.json();
+          if (data.faqs && data.faqs.length > 0) {
+            setFaqs(data.faqs);
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('demo_clinic_faqs', JSON.stringify(data.faqs));
+            }
+          } else {
+            const cached = typeof window !== 'undefined' ? localStorage.getItem('demo_clinic_faqs') : null;
+            setFaqs(cached ? JSON.parse(cached) : DEFAULT_FAQS);
+          }
+        } else {
+          const cached = typeof window !== 'undefined' ? localStorage.getItem('demo_clinic_faqs') : null;
+          setFaqs(cached ? JSON.parse(cached) : DEFAULT_FAQS);
+        }
+      } catch {
+        const cached = typeof window !== 'undefined' ? localStorage.getItem('demo_clinic_faqs') : null;
+        setFaqs(cached ? JSON.parse(cached) : DEFAULT_FAQS);
+      }
+
+      try {
+        const revRes = await fetch(`/api/v1/cms/testimonials?tenantId=${tenantId}`);
+        if (revRes.ok) {
+          const data = await revRes.json();
+          if (data.testimonials && data.testimonials.length > 0) {
+            const mapped: ReviewItem[] = data.testimonials.map((t: any) => ({
+              id: t.id,
+              patientInitials: t.patientInitials,
+              rating: t.rating,
+              treatment: t.treatment,
+              reviewText: t.reviewText,
+              source: 'Verified Patient',
+              consentObtained: t.consentRecorded,
+              status: t.moderationStatus as 'approved' | 'draft' | 'archived',
+              date: t.createdAt ? t.createdAt.slice(0, 10) : new Date().toISOString().slice(0, 10),
+            }));
+            setReviews(mapped);
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('demo_clinic_reviews', JSON.stringify(mapped));
+            }
+          } else {
+            const cached = typeof window !== 'undefined' ? localStorage.getItem('demo_clinic_reviews') : null;
+            setReviews(cached ? JSON.parse(cached) : DEFAULT_REVIEWS);
+          }
+        } else {
+          const cached = typeof window !== 'undefined' ? localStorage.getItem('demo_clinic_reviews') : null;
+          setReviews(cached ? JSON.parse(cached) : DEFAULT_REVIEWS);
+        }
+      } catch {
+        const cached = typeof window !== 'undefined' ? localStorage.getItem('demo_clinic_reviews') : null;
+        setReviews(cached ? JSON.parse(cached) : DEFAULT_REVIEWS);
+      }
     }
+    loadData();
   }, []);
-
-  const saveFaqs = (updated: FaqItem[]) => {
-    setFaqs(updated);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('demo_clinic_faqs', JSON.stringify(updated));
-    }
-  };
-
-  const saveReviews = (updated: ReviewItem[]) => {
-    setReviews(updated);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('demo_clinic_reviews', JSON.stringify(updated));
-    }
-  };
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -196,29 +241,69 @@ export default function ReviewsFaqsPage() {
     setIsFaqModalOpen(true);
   };
 
-  const handleSaveFaq = (e: React.FormEvent) => {
+  const handleSaveFaq = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!faqForm.question.trim() || !faqForm.answer.trim()) return;
-
-    if (editingFaq) {
-      const updated = faqs.map((f) => (f.id === editingFaq.id ? { ...f, ...faqForm } : f));
-      saveFaqs(updated);
-      showToast('FAQ updated successfully.');
-    } else {
-      const newFaq: FaqItem = {
-        id: `faq-${Date.now()}`,
-        ...faqForm,
-      };
-      saveFaqs([...faqs, newFaq]);
-      showToast('New clinical FAQ added.');
+    setIsSaving(true);
+    const tenantId = getTenantId();
+    try {
+      if (editingFaq) {
+        const res = await fetch(`/api/v1/cms/faqs/${editingFaq.id}?tenantId=${tenantId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'x-tenant-id': tenantId },
+          body: JSON.stringify(faqForm),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const updated = faqs.map((f) => (f.id === editingFaq.id ? { ...f, ...data.faq } : f));
+          setFaqs(updated);
+          if (typeof window !== 'undefined') localStorage.setItem('demo_clinic_faqs', JSON.stringify(updated));
+          showToast('FAQ updated successfully.');
+        } else {
+          throw new Error('Update failed');
+        }
+      } else {
+        const res = await fetch(`/api/v1/cms/faqs?tenantId=${tenantId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-tenant-id': tenantId },
+          body: JSON.stringify(faqForm),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const updated = [...faqs, data.faq];
+          setFaqs(updated);
+          if (typeof window !== 'undefined') localStorage.setItem('demo_clinic_faqs', JSON.stringify(updated));
+          showToast('New clinical FAQ added.');
+        } else {
+          throw new Error('Create failed');
+        }
+      }
+    } catch {
+      showToast('Save failed. Please retry.');
+    } finally {
+      setIsSaving(false);
     }
     setIsFaqModalOpen(false);
   };
 
-  const handleDeleteFaq = (id: string) => {
-    if (confirm('Delete this FAQ?')) {
-      saveFaqs(faqs.filter((f) => f.id !== id));
-      showToast('FAQ deleted.');
+  const handleDeleteFaq = async (id: string) => {
+    if (!confirm('Delete this FAQ?')) return;
+    const tenantId = getTenantId();
+    try {
+      const res = await fetch(`/api/v1/cms/faqs/${id}?tenantId=${tenantId}`, {
+        method: 'DELETE',
+        headers: { 'x-tenant-id': tenantId },
+      });
+      if (res.ok) {
+        const updated = faqs.filter((f) => f.id !== id);
+        setFaqs(updated);
+        if (typeof window !== 'undefined') localStorage.setItem('demo_clinic_faqs', JSON.stringify(updated));
+        showToast('FAQ deleted.');
+      } else {
+        showToast('Delete failed. Please retry.');
+      }
+    } catch {
+      showToast('Delete failed. Please retry.');
     }
   };
 
@@ -248,7 +333,7 @@ export default function ReviewsFaqsPage() {
     setIsReviewModalOpen(true);
   };
 
-  const handleSaveReview = (e: React.FormEvent) => {
+  const handleSaveReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!reviewForm.patientInitials.trim() || !reviewForm.reviewText.trim()) return;
 
@@ -258,27 +343,99 @@ export default function ReviewsFaqsPage() {
       return;
     }
 
-    if (editingReview) {
-      const updated = reviews.map((r) => (r.id === editingReview.id ? { ...r, ...reviewForm } : r));
-      saveReviews(updated);
-      showToast('Patient testimonial updated.');
-    } else {
-      const newRev: ReviewItem = {
-        id: `rev-${Date.now()}`,
-        ...reviewForm,
-        source: 'Verified Patient',
-        date: new Date().toISOString().slice(0, 10),
-      };
-      saveReviews([newRev, ...reviews]);
-      showToast('Patient testimonial added.');
+    setIsSaving(true);
+    const tenantId = getTenantId();
+    const payload = {
+      patientInitials: reviewForm.patientInitials,
+      rating: reviewForm.rating,
+      treatment: reviewForm.treatment,
+      reviewText: reviewForm.reviewText,
+      consentRecorded: reviewForm.consentObtained,
+      moderationStatus: reviewForm.status,
+    };
+
+    try {
+      if (editingReview) {
+        const res = await fetch(`/api/v1/cms/testimonials/${editingReview.id}?tenantId=${tenantId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'x-tenant-id': tenantId },
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const mapped: ReviewItem = {
+            id: data.testimonial.id,
+            patientInitials: data.testimonial.patientInitials,
+            rating: data.testimonial.rating,
+            treatment: data.testimonial.treatment,
+            reviewText: data.testimonial.reviewText,
+            source: 'Verified Patient',
+            consentObtained: data.testimonial.consentRecorded,
+            status: data.testimonial.moderationStatus,
+            date: data.testimonial.createdAt ? data.testimonial.createdAt.slice(0, 10) : editingReview.date,
+          };
+          const updated = reviews.map((r) => (r.id === editingReview.id ? mapped : r));
+          setReviews(updated);
+          if (typeof window !== 'undefined') localStorage.setItem('demo_clinic_reviews', JSON.stringify(updated));
+          showToast('Patient testimonial updated.');
+        } else {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || err.title || 'Update failed');
+        }
+      } else {
+        const res = await fetch(`/api/v1/cms/testimonials?tenantId=${tenantId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-tenant-id': tenantId },
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const mapped: ReviewItem = {
+            id: data.testimonial.id,
+            patientInitials: data.testimonial.patientInitials,
+            rating: data.testimonial.rating,
+            treatment: data.testimonial.treatment,
+            reviewText: data.testimonial.reviewText,
+            source: 'Verified Patient',
+            consentObtained: data.testimonial.consentRecorded,
+            status: data.testimonial.moderationStatus,
+            date: data.testimonial.createdAt ? data.testimonial.createdAt.slice(0, 10) : new Date().toISOString().slice(0, 10),
+          };
+          const updated = [mapped, ...reviews];
+          setReviews(updated);
+          if (typeof window !== 'undefined') localStorage.setItem('demo_clinic_reviews', JSON.stringify(updated));
+          showToast('Patient testimonial added.');
+        } else {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || err.title || 'Create failed');
+        }
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Save failed. Please retry.');
+    } finally {
+      setIsSaving(false);
     }
     setIsReviewModalOpen(false);
   };
 
-  const handleDeleteReview = (id: string) => {
-    if (confirm('Delete this testimonial?')) {
-      saveReviews(reviews.filter((r) => r.id !== id));
-      showToast('Testimonial deleted.');
+  const handleDeleteReview = async (id: string) => {
+    if (!confirm('Delete this testimonial?')) return;
+    const tenantId = getTenantId();
+    try {
+      const res = await fetch(`/api/v1/cms/testimonials/${id}?tenantId=${tenantId}`, {
+        method: 'DELETE',
+        headers: { 'x-tenant-id': tenantId },
+      });
+      if (res.ok) {
+        const updated = reviews.filter((r) => r.id !== id);
+        setReviews(updated);
+        if (typeof window !== 'undefined') localStorage.setItem('demo_clinic_reviews', JSON.stringify(updated));
+        showToast('Testimonial deleted.');
+      } else {
+        showToast('Delete failed. Please retry.');
+      }
+    } catch {
+      showToast('Delete failed. Please retry.');
     }
   };
 
@@ -616,7 +773,7 @@ export default function ReviewsFaqsPage() {
               </div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
                 <button type="button" onClick={() => setIsFaqModalOpen(false)} style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid #CBD5E1', background: '#FFFFFF', color: '#64748B', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
-                <button type="submit" style={{ padding: '8px 20px', borderRadius: '6px', border: 'none', background: '#0D5C46', color: '#FFFFFF', fontWeight: 700, cursor: 'pointer' }}>Save FAQ</button>
+                <button type="submit" disabled={isSaving} style={{ padding: '8px 20px', borderRadius: '6px', border: 'none', background: '#0D5C46', color: '#FFFFFF', fontWeight: 700, cursor: isSaving ? 'wait' : 'pointer', opacity: isSaving ? 0.7 : 1 }}>{isSaving ? 'Saving...' : 'Save FAQ'}</button>
               </div>
             </form>
           </div>
@@ -669,7 +826,7 @@ export default function ReviewsFaqsPage() {
               </div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
                 <button type="button" onClick={() => setIsReviewModalOpen(false)} style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid #CBD5E1', background: '#FFFFFF', color: '#64748B', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
-                <button type="submit" style={{ padding: '8px 20px', borderRadius: '6px', border: 'none', background: '#0D5C46', color: '#FFFFFF', fontWeight: 700, cursor: 'pointer' }}>Save Testimonial</button>
+                <button type="submit" disabled={isSaving} style={{ padding: '8px 20px', borderRadius: '6px', border: 'none', background: '#0D5C46', color: '#FFFFFF', fontWeight: 700, cursor: isSaving ? 'wait' : 'pointer', opacity: isSaving ? 0.7 : 1 }}>{isSaving ? 'Saving...' : 'Save Testimonial'}</button>
               </div>
             </form>
           </div>

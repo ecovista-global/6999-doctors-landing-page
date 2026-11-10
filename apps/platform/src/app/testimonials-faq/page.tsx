@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useClinicContent } from '@/lib/useClinicContent';
 import { PublicHeader } from '@/components/public/PublicHeader';
@@ -8,7 +8,6 @@ import { PublicFooter } from '@/components/public/PublicFooter';
 import {
   StarIcon,
   ShieldCheckIcon,
-  HelpCircleIcon,
   ChevronDownIcon,
   MessageCircleIcon,
   CalendarIcon,
@@ -16,9 +15,92 @@ import {
 } from '@/components/Icons';
 import { CLINICAL_FAQS_CATEGORIZED } from '@/lib/clinicalFaqs';
 
+interface PublicTestimonial {
+  id: string;
+  patientName: string;
+  rating: number;
+  treatment: string;
+  reviewText: string;
+  location: string;
+}
+
+interface PublicFaqItem {
+  id: string;
+  question: string;
+  answer: string;
+  category: string;
+}
+
+interface PublicFaqCategory {
+  category: string;
+  items: { q: string; a: string }[];
+}
+
 export default function TestimonialsFaqPage() {
   const { content, theme } = useClinicContent();
   const [activeTab, setActiveTab] = useState<'reviews' | 'faqs'>('reviews');
+  const [apiReviews, setApiReviews] = useState<PublicTestimonial[]>([]);
+  const [apiFaqCategories, setApiFaqCategories] = useState<PublicFaqCategory[]>([]);
+
+  useEffect(() => {
+    // Load testimonials from API
+    fetch('/api/v1/public/testimonials')
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (data && data.testimonials && data.testimonials.length > 0) {
+          const mapped: PublicTestimonial[] = data.testimonials.map((t: any) => ({
+            id: t.id,
+            patientName: t.patientInitials,
+            rating: t.rating,
+            treatment: t.treatment || 'General Consultation',
+            reviewText: t.reviewText,
+            location: 'Sector 18, Noida',
+          }));
+          setApiReviews(mapped);
+        }
+      })
+      .catch(() => {});
+
+    // Load FAQs from API
+    fetch('/api/v1/public/faqs')
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (data && data.faqs && data.faqs.length > 0) {
+          // Group FAQs by category
+          const categoryMap: Record<string, { q: string; a: string }[]> = {};
+          (data.faqs as PublicFaqItem[]).forEach((faq) => {
+            const cat = faq.category || 'General';
+            if (!categoryMap[cat]) categoryMap[cat] = [];
+            categoryMap[cat].push({ q: faq.question, a: faq.answer });
+          });
+          const grouped: PublicFaqCategory[] = Object.entries(categoryMap).map(([category, items]) => ({
+            category,
+            items,
+          }));
+          setApiFaqCategories(grouped);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Merge API reviews with static content.reviews as fallback
+  const displayReviews: PublicTestimonial[] =
+    apiReviews.length > 0
+      ? apiReviews
+      : (content.reviews as any[]).map((r) => ({
+          id: r.id,
+          patientName: r.patientName,
+          rating: r.rating,
+          treatment: r.treatment,
+          reviewText: r.reviewText,
+          location: r.location || 'Sector 18, Noida',
+        }));
+
+  // Merge API FAQs with static CLINICAL_FAQS_CATEGORIZED as fallback
+  const displayFaqCategories: PublicFaqCategory[] =
+    apiFaqCategories.length > 0 ? apiFaqCategories : CLINICAL_FAQS_CATEGORIZED;
+
+  const totalFaqCount = displayFaqCategories.reduce((acc, c) => acc + c.items.length, 0);
 
   return (
     <div style={{ minHeight: '100vh', background: '#FFFFFF', color: theme.text, fontFamily: 'var(--font-sans, system-ui)' }}>
@@ -94,7 +176,7 @@ export default function TestimonialsFaqPage() {
                 transition: 'all 150ms ease',
               }}
             >
-              Patient Reviews ({content.reviews.length})
+              Patient Reviews ({displayReviews.length})
             </button>
             <button
               type="button"
@@ -112,7 +194,7 @@ export default function TestimonialsFaqPage() {
                 transition: 'all 150ms ease',
               }}
             >
-              Clinical FAQs ({CLINICAL_FAQS_CATEGORIZED.reduce((acc, c) => acc + c.items.length, 0)})
+              Clinical FAQs ({totalFaqCount})
             </button>
           </div>
         </div>
@@ -129,7 +211,7 @@ export default function TestimonialsFaqPage() {
                 gap: '24px',
               }}
             >
-              {content.reviews.map((rev) => (
+              {displayReviews.map((rev) => (
                 <div
                   key={rev.id}
                   style={{
@@ -209,7 +291,7 @@ export default function TestimonialsFaqPage() {
           </div>
         ) : (
           <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '36px' }}>
-            {CLINICAL_FAQS_CATEGORIZED.map((cat, idx) => (
+            {displayFaqCategories.map((cat, idx) => (
               <div key={idx}>
                 <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#0F172A', marginBottom: '16px' }}>
                   {cat.category}

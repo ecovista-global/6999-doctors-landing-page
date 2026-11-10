@@ -83,3 +83,4 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
 export function getTranslation(locale: Locale, key: string, fallback?: string): string {
   return TRANSLATIONS[locale]?.[key] || fallback || key;
 }
+

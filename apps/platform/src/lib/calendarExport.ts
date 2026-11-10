@@ -116,3 +116,4 @@ export function downloadIcsFile(details: AppointmentCalendarDetails): void {
     URL.revokeObjectURL(link.href);
   }
 }
+
