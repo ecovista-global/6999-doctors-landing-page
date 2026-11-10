@@ -53,3 +53,4 @@ export const CLINICAL_FAQS_CATEGORIZED: FaqCategory[] = [
     ],
   },
 ];
+

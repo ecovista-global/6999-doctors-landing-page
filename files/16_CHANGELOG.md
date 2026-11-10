@@ -23,6 +23,14 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Fixed (Instant SSR Rendering on Page Slots & Settings)
+
+- **Eliminated Blocking Loading Screens:**
+  - Removed full-page blocking `if (loading)` conditional returns from `apps/platform/src/app/cms/pages/page.tsx` and `apps/platform/src/app/cms/settings/page.tsx`.
+  - Initialized components with synchronously renderable static constants (`ALLOWED_PAGE_SLOTS`, `DEFAULT_SETTINGS`, `FALLBACK_CONTENT`) and set `loading: false` initial state, eliminating stuck "Loading Page Slots Manager..." and "Loading Clinic Settings..." screens.
+  - Background asynchronous hydration reconciles saved states smoothly without flashing or blocking the UI.
+  - Extracted shared blog, doctor, and FAQ definitions into dedicated TypeScript modules (`blogPosts.ts`, `doctorsRoster.ts`, `clinicalFaqs.ts`) adhering to Next.js 15 App Router strict page export types.
+
 ### Added & Fixed (CMS Navigation & Functional Dedicated Routes)
 
 - **Dedicated Sidebar Navigation & Routing:**

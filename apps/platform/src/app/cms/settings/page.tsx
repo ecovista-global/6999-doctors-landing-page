@@ -20,8 +20,8 @@ const DEFAULT_SETTINGS: ClinicSettingsData = {
 };
 
 export default function ClinicSettingsPage() {
-  const [settings, setSettings] = useState<ClinicSettingsData | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [settings, setSettings] = useState<ClinicSettingsData>(DEFAULT_SETTINGS);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const getTenantId = () => {
     return typeof window !== 'undefined'
@@ -69,14 +69,6 @@ export default function ClinicSettingsPage() {
     const saved = await res.json();
     setSettings(saved);
   };
-
-  if (loading) {
-    return (
-      <div style={{ padding: '48px', textAlign: 'center', color: '#64748B' }}>
-        Loading Clinic Settings...
-      </div>
-    );
-  }
 
   return (
     <div style={{ padding: '24px 32px' }}>

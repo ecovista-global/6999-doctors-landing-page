@@ -99,7 +99,7 @@ const SLOT_EXTRAS: Record<AllowedPageSlot, SlotExtraInfo> = {
 
 export default function PageSlotsManager() {
   const [enabledPages, setEnabledPages] = useState<AllowedPageSlot[]>([...ALLOWED_PAGE_SLOTS]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [expandedSlots, setExpandedSlots] = useState<Record<string, boolean>>({});
@@ -189,14 +189,6 @@ export default function PageSlotsManager() {
       setSaving(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div style={{ padding: '48px', textAlign: 'center', color: '#64748B' }}>
-        Loading Page Slots Manager...
-      </div>
-    );
-  }
 
   return (
     <div style={{ padding: '24px 32px', maxWidth: '1050px', margin: '0 auto' }}>

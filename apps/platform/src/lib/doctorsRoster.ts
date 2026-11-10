@@ -53,3 +53,4 @@ export const CLINICAL_DOCTORS: ClinicalDoctor[] = [
     bio: 'Collaborating closely with senior physicians to formulate individualized medical nutrition therapy for diabetics, hypertensives, and fatty liver patients.',
   },
 ];
+

@@ -257,7 +257,7 @@ export const FALLBACK_CONTENT: DoctorContent = {
 
 export function useClinicContent() {
   const [content, setContent] = useState<DoctorContent>(FALLBACK_CONTENT);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const fetchContent = async () => {
     try {
