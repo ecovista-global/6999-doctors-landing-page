@@ -23,6 +23,18 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added & Changed (Apple San Francisco, Poppins, and Helvetica Typography Stack)
+
+- **Self-Hosted Poppins Font Integration:**
+  - Added self-hosted Poppins font files (Regular 400, Medium 500, SemiBold 600, Bold 700) under `apps/platform/public/fonts/poppins/` and `apps/site-template/public/fonts/poppins/`.
+  - Configured `@font-face` rules with `font-display: swap` in `apps/platform/src/app/globals.css` and `apps/site-template/src/styles.css`.
+  - Maintained 100% offline-first privacy compliance (zero external Google Fonts network calls; verified via `packages/ui/test/tokens.test.mjs`).
+- **Modern Typography Stack Across Entire Platform & CMS:**
+  - Updated design tokens (`packages/ui/src/tokens.css` and `packages/ui/src/index.ts`) `--font-sans` and `--font-display`:
+    `-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", "Poppins", "Helvetica Neue", Helvetica, Arial, sans-serif`.
+  - On macOS/iOS devices: Renders native Apple San Francisco (SF Pro) system font.
+  - On Linux and Windows devices: Renders self-hosted Poppins and Helvetica Neue with crisp geometric kerning and modern clinical readability.
+
 ### Fixed (Instant SSR Rendering & Elimination of All CMS Panel Loading Errors)
 
 - **Eliminated All Blocking Loading Screens Across CMS and Public Routes:**

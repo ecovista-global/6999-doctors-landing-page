@@ -130,8 +130,11 @@ export const RADIUS = {
 } as const;
 
 export const TYPOGRAPHY = {
-  fontSans: "'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans Devanagari', Roboto, sans-serif",
-  fontDisplay: "'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans Devanagari', sans-serif",
+  fontSans: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", "Poppins", "Helvetica Neue", Helvetica, Arial, sans-serif',
+  fontDisplay: '"Poppins", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif',
+  fontApple: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", "Helvetica Neue", Helvetica, sans-serif',
+  fontPoppins: '"Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  fontHelvetica: '"Helvetica Neue", Helvetica, Arial, sans-serif',
   fontHindi: "'Noto Sans Devanagari', var(--font-sans)",
   scale: {
     caption: '12px',

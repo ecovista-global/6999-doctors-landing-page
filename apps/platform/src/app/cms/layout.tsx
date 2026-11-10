@@ -70,7 +70,7 @@ function CmsLayoutContent({ children }: { children: React.ReactNode }) {
         background: 'var(--color-bg-surface, #F8FAFC)',
         color: 'var(--color-text-main, #0F172A)',
         overflow: 'hidden',
-        fontFamily: "var(--font-sans, 'Plus Jakarta Sans', system-ui, sans-serif)",
+        fontFamily: "var(--font-sans)",
       }}
     >
       {/* Persistent Collapsible Sidebar (MT-104) */}
