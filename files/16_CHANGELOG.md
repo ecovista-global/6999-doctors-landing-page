@@ -23,6 +23,22 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Added (MT-123 Media Library & Quota, MT-124 Publish/Rollback Controller, MT-139 Razorpay Billing & 18% GST Invoices)
+
+- **Media Library & R2 Quota Enforcement (MT-123):**
+  - Added Drizzle schema mapping (`mediaAssets`) and idempotent `0004_media_assets.sql` migration with RLS isolation.
+  - Fixed magic-byte buffer bounds and WEBP RIFF verification, enforced 5 MB max upload limit and URL scheme safety checks, persisted sanitized SVG/image bytes cleanly to `public/uploads`, switched quota exceeded errors to `429 E-1602`, and added UUID validation and disk cleanup on asset deletion.
+  - Wired `/cms/media` drag-and-drop file upload, external CDN registration, live 1 GB storage quota bar, exclusive role assignments, and per-card photo replacement to `/api/v1/cms/media`.
+  - Added `test/media-quota.test.ts` covering spoofing rejection, SVG sanitization, role exclusivity, quota enforcement, and disk cleanup.
+- **Publishing Saga & 1-Click Rollback Controller (MT-124):**
+  - Implemented atomic publish & rollback engine (`apps/platform/src/lib/publish.ts`) and Next.js endpoints `/api/v1/sites/[id]/publish` (`GET`/`POST`) and `/api/v1/sites/[id]/rollback` (`POST`) with optimistic lock conflicts (`409 E-1301`), 7-page slot validation (`E-1601`), immutable `content_sheets` snapshots, `usage_counters.content_updates_used` increments, `outbox_events`, and immutable `audit_log` entries.
+  - Wired `/cms/versions` timeline, quick release publisher, and 1-click rollback controls plus `/cms/editor` live publish action.
+  - Added `test/publish-rollback.test.ts` verifying atomic publishing, version conflicts, page-slot guards, and non-destructive rollback.
+- **Razorpay Billing & 18% GST Tax Invoices (MT-139):**
+  - Implemented `apps/platform/src/lib/billing.ts` with canonical INR paise pricing (`₹18,999` / `₹9,999` renewal for Professional Clinic), exact GST-inclusive base/tax splits under SAC `998314`, Razorpay HMAC-SHA256 webhook verification (`401 E-1401`), idempotent subscription activation, and invoice email outbox events.
+  - Added `/api/v1/payments/order`, `/api/v1/webhooks/razorpay`, print-ready GST Tax Invoice template (`apps/platform/src/templates/invoice.ts`), and integrated `BillingInvoicesPanel` into `/cms/settings`.
+  - Added `test/billing-gst.test.ts` verifying paise/GST accuracy, idempotent order creation, HMAC verification, webhook retry deduplication, and GST invoice rendering.
+
 ### Added (Live OPD Queue Tracker, Printable Slip Modal, Calendar Export & Bilingual Engine)
 
 - **Live OPD Queue & Real-Time Token Tracker:**
