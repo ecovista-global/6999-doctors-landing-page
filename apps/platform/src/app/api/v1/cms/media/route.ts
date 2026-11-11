@@ -1,11 +1,22 @@
+import { existsSync } from 'node:fs';
+import { mkdir, unlink, writeFile } from 'node:fs/promises';
+import path from 'node:path';
 import { NextRequest, NextResponse } from 'next/server';
 import { pool } from '@/db';
 import { recordAuditEvent } from '@/lib/audit';
 import { AppError } from '@/lib/errors';
 import { withGateway } from '@/lib/gateway';
 
-// 1 GB limit per Professional Clinic plan
+// 1 GB limit per Professional Clinic plan, 5 MB max per individual upload
 const STORAGE_QUOTA_BYTES = 1_073_741_824;
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function resolvePublicUploadsDir(): string {
+  const monoPublic = path.join(process.cwd(), 'apps', 'platform', 'public');
+  const basePublic = existsSync(monoPublic) ? monoPublic : path.join(process.cwd(), 'public');
+  return path.join(basePublic, 'uploads');
+}
 
 // Allowed MIME types for clinic media
 const ALLOWED_MIME_TYPES = new Set([
@@ -27,16 +38,15 @@ const MAGIC_BYTES: Array<{ mime: string; bytes: number[]; offset?: number }> = [
 function detectMimeFromBuffer(buf: Buffer): string | null {
   for (const sig of MAGIC_BYTES) {
     const offset = sig.offset ?? 0;
+    if (buf.length < offset + sig.bytes.length) continue;
     if (sig.bytes.every((b, i) => buf[offset + i] === b)) {
       if (sig.mime === 'image/webp') {
-        // confirm WEBP fourcc at offset 8
         if (buf.length >= 12 && buf.slice(8, 12).toString('ascii') === 'WEBP') return 'image/webp';
-        return 'image/gif'; // was RIFF but not WEBP
+        continue;
       }
       return sig.mime;
     }
   }
-  // Attempt SVG detection by text content
   const head = buf.slice(0, 512).toString('utf8').trimStart();
   if (head.startsWith('<?xml') || head.startsWith('<svg') || head.includes('<svg')) {
     return 'image/svg+xml';
@@ -45,10 +55,11 @@ function detectMimeFromBuffer(buf: Buffer): string | null {
 }
 
 function sanitizeSvg(raw: string): string {
-  // Strip script tags, event handlers, javascript: hrefs, and external resource refs
+  // Strip script tags, quoted/unquoted event handlers, javascript: hrefs, and external resource refs
   return raw
     .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/\son\w+\s*=\s*["'][^"']*["']/gi, '')
+    .replace(/<script\b[^>]*\/?>/gi, '')
+    .replace(/\son\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')
     .replace(/javascript\s*:/gi, 'removed:')
     .replace(/xlink:href\s*=\s*["']https?:[^"']*["']/gi, '')
     .replace(/href\s*=\s*["']https?:[^"']*["']/gi, '');
@@ -57,6 +68,9 @@ function sanitizeSvg(raw: string): string {
 export const GET = withGateway({ auth: 'none' }, async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const tenantId = searchParams.get('tenantId') || req.headers.get('x-tenant-id') || '00000000-0000-0000-0000-000000000001';
+  if (!UUID_RE.test(tenantId)) {
+    throw new AppError('E-1101', 'Invalid tenantId');
+  }
   const category = searchParams.get('category');
 
   const client = await pool.connect();
@@ -103,9 +117,9 @@ export const GET = withGateway({ auth: 'none' }, async (req: NextRequest) => {
       quota: {
         usedBytes: storageBytes,
         limitBytes: STORAGE_QUOTA_BYTES,
-        usedMb: parseFloat((storageBytes / 1_048_576).toFixed(1)),
+        usedMb: parseFloat((storageBytes / 1_048_576).toFixed(2)),
         limitMb: 1024,
-        percentUsed: parseFloat(((storageBytes / STORAGE_QUOTA_BYTES) * 100).toFixed(1)),
+        percentUsed: parseFloat(((storageBytes / STORAGE_QUOTA_BYTES) * 100).toFixed(2)),
       },
     });
   } finally {
@@ -116,16 +130,20 @@ export const GET = withGateway({ auth: 'none' }, async (req: NextRequest) => {
 export const POST = withGateway({ auth: 'none' }, async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const tenantId = searchParams.get('tenantId') || req.headers.get('x-tenant-id') || '00000000-0000-0000-0000-000000000001';
+  if (!UUID_RE.test(tenantId)) {
+    throw new AppError('E-1101', 'Invalid tenantId');
+  }
 
   const contentType = req.headers.get('content-type') || '';
 
   let title = '';
   let url = '';
+  let storageKey: string | null = null;
   let category = 'clinic';
   let fileSizeBytes = 0;
   let mimeType = 'image/jpeg';
   let dimensions = '';
-  let svgBuffer: Buffer | null = null;
+  let pendingUpload: { filePath: string; buffer: Buffer } | null = null;
 
   if (contentType.startsWith('multipart/form-data')) {
     const formData = await req.formData();
@@ -137,9 +155,13 @@ export const POST = withGateway({ auth: 'none' }, async (req: NextRequest) => {
       throw new AppError('E-1101', 'File is required for upload');
     }
 
-    // Magic byte validation
     const arrayBuf = await file.arrayBuffer();
     const buf = Buffer.from(arrayBuf);
+    if (buf.byteLength === 0 || buf.byteLength > MAX_UPLOAD_BYTES) {
+      throw new AppError('E-1201', 'This image is not allowed (max 5 MB).');
+    }
+
+    // Magic byte validation
     const detectedMime = detectMimeFromBuffer(buf);
 
     if (!detectedMime || !ALLOWED_MIME_TYPES.has(detectedMime)) {
@@ -147,36 +169,48 @@ export const POST = withGateway({ auth: 'none' }, async (req: NextRequest) => {
     }
 
     mimeType = detectedMime;
+    let finalBuffer = buf;
     fileSizeBytes = buf.byteLength;
 
     // SVG sanitization
     if (mimeType === 'image/svg+xml') {
-      const rawSvg = buf.toString('utf8');
-      const cleanSvg = sanitizeSvg(rawSvg);
-      svgBuffer = Buffer.from(cleanSvg, 'utf8');
-      fileSizeBytes = svgBuffer.byteLength;
+      const cleanSvg = sanitizeSvg(buf.toString('utf8'));
+      finalBuffer = Buffer.from(cleanSvg, 'utf8');
+      fileSizeBytes = finalBuffer.byteLength;
     }
 
-    // For demonstration, store as a data: URL or simulate CDN path
-    // In production, this is where the R2 S3-compatible upload would occur.
-    // We store a placeholder CDN URL with the storage key pattern.
-    const storageKey = `tenants/${tenantId}/media/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-    url = `/api/v1/cms/media/serve?key=${encodeURIComponent(storageKey)}`;
-    // If this were real R2: url = `https://${R2_PUBLIC_BUCKET_URL}/${storageKey}`;
+    const cleanFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_') || 'upload.bin';
+    const diskFileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${cleanFileName}`;
+    storageKey = `tenants/${tenantId}/media/${diskFileName}`;
+    url = `/uploads/${diskFileName}`;
+    pendingUpload = {
+      filePath: path.join(resolvePublicUploadsDir(), diskFileName),
+      buffer: finalBuffer,
+    };
 
     title = title.trim() || file.name.replace(/\.[^.]+$/, '');
   } else {
-    // JSON body: URL-based asset registration (Unsplash/external CDN URLs)
+    // JSON body: URL-based asset registration (external CDN / relative / data:image URLs)
     const body = await req.json();
     title = body.title?.trim() || '';
     url = body.url?.trim() || '';
     category = body.category || 'clinic';
-    fileSizeBytes = body.fileSizeBytes || 0;
+    fileSizeBytes = Math.max(0, Number(body.fileSizeBytes) || 0);
     mimeType = body.mimeType || 'image/jpeg';
     dimensions = body.dimensions || '';
 
     if (!url) {
       throw new AppError('E-1101', 'Asset URL is required');
+    }
+    const isValidUrl =
+      url.startsWith('/') ||
+      /^https?:\/\//i.test(url) ||
+      /^data:image\/(jpeg|png|webp|gif|svg\+xml);/i.test(url);
+    if (!isValidUrl) {
+      throw new AppError('E-1201', 'Unsupported image URL scheme. Use https://, http://, /, or data:image/*.');
+    }
+    if (fileSizeBytes > MAX_UPLOAD_BYTES) {
+      throw new AppError('E-1201', 'This image is not allowed (max 5 MB).');
     }
     if (!ALLOWED_MIME_TYPES.has(mimeType)) {
       mimeType = 'image/jpeg';
@@ -187,6 +221,7 @@ export const POST = withGateway({ auth: 'none' }, async (req: NextRequest) => {
 
   // Check storage quota before saving
   const client = await pool.connect();
+  let wroteFilePath: string | null = null;
   try {
     await client.query('BEGIN');
     await client.query("SELECT set_config('app.tenant_id', $1, true)", [tenantId]);
@@ -198,14 +233,14 @@ export const POST = withGateway({ auth: 'none' }, async (req: NextRequest) => {
     const currentStorageBytes = quotaRes.rows[0]?.storage_bytes ?? 0;
 
     if (currentStorageBytes + fileSizeBytes > STORAGE_QUOTA_BYTES) {
-      throw new AppError('E-1603', `Storage quota exceeded. Used: ${(currentStorageBytes / 1_048_576).toFixed(1)} MB of 1024 MB.`);
+      throw new AppError('E-1602', `Storage quota exceeded. Used: ${(currentStorageBytes / 1_048_576).toFixed(1)} MB of 1024 MB.`);
     }
 
     const res = await client.query(
-      `INSERT INTO media_assets (tenant_id, title, url, file_size_bytes, mime_type, dimensions, category, uploaded_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
-       RETURNING id, title, url, file_size_bytes, mime_type, dimensions, assigned_to, category, uploaded_at`,
-      [tenantId, title, url, fileSizeBytes, mimeType, dimensions, category]
+      `INSERT INTO media_assets (tenant_id, title, url, storage_key, file_size_bytes, mime_type, dimensions, category, uploaded_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+       RETURNING id, title, url, storage_key, file_size_bytes, mime_type, dimensions, assigned_to, category, uploaded_at`,
+      [tenantId, title, url, storageKey, fileSizeBytes, mimeType, dimensions, category]
     );
 
     const newAsset = res.rows[0];
@@ -218,6 +253,12 @@ export const POST = withGateway({ auth: 'none' }, async (req: NextRequest) => {
          ON CONFLICT (tenant_id) DO UPDATE SET storage_bytes = usage_counters.storage_bytes + $2, updated_at = NOW()`,
         [tenantId, fileSizeBytes]
       );
+    }
+
+    if (pendingUpload) {
+      await mkdir(path.dirname(pendingUpload.filePath), { recursive: true });
+      await writeFile(pendingUpload.filePath, pendingUpload.buffer);
+      wroteFilePath = pendingUpload.filePath;
     }
 
     const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || req.headers.get('x-real-ip') || '127.0.0.1';
@@ -239,6 +280,7 @@ export const POST = withGateway({ auth: 'none' }, async (req: NextRequest) => {
         id: newAsset.id,
         title: newAsset.title,
         url: newAsset.url,
+        storageKey: newAsset.storage_key,
         fileSizeBytes: newAsset.file_size_bytes,
         fileSize: `${(newAsset.file_size_bytes / 1024).toFixed(0)} KB`,
         mimeType: newAsset.mime_type,
@@ -250,6 +292,9 @@ export const POST = withGateway({ auth: 'none' }, async (req: NextRequest) => {
     }, { status: 201 });
   } catch (err) {
     await client.query('ROLLBACK');
+    if (wroteFilePath) {
+      await unlink(wroteFilePath).catch(() => {});
+    }
     throw err;
   } finally {
     client.release();

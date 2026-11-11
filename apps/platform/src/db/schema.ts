@@ -335,6 +335,21 @@ export const usageCounters = pgTable('usage_counters', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
+// 21. Media Assets Table: Tenant media library + quota metadata (MT-123)
+export const mediaAssets = pgTable('media_assets', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  title: text('title').notNull(),
+  url: text('url').notNull(),
+  storageKey: text('storage_key'),
+  fileSizeBytes: integer('file_size_bytes').notNull().default(0),
+  mimeType: text('mime_type').notNull().default('image/jpeg'),
+  dimensions: text('dimensions'),
+  assignedTo: text('assigned_to').default('unassigned'),
+  category: text('category').notNull().default('clinic'),
+  uploadedAt: timestamp('uploaded_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
 // ============================================================================
 // Exported TypeScript Schema Types
 // ============================================================================
@@ -397,3 +412,5 @@ export type NewClinicSettings = typeof clinicSettings.$inferInsert;
 
 export type UsageCounters = typeof usageCounters.$inferSelect;
 export type NewUsageCounters = typeof usageCounters.$inferInsert;
+export type MediaAssetRecord = typeof mediaAssets.$inferSelect;
+export type NewMediaAssetRecord = typeof mediaAssets.$inferInsert;
