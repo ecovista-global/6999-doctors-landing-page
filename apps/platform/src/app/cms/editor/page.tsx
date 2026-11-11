@@ -74,13 +74,30 @@ export default function SiteBlockEditorPage() {
     }, 300);
   };
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     setPublishing(true);
-    handleSave();
-    setTimeout(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('demo_site_content', JSON.stringify(formData));
+    }
+    try {
+      const res = await fetch('/api/v1/sites/00000000-0000-0000-0000-000000000001/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          data: formData,
+          theme: formData.theme,
+          notes: `Published block editor updates for ${formData.clinicName}`,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || data.title || 'Publish failed');
+      setPreviewKey((k) => k + 1);
+      showToast(`Published release v${data.version} to live edge.`);
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Unable to publish site changes.');
+    } finally {
       setPublishing(false);
-      showToast('Site published successfully to Cloudflare edge.');
-    }, 600);
+    }
   };
 
   return (
