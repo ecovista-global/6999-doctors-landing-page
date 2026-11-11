@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { BillingInvoicesPanel } from '@/components/cms/BillingInvoicesPanel';
 import { OperatingHoursEditor, ClinicSettingsData } from '@/components/cms/OperatingHoursEditor';
 
 const DEFAULT_SETTINGS: ClinicSettingsData = {
@@ -85,6 +86,8 @@ export default function ClinicSettingsPage() {
         initialSettings={settings || DEFAULT_SETTINGS}
         onSave={handleSave}
       />
+
+      <BillingInvoicesPanel />
     </div>
   );
 }
