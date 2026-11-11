@@ -1,13 +1,13 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import type { BreadcrumbItem } from './Header.js';
 
 export interface CmsShellContextValue {
   collapsed: boolean;
   setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
   activeNav: string;
-  setActiveNav: (nav: string) => void;
+  setActiveNav: React.Dispatch<React.SetStateAction<string>>;
   breadcrumbs: BreadcrumbItem[];
   setBreadcrumbs: React.Dispatch<React.SetStateAction<BreadcrumbItem[]>>;
   theme: 'light' | 'dark';
@@ -38,13 +38,15 @@ export function CmsShellProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const toggleTheme = () => {
-    const nextTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(nextTheme);
-    if (typeof document !== 'undefined') {
-      document.documentElement.setAttribute('data-theme', nextTheme);
-    }
-  };
+  const toggleTheme = useCallback(() => {
+    setTheme((prev) => {
+      const next = prev === 'light' ? 'dark' : 'light';
+      if (typeof document !== 'undefined') {
+        document.documentElement.setAttribute('data-theme', next);
+      }
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     if (typeof document !== 'undefined') {
@@ -52,22 +54,25 @@ export function CmsShellProvider({ children }: { children: React.ReactNode }) {
     }
   }, [theme]);
 
+  const value = useMemo<CmsShellContextValue>(
+    () => ({
+      collapsed,
+      setCollapsed,
+      activeNav,
+      setActiveNav,
+      breadcrumbs,
+      setBreadcrumbs,
+      theme,
+      setTheme,
+      toggleTheme,
+      searchQuery,
+      setSearchQuery,
+    }),
+    [collapsed, activeNav, breadcrumbs, theme, searchQuery, toggleTheme]
+  );
+
   return (
-    <CmsShellContext.Provider
-      value={{
-        collapsed,
-        setCollapsed,
-        activeNav,
-        setActiveNav,
-        breadcrumbs,
-        setBreadcrumbs,
-        theme,
-        setTheme,
-        toggleTheme,
-        searchQuery,
-        setSearchQuery,
-      }}
-    >
+    <CmsShellContext.Provider value={value}>
       {children}
     </CmsShellContext.Provider>
   );

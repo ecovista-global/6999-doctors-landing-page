@@ -52,9 +52,23 @@ All 10 CMS sub-pages verified via live HTTP GET tests against dev server:
 
 ---
 
-## 3. Monorepo Quality Gates
+## 3. Hotfix: Maximum Update Depth Exceeded Recursion
+- **Symptom:** Next.js development overlay reported `Maximum update depth exceeded` triggered from `src/app/cms/page.tsx (223:11) @ setBreadcrumbs`.
+- **Root Cause Analysis:**
+  1. `apps/platform/src/components/cms/CmsShellContext.tsx`: The context provider object literal `value={{ ... }}` was recreated on every render cycle without `useMemo`.
+  2. `apps/platform/src/app/cms/page.tsx`: The breadcrumbs sync effect had `[activeTab, shell]` in its dependency array. Because `shell` changed identity whenever `breadcrumbs` changed, calling `shell.setBreadcrumbs` re-rendered `CmsShellProvider`, which in turn provided a new `shell` instance, re-running the effect in an infinite loop.
+  3. `apps/platform/src/app/cms/layout.tsx`: The route synchronization effect had `activeNav` in its dependency array alongside `setActiveNav('dashboard')`, triggering re-render cycles upon root tab visits.
+- **Resolution:**
+  1. `CmsShellContext.tsx`: Memoized the context value with `useMemo` and wrapped `toggleTheme` in `useCallback`.
+  2. `cms/page.tsx`: Refactored effect dependencies to `[activeTab, setBreadcrumbs]`. Added defensive equality guard inside `setBreadcrumbs((prev) => ...)`: if `prev` matches `groupLabel` and `currentLabel`, `prev` is returned without triggering a state update.
+  3. `cms/layout.tsx`: Removed `activeNav` from dependencies; `setActiveNav` now uses functional updates `(prev) => (prev === target ? prev : target)`.
+
+---
+
+## 4. Monorepo Quality Gates
 
 - `pnpm turbo run typecheck --force`: **4/4 packages passed (0 errors)**.
 - `pnpm --filter @ecodigitech/platform test`: **153/153 tests passed across 44 test suites (0 failures)**.
 - Adherence to Rule R7: Zero emoji policy strictly maintained across all updated components.
 - Zero external font calls: system font stacks used throughout.
+

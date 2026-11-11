@@ -194,8 +194,9 @@ export default function CmsPanelPage() {
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
   // Sync breadcrumbs with shell
+  const setBreadcrumbs = shell?.setBreadcrumbs;
   useEffect(() => {
-    if (!shell?.setBreadcrumbs) return;
+    if (!setBreadcrumbs) return;
     const tabLabels: Record<string, string> = {
       dashboard: 'Dashboard',
       opd_board: "Today's OPD Board",
@@ -220,12 +221,22 @@ export default function CmsPanelPage() {
         : activeTab === 'settings' || activeTab === 'versions'
         ? 'Governance & Audit'
         : '7-Page Site CMS';
-    shell.setBreadcrumbs([
-      { label: 'CMS', href: '/cms' },
-      { label: groupLabel },
-      { label: currentLabel },
-    ]);
-  }, [activeTab, shell]);
+    setBreadcrumbs((prev) => {
+      if (
+        prev.length === 3 &&
+        prev[0]?.label === 'CMS' &&
+        prev[1]?.label === groupLabel &&
+        prev[2]?.label === currentLabel
+      ) {
+        return prev;
+      }
+      return [
+        { label: 'CMS', href: '/cms' },
+        { label: groupLabel },
+        { label: currentLabel },
+      ];
+    });
+  }, [activeTab, setBreadcrumbs]);
 
   // OPD Board & Workflow State
   const [showWeeklySummaryModal, setShowWeeklySummaryModal] = useState(false);
