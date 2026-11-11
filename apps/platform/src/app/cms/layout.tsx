@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { Sidebar } from '@/components/cms/Sidebar';
 import { Header } from '@/components/cms/Header';
@@ -48,17 +48,37 @@ function CmsLayoutContent({ children }: { children: React.ReactNode }) {
     setSearchQuery,
   } = useCmsShell();
 
-  // If on a specific sub-route and breadcrumbs are default, use path-derived breadcrumbs
-  const isDefaultBreadcrumbs =
-    breadcrumbs.length === 3 &&
-    breadcrumbs[0]?.label === 'CMS' &&
-    breadcrumbs[1]?.label === 'Submissions' &&
-    breadcrumbs[2]?.label === 'Appointments';
+  // Sync activeNav with current route on navigation
+  useEffect(() => {
+    if (pathname.startsWith('/cms/pages')) {
+      setActiveNav('pages');
+    } else if (pathname.startsWith('/cms/editor')) {
+      setActiveNav('editor');
+    } else if (pathname.startsWith('/cms/blog')) {
+      setActiveNav('blog');
+    } else if (pathname.startsWith('/cms/reviews-faqs') || pathname.startsWith('/cms/faqs')) {
+      setActiveNav('faqs');
+    } else if (pathname.startsWith('/cms/media')) {
+      setActiveNav('media');
+    } else if (pathname.startsWith('/cms/settings')) {
+      setActiveNav('settings');
+    } else if (pathname.startsWith('/cms/versions')) {
+      setActiveNav('versions');
+    } else if (pathname.startsWith('/cms/submissions')) {
+      if (activeNav !== 'opd_board' && activeNav !== 'enquiries') {
+        setActiveNav('appointments');
+      }
+    } else if (pathname === '/cms' || pathname === '/cms/') {
+      // If returning to /cms root with sub-route activeNav, reset cleanly to dashboard
+      if (['pages', 'blog', 'versions', 'faqs'].includes(activeNav)) {
+        setActiveNav('dashboard');
+      }
+    }
+  }, [pathname, activeNav, setActiveNav]);
 
-  const effectiveBreadcrumbs =
-    pathname !== '/cms/submissions' && isDefaultBreadcrumbs
-      ? getRouteBreadcrumbs(pathname)
-      : breadcrumbs;
+  // On CMS root, let cms/page.tsx control breadcrumbs per active tab; on all sub-routes, derive dynamically from path
+  const isCmsRoot = pathname === '/cms' || pathname === '/cms/';
+  const effectiveBreadcrumbs = isCmsRoot ? breadcrumbs : getRouteBreadcrumbs(pathname);
 
   return (
     <div

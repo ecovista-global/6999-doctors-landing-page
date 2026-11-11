@@ -5,6 +5,10 @@ import Link from 'next/link';
 import { useCmsShell } from '@/components/cms/CmsShellContext';
 import { DoctorContent, AppointmentRecord } from '@/lib/contentStore';
 import { FALLBACK_CONTENT } from '@/lib/useClinicContent';
+import PageSlotsManager from '@/app/cms/pages/page';
+import BlogManagementPage from '@/app/cms/blog/page';
+import VersionHistoryPage from '@/app/cms/versions/page';
+import ReviewsFaqsPage from '@/app/cms/reviews-faqs/page';
 import {
   StethoscopeIcon,
   PhoneIcon,
@@ -72,6 +76,7 @@ type Tab =
   | 'appointments'
   | 'enquiries'
   | 'editor'
+  | 'pages'
   | 'blog'
   | 'services'
   | 'reviews'
@@ -197,8 +202,11 @@ export default function CmsPanelPage() {
       appointments: 'Appointments',
       enquiries: 'Patient Enquiries',
       editor: 'Site Block Editor',
+      pages: 'Page Slots (7-Page Architecture)',
+      blog: 'Health & Wellness Blog',
       services: 'Services Catalog',
       reviews: 'Patient Reviews',
+      faqs: 'Patient Reviews & FAQs',
       clinic_hours: 'Clinic Hours & Map',
       themes: 'Themes',
       media: 'Media Library',
@@ -206,9 +214,15 @@ export default function CmsPanelPage() {
       versions: 'Version History',
     };
     const currentLabel = tabLabels[activeTab] || activeTab;
+    const groupLabel =
+      activeTab === 'dashboard' || activeTab === 'opd_board' || activeTab === 'appointments' || activeTab === 'enquiries' || activeTab === 'services' || activeTab === 'clinic_hours' || activeTab === 'themes'
+        ? 'Clinical Operations'
+        : activeTab === 'settings' || activeTab === 'versions'
+        ? 'Governance & Audit'
+        : '7-Page Site CMS';
     shell.setBreadcrumbs([
       { label: 'CMS', href: '/cms' },
-      { label: activeTab === 'appointments' || activeTab === 'enquiries' || activeTab === 'opd_board' ? 'Submissions' : 'Site Management' },
+      { label: groupLabel },
       { label: currentLabel },
     ]);
   }, [activeTab, shell]);
@@ -1155,12 +1169,16 @@ export default function CmsPanelPage() {
             {activeTab === 'opd_board' && "Today's Patient Queue (OPD)"}
             {activeTab === 'appointments' && 'Appointment Records'}
             {activeTab === 'editor' && 'Site Block Editor'}
+            {activeTab === 'pages' && 'Page Slots (7-Page Architecture)'}
+            {activeTab === 'blog' && 'Health & Wellness Blog Management'}
             {activeTab === 'services' && 'Clinical Services Catalog'}
             {activeTab === 'reviews' && 'Patient Reviews & Testimonials'}
+            {activeTab === 'faqs' && 'Patient Reviews & Clinical FAQs'}
             {activeTab === 'clinic_hours' && 'Clinic Operating Hours & Map'}
             {activeTab === 'themes' && 'Clinical Theme Customizer'}
             {activeTab === 'media' && 'Media & Asset Library'}
             {activeTab === 'settings' && 'Clinic Settings & DPDP Compliance'}
+            {activeTab === 'versions' && 'Version History & Edge Rollbacks'}
           </h1>
           <span
             style={{
@@ -1640,6 +1658,42 @@ export default function CmsPanelPage() {
                         </div>
                         <div style={{ fontWeight: '700', fontSize: '13px', color: '#0F172A' }}>6 Themes Preset</div>
                         <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>Instant palette switch</div>
+                      </button>
+
+                      <button
+                        onClick={() => setActiveTab('pages')}
+                        className="ux-btn"
+                        style={{ padding: '14px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', textAlign: 'left', cursor: 'pointer' }}
+                      >
+                        <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#CCFBF1', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
+                          <GlobeIcon size={18} color="#0D5C46" />
+                        </div>
+                        <div style={{ fontWeight: '700', fontSize: '13px', color: '#0F172A' }}>Page Slots Manager</div>
+                        <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>7-Page Architecture</div>
+                      </button>
+
+                      <button
+                        onClick={() => setActiveTab('blog')}
+                        className="ux-btn"
+                        style={{ padding: '14px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', textAlign: 'left', cursor: 'pointer' }}
+                      >
+                        <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#E0F2FE', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
+                          <FileTextIcon size={18} color="#0284C7" />
+                        </div>
+                        <div style={{ fontWeight: '700', fontSize: '13px', color: '#0F172A' }}>Health Blog Posts</div>
+                        <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>Patient education guides</div>
+                      </button>
+
+                      <button
+                        onClick={() => setActiveTab('versions')}
+                        className="ux-btn"
+                        style={{ padding: '14px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', textAlign: 'left', cursor: 'pointer' }}
+                      >
+                        <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#EDE9FE', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
+                          <RefreshCwIcon size={18} color="#7C3AED" />
+                        </div>
+                        <div style={{ fontWeight: '700', fontSize: '13px', color: '#0F172A' }}>Version History</div>
+                        <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>Audit snapshots &amp; rollback</div>
                       </button>
 
                       <button
@@ -4545,6 +4599,42 @@ export default function CmsPanelPage() {
                   </button>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* ======================================================= */}
+          {/* TAB 10: 7-PAGE SLOTS ARCHITECTURE                       */}
+          {/* ======================================================= */}
+          {activeTab === 'pages' && (
+            <div style={{ marginTop: '8px' }}>
+              <PageSlotsManager />
+            </div>
+          )}
+
+          {/* ======================================================= */}
+          {/* TAB 11: HEALTH & WELLNESS BLOG MANAGEMENT               */}
+          {/* ======================================================= */}
+          {activeTab === 'blog' && (
+            <div style={{ marginTop: '8px' }}>
+              <BlogManagementPage />
+            </div>
+          )}
+
+          {/* ======================================================= */}
+          {/* TAB 12: VERSION HISTORY & ROLLBACK AUDIT                */}
+          {/* ======================================================= */}
+          {activeTab === 'versions' && (
+            <div style={{ marginTop: '8px' }}>
+              <VersionHistoryPage />
+            </div>
+          )}
+
+          {/* ======================================================= */}
+          {/* TAB 13: FAQS & REVIEWS EXTENSION                        */}
+          {/* ======================================================= */}
+          {activeTab === 'faqs' && (
+            <div style={{ marginTop: '8px' }}>
+              <ReviewsFaqsPage />
             </div>
           )}
 

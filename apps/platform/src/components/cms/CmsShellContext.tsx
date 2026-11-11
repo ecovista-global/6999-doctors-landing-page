@@ -31,9 +31,9 @@ export function CmsShellProvider({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [activeNav, setActiveNav] = useState('dashboard');
   const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([
-    { label: 'CMS' },
-    { label: 'Submissions' },
-    { label: 'Appointments' },
+    { label: 'CMS', href: '/cms' },
+    { label: 'Clinical Operations' },
+    { label: 'Dashboard' },
   ]);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [searchQuery, setSearchQuery] = useState('');
