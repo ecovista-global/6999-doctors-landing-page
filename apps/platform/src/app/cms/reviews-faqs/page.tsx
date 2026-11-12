@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useCmsShell } from '@/components/cms/CmsShellContext';
 import {
   HelpCircleIcon,
   MessageCircleIcon,
@@ -115,6 +116,7 @@ const DEFAULT_REVIEWS: ReviewItem[] = [
 ];
 
 export default function ReviewsFaqsPage() {
+  const { searchQuery: shellSearch } = useCmsShell();
   const [activeTab, setActiveTab] = useState<'faqs' | 'reviews'>('faqs');
   const [faqs, setFaqs] = useState<FaqItem[]>([]);
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
@@ -246,8 +248,12 @@ export default function ReviewsFaqsPage() {
     if (!faqForm.question.trim() || !faqForm.answer.trim()) return;
     setIsSaving(true);
     const tenantId = getTenantId();
+    const isUuid =
+      !!editingFaq &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(editingFaq.id);
+
     try {
-      if (editingFaq) {
+      if (editingFaq && isUuid) {
         const res = await fetch(`/api/v1/cms/faqs/${editingFaq.id}?tenantId=${tenantId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', 'x-tenant-id': tenantId },
@@ -270,10 +276,12 @@ export default function ReviewsFaqsPage() {
         });
         if (res.ok) {
           const data = await res.json();
-          const updated = [...faqs, data.faq];
+          const updated = editingFaq
+            ? faqs.map((f) => (f.id === editingFaq.id ? data.faq : f))
+            : [...faqs, data.faq];
           setFaqs(updated);
           if (typeof window !== 'undefined') localStorage.setItem('demo_clinic_faqs', JSON.stringify(updated));
-          showToast('New clinical FAQ added.');
+          showToast(editingFaq ? 'FAQ saved to database.' : 'New clinical FAQ added.');
         } else {
           throw new Error('Create failed');
         }
@@ -289,19 +297,22 @@ export default function ReviewsFaqsPage() {
   const handleDeleteFaq = async (id: string) => {
     if (!confirm('Delete this FAQ?')) return;
     const tenantId = getTenantId();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
     try {
-      const res = await fetch(`/api/v1/cms/faqs/${id}?tenantId=${tenantId}`, {
-        method: 'DELETE',
-        headers: { 'x-tenant-id': tenantId },
-      });
-      if (res.ok) {
-        const updated = faqs.filter((f) => f.id !== id);
-        setFaqs(updated);
-        if (typeof window !== 'undefined') localStorage.setItem('demo_clinic_faqs', JSON.stringify(updated));
-        showToast('FAQ deleted.');
-      } else {
-        showToast('Delete failed. Please retry.');
+      if (isUuid) {
+        const res = await fetch(`/api/v1/cms/faqs/${id}?tenantId=${tenantId}`, {
+          method: 'DELETE',
+          headers: { 'x-tenant-id': tenantId },
+        });
+        if (!res.ok) {
+          showToast('Delete failed. Please retry.');
+          return;
+        }
       }
+      const updated = faqs.filter((f) => f.id !== id);
+      setFaqs(updated);
+      if (typeof window !== 'undefined') localStorage.setItem('demo_clinic_faqs', JSON.stringify(updated));
+      showToast('FAQ deleted.');
     } catch {
       showToast('Delete failed. Please retry.');
     }
@@ -354,8 +365,12 @@ export default function ReviewsFaqsPage() {
       moderationStatus: reviewForm.status,
     };
 
+    const isReviewUuid =
+      !!editingReview &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(editingReview.id);
+
     try {
-      if (editingReview) {
+      if (editingReview && isReviewUuid) {
         const res = await fetch(`/api/v1/cms/testimonials/${editingReview.id}?tenantId=${tenantId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', 'x-tenant-id': tenantId },
@@ -401,10 +416,12 @@ export default function ReviewsFaqsPage() {
             status: data.testimonial.moderationStatus,
             date: data.testimonial.createdAt ? data.testimonial.createdAt.slice(0, 10) : new Date().toISOString().slice(0, 10),
           };
-          const updated = [mapped, ...reviews];
+          const updated = editingReview
+            ? reviews.map((r) => (r.id === editingReview.id ? mapped : r))
+            : [mapped, ...reviews];
           setReviews(updated);
           if (typeof window !== 'undefined') localStorage.setItem('demo_clinic_reviews', JSON.stringify(updated));
-          showToast('Patient testimonial added.');
+          showToast(editingReview ? 'Patient testimonial saved to database.' : 'Patient testimonial added.');
         } else {
           const err = await res.json().catch(() => ({}));
           throw new Error(err.detail || err.title || 'Create failed');
@@ -421,19 +438,22 @@ export default function ReviewsFaqsPage() {
   const handleDeleteReview = async (id: string) => {
     if (!confirm('Delete this testimonial?')) return;
     const tenantId = getTenantId();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
     try {
-      const res = await fetch(`/api/v1/cms/testimonials/${id}?tenantId=${tenantId}`, {
-        method: 'DELETE',
-        headers: { 'x-tenant-id': tenantId },
-      });
-      if (res.ok) {
-        const updated = reviews.filter((r) => r.id !== id);
-        setReviews(updated);
-        if (typeof window !== 'undefined') localStorage.setItem('demo_clinic_reviews', JSON.stringify(updated));
-        showToast('Testimonial deleted.');
-      } else {
-        showToast('Delete failed. Please retry.');
+      if (isUuid) {
+        const res = await fetch(`/api/v1/cms/testimonials/${id}?tenantId=${tenantId}`, {
+          method: 'DELETE',
+          headers: { 'x-tenant-id': tenantId },
+        });
+        if (!res.ok) {
+          showToast('Delete failed. Please retry.');
+          return;
+        }
       }
+      const updated = reviews.filter((r) => r.id !== id);
+      setReviews(updated);
+      if (typeof window !== 'undefined') localStorage.setItem('demo_clinic_reviews', JSON.stringify(updated));
+      showToast('Testimonial deleted.');
     } catch {
       showToast('Delete failed. Please retry.');
     }
@@ -455,10 +475,10 @@ export default function ReviewsFaqsPage() {
         }}
       >
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#0F172A', margin: '0 0 6px 0' }}>
-            FAQs & Patient Testimonials
+          <h1 style={{ fontSize: '26px', fontWeight: 600, letterSpacing: '-0.025em', color: 'var(--color-text-main, #162228)', margin: '0 0 6px 0' }}>
+            FAQs &amp; <span className="ms-serif-italic" style={{ fontSize: '30px', fontWeight: 400 }}>patient testimonials</span>
           </h1>
-          <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
+          <p style={{ fontSize: '13.5px', color: 'var(--color-text-muted, #54666E)', margin: 0 }}>
             Manage verified clinical FAQs and DPDP-compliant patient reviews for the Reviews & FAQ page (/testimonials-faq).
           </p>
         </div>
@@ -466,45 +486,35 @@ export default function ReviewsFaqsPage() {
         <button
           type="button"
           onClick={() => (activeTab === 'faqs' ? handleOpenFaqModal() : handleOpenReviewModal())}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            background: 'var(--color-brand-primary, #0D5C46)',
-            color: '#FFFFFF',
-            border: 'none',
-            borderRadius: '8px',
-            padding: '10px 18px',
-            fontSize: '13px',
-            fontWeight: 700,
-            cursor: 'pointer',
-          }}
+          className="ms-pill-dark"
         >
-          <PlusIcon size={16} />
+          <span className="ms-pill-circle">
+            <PlusIcon size={14} color="#183C4A" />
+          </span>
           <span>{activeTab === 'faqs' ? 'Add FAQ' : 'Add Testimonial'}</span>
         </button>
       </div>
 
       {/* Tabs Switcher */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', borderBottom: '1px solid #E2E8F0' }}>
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', borderBottom: '1px solid var(--color-border-subtle)', paddingBottom: '12px' }}>
         <button
           type="button"
           onClick={() => setActiveTab('faqs')}
           style={{
-            padding: '10px 20px',
-            border: 'none',
-            borderBottom: activeTab === 'faqs' ? '3px solid #0D5C46' : '3px solid transparent',
-            background: 'transparent',
-            color: activeTab === 'faqs' ? '#0D5C46' : '#64748B',
-            fontWeight: activeTab === 'faqs' ? 800 : 600,
-            fontSize: '14px',
+            padding: '8px 18px',
+            borderRadius: '9999px',
+            border: activeTab === 'faqs' ? '1px solid #183C4A' : '1px solid var(--color-border-subtle)',
+            background: activeTab === 'faqs' ? '#183C4A' : 'var(--color-bg-base)',
+            color: activeTab === 'faqs' ? '#FFFFFF' : 'var(--color-text-muted)',
+            fontWeight: activeTab === 'faqs' ? 600 : 500,
+            fontSize: '13px',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
           }}
         >
-          <HelpCircleIcon size={16} />
+          <HelpCircleIcon size={15} />
           <span>Clinical FAQs ({faqs.length})</span>
         </button>
 
@@ -512,27 +522,27 @@ export default function ReviewsFaqsPage() {
           type="button"
           onClick={() => setActiveTab('reviews')}
           style={{
-            padding: '10px 20px',
-            border: 'none',
-            borderBottom: activeTab === 'reviews' ? '3px solid #0D5C46' : '3px solid transparent',
-            background: 'transparent',
-            color: activeTab === 'reviews' ? '#0D5C46' : '#64748B',
-            fontWeight: activeTab === 'reviews' ? 800 : 600,
-            fontSize: '14px',
+            padding: '8px 18px',
+            borderRadius: '9999px',
+            border: activeTab === 'reviews' ? '1px solid #183C4A' : '1px solid var(--color-border-subtle)',
+            background: activeTab === 'reviews' ? '#183C4A' : 'var(--color-bg-base)',
+            color: activeTab === 'reviews' ? '#FFFFFF' : 'var(--color-text-muted)',
+            fontWeight: activeTab === 'reviews' ? 600 : 500,
+            fontSize: '13px',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
           }}
         >
-          <MessageCircleIcon size={16} />
+          <MessageCircleIcon size={15} />
           <span>Patient Testimonials ({reviews.length})</span>
         </button>
       </div>
 
       {/* Search Input */}
       <div style={{ marginBottom: '20px', position: 'relative', maxWidth: '380px' }}>
-        <SearchIcon size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+        <SearchIcon size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
         <input
           type="text"
           placeholder={`Search ${activeTab === 'faqs' ? 'FAQs' : 'reviews'}...`}
@@ -540,11 +550,12 @@ export default function ReviewsFaqsPage() {
           onChange={(e) => setSearch(e.target.value)}
           style={{
             width: '100%',
-            padding: '9px 12px 9px 36px',
-            borderRadius: '8px',
-            border: '1px solid #CBD5E1',
+            padding: '10px 14px 10px 38px',
+            borderRadius: '9999px',
+            border: '1px solid var(--color-border-subtle)',
             fontSize: '13px',
-            background: '#FFFFFF',
+            background: 'var(--color-bg-base)',
+            color: 'var(--color-text-main)',
             boxSizing: 'border-box',
           }}
         />
@@ -554,7 +565,15 @@ export default function ReviewsFaqsPage() {
       {activeTab === 'faqs' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {faqs
-            .filter((f) => f.question.toLowerCase().includes(search.toLowerCase()) || f.answer.toLowerCase().includes(search.toLowerCase()))
+            .filter((f) => {
+              const q = (shellSearch || search).trim().toLowerCase();
+              if (!q) return true;
+              return (
+                f.question.toLowerCase().includes(q) ||
+                f.answer.toLowerCase().includes(q) ||
+                f.category.toLowerCase().includes(q)
+              );
+            })
             .map((faq) => (
               <div
                 key={faq.id}
@@ -641,7 +660,15 @@ export default function ReviewsFaqsPage() {
       {activeTab === 'reviews' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {reviews
-            .filter((r) => r.patientInitials.toLowerCase().includes(search.toLowerCase()) || r.reviewText.toLowerCase().includes(search.toLowerCase()))
+            .filter((r) => {
+              const q = (shellSearch || search).trim().toLowerCase();
+              if (!q) return true;
+              return (
+                r.patientInitials.toLowerCase().includes(q) ||
+                r.reviewText.toLowerCase().includes(q) ||
+                r.treatment.toLowerCase().includes(q)
+              );
+            })
             .map((rev) => (
               <div
                 key={rev.id}
@@ -671,17 +698,17 @@ export default function ReviewsFaqsPage() {
                     <span
                       style={{
                         fontSize: '11px',
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        background: rev.status === 'approved' ? '#D1FAE5' : '#FEF3C7',
-                        color: rev.status === 'approved' ? '#065F46' : '#92400E',
+                        padding: '3px 9px',
+                        borderRadius: '9999px',
+                        background: rev.status === 'approved' ? 'var(--color-brand-surface, #E7F2F5)' : '#FEF3C7',
+                        color: rev.status === 'approved' ? 'var(--color-brand-primary, #183C4A)' : '#92400E',
                         fontWeight: 700,
                       }}
                     >
                       {rev.status.toUpperCase()}
                     </span>
                     {rev.consentObtained && (
-                      <span style={{ fontSize: '11px', color: '#0D5C46', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--color-brand-primary, #183C4A)', display: 'flex', alignItems: 'center', gap: '3px' }}>
                         <ShieldCheckIcon size={12} /> DPDP Consent
                       </span>
                     )}
@@ -772,8 +799,8 @@ export default function ReviewsFaqsPage() {
                 <label htmlFor="faqActive" style={{ fontSize: '13px', fontWeight: 600 }}>Active (Visible on public FAQ accordion)</label>
               </div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
-                <button type="button" onClick={() => setIsFaqModalOpen(false)} style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid #CBD5E1', background: '#FFFFFF', color: '#64748B', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
-                <button type="submit" disabled={isSaving} style={{ padding: '8px 20px', borderRadius: '6px', border: 'none', background: '#0D5C46', color: '#FFFFFF', fontWeight: 700, cursor: isSaving ? 'wait' : 'pointer', opacity: isSaving ? 0.7 : 1 }}>{isSaving ? 'Saving...' : 'Save FAQ'}</button>
+                <button type="button" onClick={() => setIsFaqModalOpen(false)} className="ms-pill-light">Cancel</button>
+                <button type="submit" disabled={isSaving} className="ms-pill-dark" style={{ padding: '9px 20px', cursor: isSaving ? 'wait' : 'pointer', opacity: isSaving ? 0.7 : 1 }}>{isSaving ? 'Saving...' : 'Save FAQ'}</button>
               </div>
             </form>
           </div>
@@ -825,8 +852,8 @@ export default function ReviewsFaqsPage() {
                 </p>
               </div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
-                <button type="button" onClick={() => setIsReviewModalOpen(false)} style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid #CBD5E1', background: '#FFFFFF', color: '#64748B', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
-                <button type="submit" disabled={isSaving} style={{ padding: '8px 20px', borderRadius: '6px', border: 'none', background: '#0D5C46', color: '#FFFFFF', fontWeight: 700, cursor: isSaving ? 'wait' : 'pointer', opacity: isSaving ? 0.7 : 1 }}>{isSaving ? 'Saving...' : 'Save Testimonial'}</button>
+                <button type="button" onClick={() => setIsReviewModalOpen(false)} className="ms-pill-light">Cancel</button>
+                <button type="submit" disabled={isSaving} className="ms-pill-dark" style={{ padding: '9px 20px', cursor: isSaving ? 'wait' : 'pointer', opacity: isSaving ? 0.7 : 1 }}>{isSaving ? 'Saving...' : 'Save Testimonial'}</button>
               </div>
             </form>
           </div>
@@ -835,7 +862,7 @@ export default function ReviewsFaqsPage() {
 
       {/* Toast Feedback */}
       {toastMessage && (
-        <div style={{ position: 'fixed', bottom: '24px', right: '24px', background: '#0D5C46', color: '#FFFFFF', padding: '12px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', zIndex: 200, display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ position: 'fixed', bottom: '24px', right: '24px', background: '#183C4A', color: '#FFFFFF', padding: '12px 20px', borderRadius: '9999px', fontSize: '13px', fontWeight: 600, boxShadow: '0 10px 24px rgba(24,60,74,0.28)', zIndex: 200, display: 'flex', alignItems: 'center', gap: '8px' }}>
           <CheckCircleIcon size={16} />
           <span>{toastMessage}</span>
         </div>

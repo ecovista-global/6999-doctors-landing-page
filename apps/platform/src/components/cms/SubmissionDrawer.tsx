@@ -28,6 +28,24 @@ export interface SubmissionDrawerProps {
   onStatusChanged?: (id: string, newStatus: CmsAppointmentItem['status']) => void;
 }
 
+export interface AppointmentTimelineEvent {
+  id: string;
+  actorId: string;
+  fromStatus: string | null;
+  toStatus: string;
+  note: string | null;
+  createdAt: string;
+}
+
+export interface PatientVisitSummary {
+  id: string;
+  serviceName: string;
+  doctorName: string | null;
+  preferredDate: string;
+  preferredTimeSlot: string;
+  status: string;
+}
+
 export function SubmissionDrawer({
   submission,
   isOpen,
@@ -39,14 +57,29 @@ export function SubmissionDrawer({
   const [isSavingNote, setIsSavingNote] = useState<boolean>(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [copyFeedback, setCopyFeedback] = useState<boolean>(false);
+  const [events, setEvents] = useState<AppointmentTimelineEvent[]>([]);
+  const [patientHistory, setPatientHistory] = useState<PatientVisitSummary[]>([]);
 
-  // Sync notes when submission prop changes
+  // Sync notes and load full booking history when submission changes
   useEffect(() => {
     if (submission) {
       setNotes(submission.notes || '');
       setSaveStatus('idle');
+      if (isOpen && submission.id && submission.tenantId) {
+        fetch(`/api/v1/cms/submissions/appointments/${submission.id}?tenantId=${submission.tenantId}`, {
+          cache: 'no-store',
+        })
+          .then((res) => (res.ok ? res.json() : null))
+          .then((detail) => {
+            if (detail) {
+              setEvents(Array.isArray(detail.events) ? detail.events : []);
+              setPatientHistory(Array.isArray(detail.patientHistory) ? detail.patientHistory : []);
+            }
+          })
+          .catch(() => {});
+      }
     }
-  }, [submission]);
+  }, [submission, isOpen]);
 
   // Handle ESC key to close
   useEffect(() => {
@@ -297,6 +330,14 @@ export function SubmissionDrawer({
               </div>
               <div>
                 <span style={{ color: '#64748B', display: 'block', fontSize: '11px', fontWeight: 600 }}>
+                  Assigned Doctor
+                </span>
+                <strong style={{ color: 'var(--color-brand-primary, #183C4A)' }}>
+                  {submission.doctorName || 'Clinic General OPD'}
+                </strong>
+              </div>
+              <div>
+                <span style={{ color: '#64748B', display: 'block', fontSize: '11px', fontWeight: 600 }}>
                   Phone Number
                 </span>
                 <strong style={{ color: '#0F172A' }}>{submission.patientPhone}</strong>
@@ -305,7 +346,7 @@ export function SubmissionDrawer({
                 <span style={{ color: '#64748B', display: 'block', fontSize: '11px', fontWeight: 600 }}>
                   Preferred Date
                 </span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#0D5C46', fontWeight: 700 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--color-brand-primary, #183C4A)', fontWeight: 700 }}>
                   <CalendarIcon size={13} />
                   {submission.preferredDate}
                 </div>
@@ -333,28 +374,28 @@ export function SubmissionDrawer({
           {/* Compliance & Security Card (DPDP Act 2023) */}
           <div
             style={{
-              background: '#F0FDF4',
-              border: '1px solid #BBF7D0',
-              borderRadius: '8px',
+              background: 'var(--color-brand-surface, #E7F2F5)',
+              border: '1px solid var(--color-border-subtle, #DFE8EB)',
+              borderRadius: '14px',
               padding: '16px',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-              <ShieldCheckIcon size={15} color="#15803D" />
+              <ShieldCheckIcon size={15} color="var(--color-brand-primary, #183C4A)" />
               <h3
                 style={{
                   fontSize: '12px',
                   fontWeight: 700,
                   textTransform: 'uppercase',
                   letterSpacing: '0.05em',
-                  color: '#15803D',
+                  color: 'var(--color-brand-primary, #183C4A)',
                   margin: 0,
                 }}
               >
                 DPDP & Verification Guardrails
               </h3>
             </div>
-            <div style={{ fontSize: '12px', color: '#166534', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <div style={{ fontSize: '12px', color: 'var(--color-text-main, #121B1F)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
               <div>
                 Consent Timestamp: <strong>{submission.consentAt}</strong>
               </div>
@@ -377,18 +418,89 @@ export function SubmissionDrawer({
             onStatusChanged={(newStatus) => onStatusChanged?.(submission.id, newStatus)}
           />
 
+          {/* Booking History Timeline & Prior Patient Visits */}
+          <div
+            style={{
+              background: 'var(--color-bg-surface, #FFFFFF)',
+              border: '1px solid var(--color-border-subtle, #DFE8EB)',
+              borderRadius: '14px',
+              padding: '16px',
+            }}
+          >
+            <h3
+              style={{
+                fontSize: '12px',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                color: 'var(--color-text-muted, #475569)',
+                margin: '0 0 10px 0',
+              }}
+            >
+              Status Timeline &amp; Booking History
+            </h3>
+            {events.length === 0 ? (
+              <p style={{ fontSize: '12px', color: '#64748B', margin: 0 }}>
+                Initial request created on {submission.createdAt.slice(0, 10)}.
+              </p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {events.map((ev) => (
+                  <div
+                    key={ev.id}
+                    style={{
+                      fontSize: '12px',
+                      padding: '8px 10px',
+                      borderRadius: '8px',
+                      background: 'var(--color-bg-base, #F5F8F9)',
+                      border: '1px solid var(--color-border-subtle, #DFE8EB)',
+                    }}
+                  >
+                    <div style={{ fontWeight: 700, color: '#0F172A' }}>
+                      {ev.fromStatus ? `${ev.fromStatus} -> ${ev.toStatus}` : `Created (${ev.toStatus})`}
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#64748B' }}>
+                      Actor: {ev.actorId} &bull; {new Date(ev.createdAt).toLocaleString()}
+                    </div>
+                    {ev.note && (
+                      <div style={{ fontSize: '11.5px', color: '#334155', marginTop: '3px' }}>{ev.note}</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {patientHistory.length > 0 && (
+              <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid var(--color-border-subtle, #DFE8EB)' }}>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '6px' }}>
+                  Previous Visits ({patientHistory.length})
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {patientHistory.map((h) => (
+                    <div key={h.id} style={{ fontSize: '12px', color: '#334155', display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
+                      <span>
+                        {h.preferredDate} ({h.preferredTimeSlot}) &bull; {h.doctorName || h.serviceName}
+                      </span>
+                      <strong style={{ color: 'var(--color-brand-primary, #183C4A)' }}>{h.status}</strong>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Internal Staff Notes Area with Auto-Save */}
           <div
             style={{
-              background: 'var(--color-bg-base, #FFFFFF)',
-              border: '1px solid var(--color-border-subtle, #CBD5E1)',
-              borderRadius: '8px',
+              background: 'var(--color-bg-surface, #FFFFFF)',
+              border: '1px solid var(--color-border-subtle, #DFE8EB)',
+              borderRadius: '14px',
               padding: '16px',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <FileTextIcon size={14} color="#0D5C46" />
+                <FileTextIcon size={14} color="var(--color-brand-primary, #183C4A)" />
                 <label
                   htmlFor="drawer-notes-textarea"
                   style={{
@@ -396,7 +508,7 @@ export function SubmissionDrawer({
                     fontWeight: 700,
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em',
-                    color: 'var(--color-text-main, #0F172A)',
+                    color: 'var(--color-text-main, #121B1F)',
                   }}
                 >
                   Internal Staff Notes
@@ -407,7 +519,7 @@ export function SubmissionDrawer({
                 <span style={{ fontSize: '11px', color: '#D97706', fontWeight: 600 }}>Saving...</span>
               )}
               {saveStatus === 'saved' && (
-                <span style={{ fontSize: '11px', color: '#059669', fontWeight: 600 }}>Saved to DB</span>
+                <span style={{ fontSize: '11px', color: 'var(--color-brand-primary, #183C4A)', fontWeight: 700 }}>Saved to DB</span>
               )}
               {saveStatus === 'error' && (
                 <span style={{ fontSize: '11px', color: '#DC2626', fontWeight: 600 }}>Save Failed</span>
@@ -447,10 +559,10 @@ export function SubmissionDrawer({
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  padding: '6px 14px',
-                  borderRadius: '6px',
+                  padding: '8px 16px',
+                  borderRadius: '9999px',
                   border: 'none',
-                  background: 'var(--color-brand-primary, #0D5C46)',
+                  background: 'var(--color-brand-primary, #183C4A)',
                   color: '#FFFFFF',
                   fontWeight: 600,
                   fontSize: '12px',

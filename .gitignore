@@ -28,6 +28,7 @@ Thumbs.db
 .idea/
 
 # Testing & Coverage
+.taste-skill/
 coverage/
 playwright-report/
 test-results/

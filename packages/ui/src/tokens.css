@@ -23,9 +23,9 @@
   --color-border-subtle: #E2E8F0;
   --color-border-strong: #CBD5E1;
 
-  /* Typography / Text */
+  /* Typography / Text (Contrast ≥ 7:1 on white/surface grounds) */
   --color-text-main: #0F172A;
-  --color-text-muted: #475569;
+  --color-text-muted: #2F3E46;
   --color-text-inverse: #FFFFFF;
 
   /* Semantic Status Tokens (Contrast ≥ 4.5:1) */
@@ -72,7 +72,7 @@
   --color-border-strong: #94D2C7;
 
   --color-text-main: #0B2A27;
-  --color-text-muted: #44625E;
+  --color-text-muted: #2B4042;
   --color-text-inverse: #FFFFFF;
 
   --brand: var(--color-brand-primary);
@@ -164,12 +164,12 @@
   --space-16: 64px;
   --space-20: 80px;
 
-  /* Typography: Self-hosted Poppins + Apple SF Pro + Helvetica + Devanagari Fallback Chain */
+  /* Typography: Self-hosted Plus Jakarta Sans + system-ui + Devanagari Fallback Chain */
   /* Zero external Google Fonts network calls */
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", "Poppins", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --font-display: "Poppins", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --font-apple: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", "Helvetica Neue", Helvetica, sans-serif;
-  --font-poppins: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-display: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-apple: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, sans-serif;
+  --font-poppins: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-helvetica: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-hindi: 'Noto Sans Devanagari', var(--font-sans);
 
@@ -198,7 +198,7 @@
 
 /* Accessibility: Focus rings */
 :focus-visible {
-  outline: 2px solid var(--color-brand-primary);
+  outline: 3px solid var(--color-brand-primary);
   outline-offset: 2px;
 }
 

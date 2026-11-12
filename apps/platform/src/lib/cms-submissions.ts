@@ -9,6 +9,8 @@ export interface CmsAppointmentItem {
   patientPhone: string;
   patientEmail: string | null;
   serviceName: string;
+  doctorId: string | null;
+  doctorName: string | null;
   preferredDate: string;
   preferredTimeSlot: string;
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
@@ -24,6 +26,7 @@ export interface FetchCmsAppointmentsParams {
   tab?: 'today' | 'all' | undefined;
   status?: string | undefined;
   service?: string | undefined;
+  doctor?: string | undefined;
   startDate?: string | undefined;
   endDate?: string | undefined;
   search?: string | undefined;
@@ -84,6 +87,7 @@ export async function fetchCmsAppointments(
     tab = 'all',
     status,
     service,
+    doctor,
     startDate,
     endDate,
     search,
@@ -124,6 +128,13 @@ export async function fetchCmsAppointments(
       paramIndex++;
     }
 
+    // Doctor filter
+    if (doctor && doctor !== 'all') {
+      conditions.push(`(LOWER(COALESCE(doctor_name, '')) = LOWER($${paramIndex}) OR doctor_id::text = $${paramIndex})`);
+      values.push(doctor);
+      paramIndex++;
+    }
+
     // Date range filters
     if (startDate) {
       conditions.push(`preferred_date >= $${paramIndex}`);
@@ -158,6 +169,8 @@ export async function fetchCmsAppointments(
         patient_phone_enc,
         patient_email_enc,
         service_name,
+        doctor_id,
+        doctor_name,
         preferred_date,
         preferred_time_slot,
         status,
@@ -224,6 +237,8 @@ export async function fetchCmsAppointments(
         patientPhone,
         patientEmail,
         serviceName: row.service_name,
+        doctorId: row.doctor_id || null,
+        doctorName: row.doctor_name || null,
         preferredDate: formattedDate,
         preferredTimeSlot: row.preferred_time_slot,
         status: row.status,
@@ -244,7 +259,8 @@ export async function fetchCmsAppointments(
           item.patientName.toLowerCase().includes(q) ||
           item.patientPhone.includes(q) ||
           (item.patientEmail && item.patientEmail.toLowerCase().includes(q)) ||
-          item.serviceName.toLowerCase().includes(q)
+          item.serviceName.toLowerCase().includes(q) ||
+          (item.doctorName && item.doctorName.toLowerCase().includes(q))
       );
     }
 

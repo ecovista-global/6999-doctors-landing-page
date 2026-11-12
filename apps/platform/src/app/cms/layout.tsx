@@ -8,19 +8,22 @@ import { CmsShellProvider, useCmsShell } from '@/components/cms/CmsShellContext'
 
 function getRouteBreadcrumbs(pathname: string) {
   if (pathname.startsWith('/cms/pages')) {
-    return [{ label: 'CMS', href: '/cms' }, { label: '7-Page Site CMS' }, { label: 'Page Slots (7-Page Architecture)' }];
+    return [{ label: 'CMS', href: '/cms' }, { label: '10-Page Site CMS' }, { label: 'Page Slots (10-Page Architecture)' }];
+  }
+  if (pathname.startsWith('/cms/doctors')) {
+    return [{ label: 'CMS', href: '/cms' }, { label: '10-Page Site CMS' }, { label: 'Doctors & Specialties' }];
   }
   if (pathname.startsWith('/cms/editor')) {
-    return [{ label: 'CMS', href: '/cms' }, { label: '7-Page Site CMS' }, { label: 'Site Block Editor' }];
+    return [{ label: 'CMS', href: '/cms' }, { label: '10-Page Site CMS' }, { label: 'Site Block Editor' }];
   }
   if (pathname.startsWith('/cms/blog')) {
-    return [{ label: 'CMS', href: '/cms' }, { label: '7-Page Site CMS' }, { label: 'Blog Posts' }];
+    return [{ label: 'CMS', href: '/cms' }, { label: '10-Page Site CMS' }, { label: 'Blog Posts' }];
   }
   if (pathname.startsWith('/cms/reviews-faqs') || pathname.startsWith('/cms/faqs')) {
-    return [{ label: 'CMS', href: '/cms' }, { label: '7-Page Site CMS' }, { label: 'FAQs & Reviews' }];
+    return [{ label: 'CMS', href: '/cms' }, { label: '10-Page Site CMS' }, { label: 'FAQs & Reviews' }];
   }
   if (pathname.startsWith('/cms/media')) {
-    return [{ label: 'CMS', href: '/cms' }, { label: '7-Page Site CMS' }, { label: 'Media Library' }];
+    return [{ label: 'CMS', href: '/cms' }, { label: '10-Page Site CMS' }, { label: 'Media Library' }];
   }
   if (pathname.startsWith('/cms/settings')) {
     return [{ label: 'CMS', href: '/cms' }, { label: 'Governance & Audit' }, { label: 'Settings & Security' }];
@@ -48,10 +51,19 @@ function CmsLayoutContent({ children }: { children: React.ReactNode }) {
     setSearchQuery,
   } = useCmsShell();
 
+  // Collapse sidebar automatically on narrow viewports so mobile content stays readable
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      setCollapsed(true);
+    }
+  }, [setCollapsed]);
+
   // Sync activeNav with current route on navigation
   useEffect(() => {
     if (pathname.startsWith('/cms/pages')) {
       setActiveNav((prev) => (prev === 'pages' ? prev : 'pages'));
+    } else if (pathname.startsWith('/cms/doctors')) {
+      setActiveNav((prev) => (prev === 'doctors' ? prev : 'doctors'));
     } else if (pathname.startsWith('/cms/editor')) {
       setActiveNav((prev) => (prev === 'editor' ? prev : 'editor'));
     } else if (pathname.startsWith('/cms/blog')) {

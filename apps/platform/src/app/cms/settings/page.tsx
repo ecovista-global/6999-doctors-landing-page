@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { BillingInvoicesPanel } from '@/components/cms/BillingInvoicesPanel';
 import { OperatingHoursEditor, ClinicSettingsData } from '@/components/cms/OperatingHoursEditor';
+import { OperationsGovernancePanel } from '@/components/cms/OperationsGovernancePanel';
 
 const DEFAULT_SETTINGS: ClinicSettingsData = {
   operatingHours: {
@@ -74,10 +75,10 @@ export default function ClinicSettingsPage() {
   return (
     <div style={{ padding: '24px 32px' }}>
       <div style={{ maxWidth: '860px', margin: '0 auto 24px auto' }}>
-        <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#0F172A', margin: '0 0 6px 0' }}>
-          Clinic Settings & Operating Hours
+        <h1 style={{ fontSize: '26px', fontWeight: 600, letterSpacing: '-0.025em', color: 'var(--color-text-main, #162228)', margin: '0 0 6px 0' }}>
+          Clinic Settings &amp; <span className="ms-serif-italic" style={{ fontSize: '30px' }}>operating hours</span>
         </h1>
-        <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
+        <p style={{ fontSize: '13.5px', color: 'var(--color-text-muted, #54666E)', margin: 0 }}>
           Manage weekly clinical timings, booking slot durations, notification email dispatches, and bot security thresholds.
         </p>
       </div>
@@ -86,6 +87,8 @@ export default function ClinicSettingsPage() {
         initialSettings={settings || DEFAULT_SETTINGS}
         onSave={handleSave}
       />
+
+      <OperationsGovernancePanel />
 
       <BillingInvoicesPanel />
     </div>

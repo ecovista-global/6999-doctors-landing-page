@@ -12,6 +12,7 @@ import {
 } from '@/lib/idempotency';
 import { validateSpamProtection } from '@/lib/spam-protection';
 import { appointmentSubmissionSchema } from '@/lib/appointment-schemas';
+import { resolvePublicTenantId } from '@/lib/defaultTenant';
 
 // ==============================================================================
 // 1. CORS Preflight & Security Headers
@@ -127,28 +128,7 @@ export const POST = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) 
     await client.query('BEGIN');
 
     // 4.1 Resolve Tenant ID
-    let resolvedTenantId = data.tenantId;
-
-    if (!resolvedTenantId && data.clinicSlug) {
-      const tenantLookup = await client.query(
-        'SELECT id FROM tenants WHERE slug = $1 LIMIT 1',
-        [data.clinicSlug]
-      );
-      if (tenantLookup.rowCount && tenantLookup.rowCount > 0) {
-        resolvedTenantId = tenantLookup.rows[0].id;
-      }
-    }
-
-    if (!resolvedTenantId) {
-      // Fallback: lookup single active site if neither provided
-      const defaultTenantLookup = await client.query(
-        'SELECT id FROM tenants WHERE status = $1 ORDER BY created_at ASC LIMIT 1',
-        ['active']
-      );
-      if (defaultTenantLookup.rowCount && defaultTenantLookup.rowCount > 0) {
-        resolvedTenantId = defaultTenantLookup.rows[0].id;
-      }
-    }
+    const resolvedTenantId = await resolvePublicTenantId(client, data.tenantId, data.clinicSlug);
 
     if (!resolvedTenantId) {
       throw new AppError('E-1101', 'Unable to resolve clinic tenant for appointment booking');
@@ -156,6 +136,53 @@ export const POST = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) 
 
     // Set transaction-level tenant scoping for RLS compliance (MT-107)
     await client.query("SELECT set_config('app.tenant_id', $1, true)", [resolvedTenantId]);
+
+    // 4.1.5 Optional Slot Conflict Guard (Premium Multi-Doctor & Strict Slot Selection)
+    let resolvedDoctorName = data.doctorName || null;
+    if (data.doctorId) {
+      const docRes = await client.query<{ id: string; name: string }>(
+        'SELECT id, name FROM doctors WHERE id = $1 AND tenant_id = $2 LIMIT 1',
+        [data.doctorId, resolvedTenantId]
+      );
+      if (docRes.rowCount && docRes.rows[0]) {
+        resolvedDoctorName = resolvedDoctorName || docRes.rows[0].name;
+      }
+    }
+
+    if (data.doctorId || data.strictSlotCheck) {
+      const conflictRes = data.doctorId
+        ? await client.query(
+            `SELECT id FROM appointments
+             WHERE tenant_id = $1
+               AND doctor_id = $2
+               AND preferred_date = $3
+               AND preferred_time_slot = $4
+               AND status IN ('pending', 'confirmed')
+             LIMIT 1
+             FOR UPDATE`,
+            [resolvedTenantId, data.doctorId, data.preferredDate, data.preferredTimeSlot]
+          )
+        : await client.query(
+            `SELECT id FROM appointments
+             WHERE tenant_id = $1
+               AND doctor_id IS NULL
+               AND preferred_date = $2
+               AND preferred_time_slot = $3
+               AND status IN ('pending', 'confirmed')
+             LIMIT 1
+             FOR UPDATE`,
+            [resolvedTenantId, data.preferredDate, data.preferredTimeSlot]
+          );
+
+      if (conflictRes.rowCount && conflictRes.rowCount > 0) {
+        await client.query('ROLLBACK');
+        clearIdempotency(idempotencyKey);
+        throw new AppError(
+          'E-1608',
+          `Time slot "${data.preferredTimeSlot}" on ${data.preferredDate}${resolvedDoctorName ? ` with ${resolvedDoctorName}` : ''} is already booked`
+        );
+      }
+    }
 
     // 4.2 Check Database Idempotency Constraint Backstop
     const existingAppt = await client.query(
@@ -198,6 +225,8 @@ export const POST = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) 
         patient_name_enc,
         patient_phone_enc,
         patient_email_enc,
+        doctor_id,
+        doctor_name,
         service_name,
         preferred_date,
         preferred_time_slot,
@@ -206,13 +235,15 @@ export const POST = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) 
         consent_at,
         idempotency_key,
         ip_hash
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, now(), $10, $11)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, now(), $12, $13)
       RETURNING id, created_at`,
       [
         resolvedTenantId,
         patientNameEnc,
         patientPhoneEnc,
         patientEmailEnc,
+        data.doctorId || null,
+        resolvedDoctorName,
         data.serviceName,
         data.preferredDate,
         data.preferredTimeSlot,
@@ -239,6 +270,8 @@ export const POST = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) 
         JSON.stringify({
           appointmentId,
           tenantId: resolvedTenantId,
+          doctorId: data.doctorId || null,
+          doctorName: resolvedDoctorName,
           serviceName: data.serviceName,
           preferredDate: data.preferredDate,
           preferredTimeSlot: data.preferredTimeSlot,
@@ -263,7 +296,9 @@ export const POST = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) 
         'public_form',
         'none',
         'pending',
-        'Initial online booking request received from patient portal',
+        resolvedDoctorName
+          ? `Online booking request for ${resolvedDoctorName} (${data.preferredTimeSlot})`
+          : 'Initial online booking request received from patient portal',
       ]
     );
 
@@ -272,6 +307,8 @@ export const POST = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) 
     const successPayload = {
       status: 'accepted',
       appointmentId,
+      doctorId: data.doctorId || null,
+      doctorName: resolvedDoctorName,
       serviceName: data.serviceName,
       preferredDate: data.preferredDate,
       preferredTimeSlot: data.preferredTimeSlot,

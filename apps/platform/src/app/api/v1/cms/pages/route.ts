@@ -5,7 +5,9 @@ import { AppError } from '@/lib/errors';
 import { withGateway } from '@/lib/gateway';
 import {
   ALLOWED_PAGE_SLOTS,
+  PREMIUM_ALLOWED_PAGE_SLOTS,
   PAGE_SLOTS_METADATA,
+  PREMIUM_PAGE_SLOTS_METADATA,
   validatePageSlots,
 } from '@ecodigitech/content-schema';
 
@@ -21,21 +23,30 @@ export const GET = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) =
   try {
     await client.query("SELECT set_config('app.tenant_id', $1, true)", [tenantId]);
 
+    const siteRes = await client.query<{ plan: string }>(
+      `SELECT plan FROM sites WHERE tenant_id = $1 LIMIT 1`,
+      [tenantId]
+    );
+    const sitePlan = siteRes.rows[0]?.plan === 'premium' ? 'premium' : 'professional';
+    const maxAllowedPages = sitePlan === 'premium' ? 10 : 7;
+    const allPageSlots = sitePlan === 'premium' ? PREMIUM_PAGE_SLOTS_METADATA : PAGE_SLOTS_METADATA;
+    const defaultPages = sitePlan === 'premium' ? [...PREMIUM_ALLOWED_PAGE_SLOTS] : [...ALLOWED_PAGE_SLOTS];
+
     const res = await client.query(
       `SELECT enabled_pages FROM clinic_settings WHERE tenant_id = $1 LIMIT 1`,
       [tenantId]
     );
 
-    const defaultPages = [...ALLOWED_PAGE_SLOTS];
     const enabledPages =
       res.rowCount && res.rows[0].enabled_pages && res.rows[0].enabled_pages.length > 0
         ? res.rows[0].enabled_pages
         : defaultPages;
 
     return NextResponse.json({
+      plan: sitePlan,
       enabledPages,
-      maxAllowedPages: 7,
-      allPageSlots: PAGE_SLOTS_METADATA,
+      maxAllowedPages,
+      allPageSlots,
     });
   } finally {
     client.release();
@@ -57,20 +68,6 @@ export const PUT = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) =
     throw new AppError('E-1101', 'enabledPages must be an array of page slot strings');
   }
 
-  // 1. Strict 7-page limit check (Rule R1 / 18 § 2 / E-1601)
-  if (enabledPages.length > 7) {
-    throw new AppError(
-      'E-1601',
-      `Page limit exceeded: maximum of 7 pages allowed on the Professional Clinic plan, received ${enabledPages.length}`
-    );
-  }
-
-  // 2. Validate allowed page slot names
-  const validation = validatePageSlots(enabledPages);
-  if (!validation.valid) {
-    throw new AppError('E-1101', validation.error || 'Invalid page slots');
-  }
-
   const clientIp =
     req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     req.headers.get('x-real-ip') ||
@@ -82,6 +79,31 @@ export const PUT = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) =
   try {
     await client.query('BEGIN');
     await client.query("SELECT set_config('app.tenant_id', $1, true)", [tenantId]);
+
+    const siteRes = await client.query<{ plan: string }>(
+      `SELECT plan FROM sites WHERE tenant_id = $1 LIMIT 1`,
+      [tenantId]
+    );
+    const requestedPlan = body.plan === 'premium' ? 'premium' : undefined;
+    const sitePlan: 'professional' | 'premium' =
+      requestedPlan || (siteRes.rows[0]?.plan === 'premium' ? 'premium' : 'professional');
+    const maxAllowedPages = sitePlan === 'premium' ? 10 : 7;
+
+    // 1. Plan-aware page limit check (7 for Professional ₹18,999; 10 for Premium ₹24,999)
+    if (enabledPages.length > maxAllowedPages) {
+      await client.query('ROLLBACK');
+      throw new AppError(
+        'E-1601',
+        `Page limit exceeded: maximum of ${maxAllowedPages} pages allowed on the ${sitePlan === 'premium' ? 'Premium' : 'Professional'} Clinic plan, received ${enabledPages.length}`
+      );
+    }
+
+    // 2. Validate allowed page slot names for the active plan
+    const validation = validatePageSlots(enabledPages, sitePlan);
+    if (!validation.valid) {
+      await client.query('ROLLBACK');
+      throw new AppError('E-1101', validation.error || 'Invalid page slots');
+    }
 
     // Upsert into clinic_settings
     await client.query(
@@ -114,8 +136,10 @@ export const PUT = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) =
       action: 'pages.update',
       target: 'clinic_settings:enabled_pages',
       details: {
+        plan: sitePlan,
         enabledPages,
         pageCount: enabledPages.length,
+        maxAllowedPages,
       },
       ip: clientIp,
       userAgent,
@@ -125,9 +149,10 @@ export const PUT = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) =
 
     return NextResponse.json({
       success: true,
+      plan: sitePlan,
       enabledPages,
       pageCount: enabledPages.length,
-      maxAllowedPages: 7,
+      maxAllowedPages,
       savedAt: new Date().toISOString(),
     });
   } catch (e) {

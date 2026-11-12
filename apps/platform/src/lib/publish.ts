@@ -170,7 +170,8 @@ export async function publishSiteVersion(input: PublishInput) {
     }
 
     if (Array.isArray(mergedData.enabledPages)) {
-      const validation = validatePageSlots(mergedData.enabledPages as string[]);
+      const sitePlan = site.plan === 'premium' ? 'premium' : 'professional';
+      const validation = validatePageSlots(mergedData.enabledPages as string[], sitePlan);
       if (!validation.valid) {
         throw new AppError('E-1601', validation.error || 'Invalid page slots');
       }

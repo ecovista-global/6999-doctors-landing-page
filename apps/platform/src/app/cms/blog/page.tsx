@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useCmsShell } from '@/components/cms/CmsShellContext';
 import {
   Edit3Icon,
   PlusIcon,
@@ -91,6 +92,7 @@ const DEFAULT_POSTS: BlogPost[] = [
 ];
 
 export default function BlogManagementPage() {
+  const { searchQuery: shellSearch } = useCmsShell();
   const [posts, setPosts] = useState<BlogPost[]>(DEFAULT_POSTS);
   const [search, setSearch] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -293,9 +295,13 @@ export default function BlogManagementPage() {
     const autoReadTime = calculateReadTime(sanitizedContent);
     const tenantId = getTenantId();
 
+    const isUuid =
+      !!editingPost &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(editingPost.id);
+
     try {
-      if (editingPost) {
-        // PUT update
+      if (editingPost && isUuid) {
+        // PUT update existing Postgres row
         const res = await fetch(`/api/v1/cms/posts/${editingPost.id}?tenantId=${tenantId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -313,25 +319,11 @@ export default function BlogManagementPage() {
           savePostsToStorage(updated);
           showToast('Article updated successfully.');
         } else {
-          // Offline fallback
-          const updated = posts.map((p) =>
-            p.id === editingPost.id
-              ? {
-                  ...p,
-                  ...formData,
-                  slug: finalSlug,
-                  content: sanitizedContent,
-                  readTime: autoReadTime,
-                  publishedAt: formData.isPublished ? p.publishedAt || new Date().toISOString().slice(0, 10) : undefined,
-                  updatedAt: new Date().toISOString(),
-                }
-              : p
-          );
-          savePostsToStorage(updated);
-          showToast('Article updated in local storage.');
+          showToast('Failed to save article to database. Please retry.');
+          return;
         }
       } else {
-        // POST create
+        // POST create (new article or promoting a local fallback draft to Postgres)
         const res = await fetch(`/api/v1/cms/posts?tenantId=${tenantId}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -345,27 +337,20 @@ export default function BlogManagementPage() {
 
         if (res.ok) {
           const data = await res.json();
-          savePostsToStorage([data.post, ...posts]);
-          showToast('New clinical article published.');
+          const updated = editingPost
+            ? posts.map((p) => (p.id === editingPost.id ? data.post : p))
+            : [data.post, ...posts];
+          savePostsToStorage(updated);
+          showToast(editingPost ? 'Article saved to database.' : 'New clinical article published.');
         } else {
-          // Offline fallback
-          const newPost: BlogPost = {
-            id: `post-${Date.now()}`,
-            ...formData,
-            slug: finalSlug,
-            content: sanitizedContent,
-            readTime: autoReadTime,
-            createdAt: new Date().toISOString(),
-            publishedAt: formData.isPublished ? new Date().toISOString().slice(0, 10) : undefined,
-          };
-          savePostsToStorage([newPost, ...posts]);
-          showToast('New clinical article saved.');
+          showToast('Failed to publish article to database. Please retry.');
+          return;
         }
       }
 
       setIsEditorOpen(false);
     } catch {
-      showToast('Error saving article. Stored locally.');
+      showToast('Network error saving article. Please retry.');
     } finally {
       setIsSaving(false);
     }
@@ -374,10 +359,13 @@ export default function BlogManagementPage() {
   const handleDeletePost = async (id: string) => {
     if (confirm('Are you sure you want to delete this clinical article?')) {
       const tenantId = getTenantId();
-      try {
-        await fetch(`/api/v1/cms/posts/${id}?tenantId=${tenantId}`, { method: 'DELETE' });
-      } catch {
-        // ignore
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      if (isUuid) {
+        const res = await fetch(`/api/v1/cms/posts/${id}?tenantId=${tenantId}`, { method: 'DELETE' });
+        if (!res.ok) {
+          showToast('Delete failed. Please retry.');
+          return;
+        }
       }
       const updated = posts.filter((p) => p.id !== id);
       savePostsToStorage(updated);
@@ -393,10 +381,12 @@ export default function BlogManagementPage() {
   const categories = ['all', 'General Medicine', 'Infectious Disease', 'Preventive Care', 'Cardiology', 'Pediatrics'];
 
   const filteredPosts = posts.filter((p) => {
+    const effectiveSearch = (shellSearch || search).trim().toLowerCase();
     const matchesSearch =
-      p.title.toLowerCase().includes(search.toLowerCase()) ||
-      p.excerpt.toLowerCase().includes(search.toLowerCase()) ||
-      p.slug.toLowerCase().includes(search.toLowerCase());
+      !effectiveSearch ||
+      p.title.toLowerCase().includes(effectiveSearch) ||
+      p.excerpt.toLowerCase().includes(effectiveSearch) ||
+      p.slug.toLowerCase().includes(effectiveSearch);
     const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -417,26 +407,26 @@ export default function BlogManagementPage() {
         }}
       >
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <FileTextIcon size={20} color="#0D5C46" />
-            <h1 style={{ fontSize: '20px', fontWeight: 800, color: '#0F172A', margin: 0 }}>
-              Clinical Health Blog &amp; Education Guides
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+            <FileTextIcon size={20} color="var(--color-brand-primary, #183C4A)" />
+            <h1 style={{ fontSize: '26px', fontWeight: 600, color: 'var(--color-text-main, #121B1F)', margin: 0, letterSpacing: '-0.02em' }}>
+              Clinical Health <span className="ms-serif-italic">Blog &amp; Education</span> Guides
             </h1>
             <span
               style={{
                 fontSize: '11px',
                 fontWeight: 700,
-                background: '#ECFDF5',
-                color: '#065F46',
-                padding: '2px 8px',
-                borderRadius: '6px',
-                border: '1px solid #A7F3D0',
+                background: 'var(--color-brand-surface, #E7F2F5)',
+                color: 'var(--color-brand-primary, #183C4A)',
+                padding: '3px 10px',
+                borderRadius: '9999px',
+                border: '1px solid var(--color-border-subtle, #DFE8EB)',
               }}
             >
               WYSIWYG &bull; MT-121
             </span>
           </div>
-          <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
+          <p style={{ fontSize: '13.5px', color: 'var(--color-text-muted, #5A6B72)', margin: 0 }}>
             Author, sanitize, and publish evidence-backed patient guidance articles with clinical callout boxes and automatic XSS filtering.
           </p>
         </div>
@@ -444,23 +434,12 @@ export default function BlogManagementPage() {
         <button
           type="button"
           onClick={handleOpenNew}
-          style={{
-            background: '#0D5C46',
-            color: '#FFFFFF',
-            border: 'none',
-            borderRadius: '8px',
-            padding: '10px 18px',
-            fontSize: '13px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            boxShadow: '0 2px 4px rgba(13, 92, 70, 0.2)',
-          }}
+          className="ms-pill-dark"
         >
-          <PlusIcon size={16} color="#FFFFFF" />
           <span>Write New Article</span>
+          <span className="ms-pill-circle">
+            <PlusIcon size={14} color="#183C4A" />
+          </span>
         </button>
       </div>
 
@@ -484,14 +463,17 @@ export default function BlogManagementPage() {
             onChange={(e) => setSearch(e.target.value)}
             style={{
               width: '100%',
-              padding: '9px 12px 9px 36px',
-              borderRadius: '8px',
-              border: '1px solid #CBD5E1',
+              padding: '9px 14px 9px 38px',
+              borderRadius: '9999px',
+              border: '1px solid var(--color-border-subtle, #DFE8EB)',
+              background: 'var(--color-bg-surface, #FFFFFF)',
+              color: 'var(--color-text-main, #121B1F)',
               fontSize: '13px',
               boxSizing: 'border-box',
+              outline: 'none',
             }}
           />
-          <span style={{ position: 'absolute', left: '12px', top: '10px', color: '#94A3B8' }}>
+          <span style={{ position: 'absolute', left: '14px', top: '10px', color: 'var(--color-text-muted, #5A6B72)' }}>
             <SearchIcon size={16} />
           </span>
         </div>
@@ -504,14 +486,14 @@ export default function BlogManagementPage() {
               type="button"
               onClick={() => setSelectedCategory(cat)}
               style={{
-                padding: '6px 12px',
-                borderRadius: '6px',
+                padding: '6px 14px',
+                borderRadius: '9999px',
                 border: '1px solid',
-                borderColor: selectedCategory === cat ? '#0D5C46' : '#E2E8F0',
-                background: selectedCategory === cat ? '#ECFDF5' : '#FFFFFF',
-                color: selectedCategory === cat ? '#0D5C46' : '#64748B',
+                borderColor: selectedCategory === cat ? 'var(--color-brand-primary, #183C4A)' : 'var(--color-border-subtle, #DFE8EB)',
+                background: selectedCategory === cat ? 'var(--color-brand-primary, #183C4A)' : 'var(--color-bg-surface, #FFFFFF)',
+                color: selectedCategory === cat ? '#FFFFFF' : 'var(--color-text-muted, #5A6B72)',
                 fontSize: '12px',
-                fontWeight: selectedCategory === cat ? 700 : 500,
+                fontWeight: selectedCategory === cat ? 700 : 600,
                 cursor: 'pointer',
               }}
             >
@@ -542,16 +524,8 @@ export default function BlogManagementPage() {
           <button
             type="button"
             onClick={handleOpenNew}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '6px',
-              background: '#0D5C46',
-              color: '#FFF',
-              border: 'none',
-              fontSize: '13px',
-              fontWeight: 700,
-              cursor: 'pointer',
-            }}
+            className="ms-pill-dark"
+            style={{ padding: '9px 18px', fontSize: '13px' }}
           >
             Create Article
           </button>
@@ -658,8 +632,8 @@ export default function BlogManagementPage() {
                   {post.excerpt || extractPlainText(post.content).slice(0, 120)}
                 </p>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: '#94A3B8' }}>
-                  <span>Slug: <code style={{ color: '#0D5C46', background: '#F8FAFC', padding: '1px 4px' }}>/blog/{post.slug}</code></span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: 'var(--color-text-muted, #5A6B72)' }}>
+                  <span>Slug: <code style={{ color: 'var(--color-brand-primary, #183C4A)', background: 'var(--color-brand-surface, #E7F2F5)', padding: '2px 6px', borderRadius: '6px' }}>/blog/{post.slug}</code></span>
                   {post.publishedAt && <span>&bull; Published: {post.publishedAt}</span>}
                 </div>
               </div>
@@ -767,8 +741,8 @@ export default function BlogManagementPage() {
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Edit3Icon size={18} color="#0D5C46" />
-                <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0F172A', margin: 0 }}>
+                <Edit3Icon size={18} color="var(--color-brand-primary, #183C4A)" />
+                <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--color-text-main, #121B1F)', margin: 0 }}>
                   {editingPost ? 'Edit Clinical Article' : 'Compose Patient Health Article'}
                 </h2>
               </div>
@@ -1234,8 +1208,8 @@ export default function BlogManagementPage() {
                       .live-preview-box h3 { font-size: 16px; font-weight: 700; color: #0F172A; margin: 14px 0 6px 0; }
                       .live-preview-box p { font-size: 14px; color: #334155; line-height: 1.7; margin: 0 0 12px 0; }
                       .live-preview-box ul, .live-preview-box ol { margin: 0 0 14px 0; padding-left: 20px; font-size: 14px; color: #334155; line-height: 1.6; }
-                      .live-preview-box blockquote { border-left: 4px solid #0D5C46; background: #F8FAFC; margin: 12px 0; padding: 10px 16px; font-style: italic; color: #475569; }
-                      .live-preview-box .clinical-callout { background: #ECFDF5; border-left: 4px solid #059669; padding: 12px 16px; border-radius: 6px; margin: 14px 0; color: #065F46; font-size: 13px; line-height: 1.6; }
+                      .live-preview-box blockquote { border-left: 4px solid var(--color-brand-primary, #183C4A); background: var(--color-bg-base, #F5F8F9); margin: 12px 0; padding: 10px 16px; font-style: italic; color: var(--color-text-muted, #5A6B72); }
+                      .live-preview-box .clinical-callout { background: var(--color-brand-surface, #E7F2F5); border-left: 4px solid var(--color-brand-primary, #183C4A); padding: 12px 16px; border-radius: 10px; margin: 14px 0; color: var(--color-brand-primary, #183C4A); font-size: 13px; line-height: 1.6; }
                       .live-preview-box .clinical-callout.emergency-alert { background: #FEF2F2; border-left-color: #DC2626; color: #991B1B; }
                     `}</style>
                     <div
@@ -1253,7 +1227,7 @@ export default function BlogManagementPage() {
                   id="isPublished"
                   checked={formData.isPublished}
                   onChange={(e) => setFormData({ ...formData, isPublished: e.target.checked })}
-                  style={{ width: '16px', height: '16px', accentColor: '#0D5C46' }}
+                  style={{ width: '16px', height: '16px', accentColor: 'var(--color-brand-primary, #183C4A)' }}
                 />
                 <label htmlFor="isPublished" style={{ fontSize: '13px', fontWeight: 600, color: '#0F172A' }}>
                   Publish immediately (Visible on live patient health blog)
@@ -1281,19 +1255,24 @@ export default function BlogManagementPage() {
                 <button
                   type="submit"
                   disabled={isSaving || slugCollision}
-                  style={{
-                    padding: '9px 22px',
-                    borderRadius: '6px',
-                    border: 'none',
-                    background: slugCollision ? '#94A3B8' : '#0D5C46',
-                    color: '#FFFFFF',
-                    fontSize: '13px',
-                    fontWeight: 700,
-                    cursor: slugCollision ? 'not-allowed' : 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                  }}
+                  className={slugCollision ? undefined : 'ms-pill-dark'}
+                  style={
+                    slugCollision
+                      ? {
+                          padding: '9px 22px',
+                          borderRadius: '9999px',
+                          border: 'none',
+                          background: '#94A3B8',
+                          color: '#FFFFFF',
+                          fontSize: '13px',
+                          fontWeight: 700,
+                          cursor: 'not-allowed',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                        }
+                      : { padding: '9px 22px', fontSize: '13px' }
+                  }
                 >
                   {isSaving ? (
                     <span>Saving...</span>
@@ -1316,13 +1295,13 @@ export default function BlogManagementPage() {
             position: 'fixed',
             bottom: '24px',
             right: '24px',
-            background: '#0D5C46',
+            background: 'var(--color-brand-primary, #183C4A)',
             color: '#FFFFFF',
             padding: '12px 20px',
-            borderRadius: '8px',
+            borderRadius: '9999px',
             fontSize: '13px',
             fontWeight: 600,
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+            boxShadow: '0 8px 24px rgba(18, 46, 57, 0.2)',
             zIndex: 200,
             display: 'flex',
             alignItems: 'center',

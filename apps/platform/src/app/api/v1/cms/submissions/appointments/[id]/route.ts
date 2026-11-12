@@ -5,6 +5,8 @@ import { recordAuditEvent } from '@/lib/audit';
 import { AppError } from '@/lib/errors';
 import { withGateway } from '@/lib/gateway';
 import { assertValidStatusTransition } from '@/lib/appointment-state-machine';
+import { updateAppointmentStatus } from '@/lib/contentStore';
+import { sendEmail } from '@/lib/resend';
 
 interface RouteContext {
   params?: Promise<{ id: string }>;
@@ -52,6 +54,8 @@ export const GET = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) =
         patient_phone_enc,
         patient_email_enc,
         service_name,
+        doctor_id,
+        doctor_name,
         preferred_date,
         preferred_time_slot,
         status,
@@ -106,6 +110,46 @@ export const GET = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) =
       }
     }
 
+    // Load status transition timeline & prior visits for this patient within tenant
+    const eventsRes = await client.query(
+      `SELECT id, actor_id, from_status, to_status, note, created_at
+       FROM appointment_events
+       WHERE appointment_id = $1 AND tenant_id = $2
+       ORDER BY created_at ASC`,
+      [id, tenantId]
+    );
+
+    const candidateHistoryRes = await client.query(
+      `SELECT id, patient_phone_enc, service_name, doctor_name, preferred_date, preferred_time_slot, status, created_at
+       FROM appointments
+       WHERE tenant_id = $1 AND id != $2
+       ORDER BY created_at DESC
+       LIMIT 40`,
+      [tenantId, id]
+    );
+
+    const normalizedPhone = patientPhone.replace(/\D/g, '');
+    const patientHistory = candidateHistoryRes.rows
+      .filter((hRow: any) => {
+        if (!normalizedPhone || normalizedPhone.length < 6) return false;
+        try {
+          const decPhone = decrypt(hRow.patient_phone_enc).replace(/\D/g, '');
+          return decPhone === normalizedPhone;
+        } catch {
+          return String(hRow.patient_phone_enc).replace(/\D/g, '') === normalizedPhone;
+        }
+      })
+      .slice(0, 10)
+      .map((hRow: any) => ({
+        id: hRow.id,
+        serviceName: hRow.service_name,
+        doctorName: hRow.doctor_name || null,
+        preferredDate: formatDateOnly(hRow.preferred_date),
+        preferredTimeSlot: hRow.preferred_time_slot,
+        status: hRow.status,
+        createdAt: hRow.created_at instanceof Date ? hRow.created_at.toISOString() : String(hRow.created_at),
+      }));
+
     // Record immutable audit event for patient record access (Rule R9 & 18 § 3)
     await recordAuditEvent({
       tenantId,
@@ -127,6 +171,8 @@ export const GET = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) =
       patientPhone,
       patientEmail,
       serviceName: row.service_name,
+      doctorId: row.doctor_id || null,
+      doctorName: row.doctor_name || null,
       preferredDate: formatDateOnly(row.preferred_date),
       preferredTimeSlot: row.preferred_time_slot,
       status: row.status,
@@ -136,6 +182,15 @@ export const GET = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) =
       ipHash: row.ip_hash,
       turnstileScore: '1.0 (Verified Human)',
       createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : String(row.created_at),
+      events: eventsRes.rows.map((ev: any) => ({
+        id: ev.id,
+        actorId: ev.actor_id,
+        fromStatus: ev.from_status,
+        toStatus: ev.to_status,
+        note: ev.note,
+        createdAt: ev.created_at instanceof Date ? ev.created_at.toISOString() : String(ev.created_at),
+      })),
+      patientHistory,
     });
   } finally {
     client.release();
@@ -172,7 +227,8 @@ export const PATCH = withGateway({ auth: 'none' }, async (req: NextRequest, ctx)
 
     // Check existing record
     const existingRes = await client.query(
-      `SELECT id, status, notes FROM appointments WHERE id = $1 AND tenant_id = $2`,
+      `SELECT id, idempotency_key, status, notes, patient_name_enc, patient_email_enc, service_name, doctor_name, preferred_date, preferred_time_slot
+       FROM appointments WHERE id = $1 AND tenant_id = $2`,
       [id, tenantId]
     );
 
@@ -224,7 +280,8 @@ export const PATCH = withGateway({ auth: 'none' }, async (req: NextRequest, ctx)
       await client.query(updateQuery, values);
     }
 
-    // If status changed, record in appointment_events
+    // If status changed, record in appointment_events and enqueue notification
+    let outboxInserted = false;
     if (statusUpdated) {
       await client.query(
         `INSERT INTO appointment_events (
@@ -232,6 +289,25 @@ export const PATCH = withGateway({ auth: 'none' }, async (req: NextRequest, ctx)
         ) VALUES ($1, $2, $3, $4, $5, $6)`,
         [id, tenantId, actorId, current.status, status, notes || null]
       );
+
+      await client.query(
+        `INSERT INTO outbox_events (tenant_id, type, payload)
+         VALUES ($1, $2, $3)`,
+        [
+          tenantId,
+          'appointment.status_changed',
+          JSON.stringify({
+            appointmentId: id,
+            fromStatus: current.status,
+            toStatus: status,
+            serviceName: current.service_name,
+            doctorName: current.doctor_name || null,
+            preferredDate: formatDateOnly(current.preferred_date),
+            preferredTimeSlot: current.preferred_time_slot,
+          }),
+        ]
+      );
+      outboxInserted = true;
     }
 
     // Record audit event
@@ -256,11 +332,70 @@ export const PATCH = withGateway({ auth: 'none' }, async (req: NextRequest, ctx)
 
     await client.query('COMMIT');
 
+    // Sync updates back to file-backed contentStore when linked to a patient-site booking
+    const idemKey: string | undefined = current.idempotency_key;
+    if (idemKey && idemKey.startsWith('store-')) {
+      const storeId = idemKey.slice('store-'.length);
+      const nextStatus = status === 'pending' ? 'new' : status;
+      updateAppointmentStatus(storeId, nextStatus, notes);
+    }
+
+    // Dispatch email notifications outside transaction on status update
+    let emailDispatched = false;
+    if (statusUpdated) {
+      try {
+        let patientName = 'Patient';
+        let patientEmail: string | null = null;
+        try {
+          patientName = decrypt(current.patient_name_enc);
+        } catch {
+          patientName = String(current.patient_name_enc || 'Patient');
+        }
+        if (current.patient_email_enc) {
+          try {
+            patientEmail = decrypt(current.patient_email_enc);
+          } catch {
+            patientEmail = String(current.patient_email_enc);
+          }
+        }
+
+        const settingsRes = await client.query(
+          `SELECT notification_emails FROM clinic_settings WHERE tenant_id = $1 LIMIT 1`,
+          [tenantId]
+        );
+        const clinicEmails: string[] = Array.isArray(settingsRes.rows[0]?.notification_emails)
+          ? settingsRes.rows[0].notification_emails.filter(Boolean)
+          : [];
+        const recipients = Array.from(
+          new Set([
+            ...(patientEmail ? [patientEmail] : []),
+            ...clinicEmails,
+          ])
+        );
+
+        if (recipients.length > 0) {
+          const dateStr = formatDateOnly(current.preferred_date);
+          const doctorLabel = current.doctor_name ? ` with ${current.doctor_name}` : '';
+          await sendEmail({
+            to: recipients,
+            subject: `Appointment ${String(status).toUpperCase()}: ${patientName} (${dateStr})`,
+            text: `Hello,\n\nAppointment ${id} for ${patientName}${doctorLabel} (${current.service_name}) on ${dateStr} at ${current.preferred_time_slot} has been updated from "${current.status}" to "${status}".\n\nNotes: ${notes !== undefined ? notes : current.notes || 'None'}`,
+            html: `<p>Appointment <strong>${id}</strong> for <strong>${patientName}</strong>${doctorLabel} (${current.service_name}) on <strong>${dateStr}</strong> at <strong>${current.preferred_time_slot}</strong> changed status from <em>${current.status}</em> to <strong>${status}</strong>.</p>`,
+          });
+          emailDispatched = true;
+        }
+      } catch (mailErr) {
+        console.warn('[CMS APPOINTMENT PATCH] Non-blocking email error:', mailErr);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       id,
       status: status || current.status,
       notes: notes !== undefined ? notes : current.notes,
+      outboxQueued: outboxInserted,
+      emailDispatched,
       savedAt: new Date().toISOString(),
     });
   } catch (e) {

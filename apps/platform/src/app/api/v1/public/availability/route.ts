@@ -3,6 +3,7 @@ import { pool } from '@/db';
 import { AppError } from '@/lib/errors';
 import { withGateway } from '@/lib/gateway';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { resolvePublicTenantId } from '@/lib/defaultTenant';
 
 // ==============================================================================
 // 1. CORS Preflight & Security Headers
@@ -116,6 +117,8 @@ export const GET = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) =
   const clinicSlug = searchParams.get('clinicSlug')?.trim();
   const tenantIdParam = searchParams.get('tenantId')?.trim();
   const dateParam = searchParams.get('date')?.trim();
+  const doctorIdParam = searchParams.get('doctorId')?.trim();
+  const doctorNameParam = searchParams.get('doctorName')?.trim() || searchParams.get('doctor')?.trim();
 
   // Validate date parameter
   const targetDateStr = dateParam || new Date().toISOString().split('T')[0]!;
@@ -126,27 +129,7 @@ export const GET = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) =
   const client = await pool.connect();
   try {
     // 2. Resolve Tenant
-    let resolvedTenantId = tenantIdParam;
-
-    if (!resolvedTenantId && clinicSlug) {
-      const tenantLookup = await client.query(
-        'SELECT id FROM tenants WHERE slug = $1 LIMIT 1',
-        [clinicSlug]
-      );
-      if (tenantLookup.rowCount && tenantLookup.rowCount > 0) {
-        resolvedTenantId = tenantLookup.rows[0].id;
-      }
-    }
-
-    if (!resolvedTenantId) {
-      const defaultTenantLookup = await client.query(
-        'SELECT id FROM tenants WHERE status = $1 ORDER BY created_at ASC LIMIT 1',
-        ['active']
-      );
-      if (defaultTenantLookup.rowCount && defaultTenantLookup.rowCount > 0) {
-        resolvedTenantId = defaultTenantLookup.rows[0].id;
-      }
-    }
+    const resolvedTenantId = await resolvePublicTenantId(client, tenantIdParam, clinicSlug);
 
     if (!resolvedTenantId) {
       throw new AppError('E-1101', 'Clinic tenant not found');
@@ -174,12 +157,12 @@ export const GET = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) =
       sunday: 'closed',
     };
 
-    const operatingHours: Record<string, string> =
+    let operatingHours: Record<string, any> =
       settingsRes.rowCount && settingsRes.rowCount > 0 && settingsRes.rows[0].operating_hours
-        ? (settingsRes.rows[0].operating_hours as Record<string, string>)
+        ? (settingsRes.rows[0].operating_hours as Record<string, any>)
         : defaultHours;
 
-    const slotInterval =
+    let slotInterval =
       settingsRes.rowCount && settingsRes.rowCount > 0
         ? settingsRes.rows[0].slot_interval_minutes || 30
         : 30;
@@ -188,6 +171,30 @@ export const GET = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) =
       settingsRes.rowCount && settingsRes.rowCount > 0
         ? settingsRes.rows[0].max_daily_slots || 40
         : 40;
+
+    let resolvedDoctorId: string | null = doctorIdParam || null;
+    let resolvedDoctorName: string | null = doctorNameParam || null;
+    if (doctorIdParam || doctorNameParam) {
+      const docRes = await client.query(
+        doctorIdParam
+          ? `SELECT id, name, operating_hours FROM doctors WHERE tenant_id = $1 AND id = $2 LIMIT 1`
+          : `SELECT id, name, operating_hours FROM doctors WHERE tenant_id = $1 AND LOWER(name) = LOWER($2) LIMIT 1`,
+        [resolvedTenantId, doctorIdParam || doctorNameParam]
+      );
+      if (docRes.rowCount && docRes.rowCount > 0) {
+        resolvedDoctorId = docRes.rows[0].id;
+        resolvedDoctorName = docRes.rows[0].name;
+        const docHours = docRes.rows[0].operating_hours;
+        if (docHours && typeof docHours === 'object') {
+          if (Object.keys(docHours).length > 0) {
+            operatingHours = { ...operatingHours, ...docHours };
+          }
+          if (docHours.slotIntervalMinutes) {
+            slotInterval = Number(docHours.slotIntervalMinutes) || slotInterval;
+          }
+        }
+      }
+    }
 
     // 4. Calculate day of week
     const targetDate = new Date(`${targetDateStr}T00:00:00Z`);
@@ -212,6 +219,8 @@ export const GET = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) =
           operatingHours: 'Closed',
           slotIntervalMinutes: slotInterval,
           maxDailySlots,
+          doctorId: resolvedDoctorId,
+          doctorName: resolvedDoctorName,
           totalSlots: 0,
           availableSlots: [],
           bookedSlots: [],
@@ -229,15 +238,26 @@ export const GET = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) =
     // 5. Generate Total Slots
     const allSlots = generateSlots(dayHours, slotInterval, maxDailySlots);
 
-    // 6. Query Existing Bookings for this clinic and date
-    const bookingsRes = await client.query(
-      `SELECT preferred_time_slot
-       FROM appointments
-       WHERE tenant_id = $1
-         AND preferred_date = $2
-         AND status != 'cancelled'`,
-      [resolvedTenantId, targetDateStr]
-    );
+    // 6. Query Existing Bookings for this clinic/doctor and date
+    const bookingsQuery = resolvedDoctorId || resolvedDoctorName
+      ? `SELECT preferred_time_slot
+         FROM appointments
+         WHERE tenant_id = $1
+           AND preferred_date = $2
+           AND status IN ('pending', 'confirmed')
+           AND (
+             ($3::uuid IS NOT NULL AND doctor_id = $3::uuid)
+             OR ($4::text IS NOT NULL AND LOWER(COALESCE(doctor_name, '')) = LOWER($4::text))
+           )`
+      : `SELECT preferred_time_slot
+         FROM appointments
+         WHERE tenant_id = $1
+           AND preferred_date = $2
+           AND status != 'cancelled'`;
+    const bookingsParams = resolvedDoctorId || resolvedDoctorName
+      ? [resolvedTenantId, targetDateStr, resolvedDoctorId, resolvedDoctorName]
+      : [resolvedTenantId, targetDateStr];
+    const bookingsRes = await client.query(bookingsQuery, bookingsParams);
 
     const bookedSlotsSet = new Set<string>();
     for (const row of bookingsRes.rows) {
@@ -257,6 +277,8 @@ export const GET = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) =
         operatingHours: dayHours,
         slotIntervalMinutes: slotInterval,
         maxDailySlots,
+        doctorId: resolvedDoctorId,
+        doctorName: resolvedDoctorName,
         totalSlots: allSlots.length,
         availableSlots,
         bookedSlots,

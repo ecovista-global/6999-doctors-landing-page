@@ -20,6 +20,7 @@ import {
   ChevronRightIcon,
   ShieldCheckIcon,
   GlobeIcon,
+  UsersIcon,
 } from '@/components/Icons';
 
 export interface NavItem {
@@ -59,9 +60,10 @@ export const defaultSidebarGroups: NavGroup[] = [
     ],
   },
   {
-    groupTitle: '7-Page Site CMS',
+    groupTitle: '10-Page Site CMS',
     items: [
-      { id: 'pages', label: 'Page Slots (7 Pages)', icon: <GlobeIcon size={18} />, href: '/cms/pages', badge: '7 Active', badgeColor: '#059669' },
+      { id: 'pages', label: 'Page Slots (10 Pages)', icon: <GlobeIcon size={18} />, href: '/cms/pages', badge: '10 Active', badgeColor: '#183C4A' },
+      { id: 'doctors', label: 'Doctors & Specialties', icon: <UsersIcon size={18} />, href: '/cms/doctors' },
       { id: 'editor', label: 'Site Block Editor', icon: <FileTextIcon size={18} />, href: '/cms/editor' },
       { id: 'blog', label: 'Blog Posts', icon: <Edit3Icon size={18} />, href: '/cms/blog' },
       { id: 'faqs', label: 'FAQs & Reviews', icon: <HelpCircleIcon size={18} />, href: '/cms/reviews-faqs' },
@@ -83,7 +85,7 @@ export function Sidebar({
   activeNav,
   onSelectNav,
   clinicName = 'HealthConsult Clinic',
-  planName = 'Professional Clinic',
+  planName = 'Premium Clinic',
   doctorName = 'Dr. Maanvita Kumari',
   staffName = 'Front Desk (Aarti)',
   newAppointmentsCount = 0,
@@ -94,6 +96,8 @@ export function Sidebar({
   let resolvedActiveNav = activeNav;
   if (pathname.startsWith('/cms/pages')) {
     resolvedActiveNav = 'pages';
+  } else if (pathname.startsWith('/cms/doctors')) {
+    resolvedActiveNav = 'doctors';
   } else if (pathname.startsWith('/cms/editor')) {
     resolvedActiveNav = 'editor';
   } else if (pathname.startsWith('/cms/blog')) {
@@ -153,18 +157,18 @@ export function Sidebar({
               style={{
                 width: '40px',
                 height: '40px',
-                borderRadius: 'var(--radius-md, 10px)',
-                background: 'var(--color-brand-surface, #E6F4F1)',
-                color: 'var(--color-brand-primary, #0D5C46)',
+                borderRadius: '11px',
+                background: 'var(--color-brand-primary, #183C4A)',
+                color: '#FFFFFF',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0,
-                border: '1px solid var(--color-border-subtle, #E2E8F0)',
+                boxShadow: '0 4px 10px rgba(24, 60, 74, 0.18)',
               }}
               title={clinicName}
             >
-              <LogoMark size={22} color="var(--color-brand-primary, #0D5C46)" strokeWidth={2} />
+              <LogoMark size={21} color="#FFFFFF" strokeWidth={2.2} />
             </div>
 
             {!collapsed && (
@@ -184,13 +188,13 @@ export function Sidebar({
                 >
                   <span>{clinicName}</span>
                   <span title="Verified Clinic Practice">
-                    <ShieldCheckIcon size={14} color="var(--color-brand-primary, #0D5C46)" />
+                    <ShieldCheckIcon size={14} color="var(--color-brand-primary, #183C4A)" />
                   </span>
                 </div>
                 <div
                   style={{
                     fontSize: '11px',
-                    color: 'var(--color-brand-primary, #0D5C46)',
+                    color: 'var(--color-brand-primary, #183C4A)',
                     fontWeight: 700,
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
@@ -305,22 +309,23 @@ export function Sidebar({
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: collapsed ? 'center' : 'space-between',
-                        padding: collapsed ? '12px 0' : '10px 14px',
-                        borderRadius: 'var(--radius-md, 10px)',
+                        padding: collapsed ? '12px 0' : '10px 15px',
+                        borderRadius: collapsed ? '12px' : '9999px',
                         border: 'none',
                         background: isActive
                           ? 'var(--color-brand-primary, #0D5C46)'
                           : 'transparent',
                         color: isActive
                           ? 'var(--color-text-inverse, #FFFFFF)'
-                          : 'var(--color-text-main, #475569)',
+                          : 'var(--color-text-muted, #54666E)',
                         fontWeight: isActive ? 700 : 600,
                         fontSize: '13px',
                         cursor: 'pointer',
                         textAlign: 'left',
                         textDecoration: 'none',
                         boxSizing: 'border-box',
-                        transition: 'background-color 150ms ease, color 150ms ease',
+                        boxShadow: isActive ? '0 6px 14px -4px rgba(24, 60, 74, 0.25)' : 'none',
+                        transition: 'background-color 150ms ease, color 150ms ease, transform 150ms ease',
                       }}
                     >
                       <div
@@ -385,10 +390,10 @@ export function Sidebar({
         {!collapsed && (
           <div
             style={{
-              background: 'var(--color-brand-surface, #E6F4F1)',
-              border: '1px solid var(--color-border-subtle, #BBF7D0)',
-              padding: '10px 12px',
-              borderRadius: 'var(--radius-md, 10px)',
+              background: 'var(--color-brand-surface, #E7F2F5)',
+              border: '1px solid var(--color-border-subtle, rgba(24, 60, 74, 0.12))',
+              padding: '12px 14px',
+              borderRadius: '14px',
               marginBottom: '12px',
             }}
           >

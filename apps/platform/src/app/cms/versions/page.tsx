@@ -129,10 +129,10 @@ export default function VersionHistoryPage() {
         }}
       >
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#0F172A', margin: '0 0 6px 0' }}>
-            Version History &amp; Publishing Rollback
+          <h1 style={{ fontSize: '26px', fontWeight: 600, letterSpacing: '-0.025em', color: 'var(--color-text-main, #162228)', margin: '0 0 6px 0' }}>
+            Version History &amp; <span className="ms-serif-italic" style={{ fontSize: '30px' }}>publishing rollback</span>
           </h1>
-          <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
+          <p style={{ fontSize: '13.5px', color: 'var(--color-text-muted, #54666E)', margin: 0 }}>
             Audit immutable content snapshots, publish new releases, and execute atomic 1-click rollbacks.
           </p>
         </div>
@@ -143,13 +143,13 @@ export default function VersionHistoryPage() {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '6px 14px',
-              borderRadius: '999px',
-              background: '#D1FAE5',
-              border: '1px solid #A7F3D0',
+              padding: '7px 14px',
+              borderRadius: '9999px',
+              background: 'var(--color-brand-surface, #E7F2F5)',
+              border: '1px solid var(--color-border-subtle)',
               fontSize: '12px',
               fontWeight: 700,
-              color: '#065F46',
+              color: 'var(--color-brand-primary, #183C4A)',
             }}
           >
             <ShieldCheckIcon size={14} />
@@ -168,7 +168,7 @@ export default function VersionHistoryPage() {
             border: '1px solid #FECACA',
             color: '#B91C1C',
             padding: '10px 14px',
-            borderRadius: '8px',
+            borderRadius: '12px',
             fontSize: '13px',
             fontWeight: 600,
             marginBottom: '16px',
@@ -182,16 +182,14 @@ export default function VersionHistoryPage() {
       {/* Quick Publish Snapshot Bar */}
       <form
         onSubmit={handlePublishSnapshot}
+        className="ms-card"
         style={{
           display: 'flex',
           gap: '12px',
           alignItems: 'center',
-          background: '#FFFFFF',
-          border: '1px solid #E2E8F0',
-          borderRadius: '12px',
           padding: '14px 18px',
           marginBottom: '20px',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)',
+          flexWrap: 'wrap',
         }}
       >
         <input
@@ -201,65 +199,56 @@ export default function VersionHistoryPage() {
           onChange={(e) => setReleaseNotes(e.target.value)}
           style={{
             flex: 1,
-            padding: '9px 12px',
-            borderRadius: '6px',
-            border: '1px solid #CBD5E1',
+            minWidth: '220px',
+            padding: '10px 16px',
+            borderRadius: '9999px',
+            border: '1px solid var(--color-border-subtle)',
+            background: 'var(--color-bg-surface)',
+            color: 'var(--color-text-main)',
             fontSize: '13px',
           }}
         />
         <button
           type="submit"
           disabled={isPublishing || loading}
-          style={{
-            padding: '9px 16px',
-            borderRadius: '6px',
-            border: 'none',
-            background: '#0D5C46',
-            color: '#FFFFFF',
-            fontSize: '13px',
-            fontWeight: 700,
-            cursor: isPublishing || loading ? 'not-allowed' : 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            whiteSpace: 'nowrap',
-          }}
+          className="ms-pill-dark"
+          style={{ cursor: isPublishing || loading ? 'not-allowed' : 'pointer' }}
         >
-          <UploadIcon size={14} />
+          <span className="ms-pill-circle">
+            <UploadIcon size={13} color="#183C4A" />
+          </span>
           <span>{isPublishing ? 'Publishing...' : 'Publish New Release'}</span>
         </button>
       </form>
 
       {/* Version timeline list */}
       {loading ? (
-        <p style={{ fontSize: '13px', color: '#64748B' }}>Loading published snapshots...</p>
+        <p style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>Loading published snapshots...</p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {versions.map((ver) => (
             <div
               key={ver.id}
+              className="ms-card"
               style={{
-                padding: '20px 24px',
-                borderRadius: '12px',
-                background: '#FFFFFF',
-                border: `1px solid ${ver.isLive ? '#0D5C46' : '#E2E8F0'}`,
-                boxShadow: ver.isLive ? '0 2px 8px rgba(13, 92, 70, 0.08)' : '0 1px 3px rgba(0, 0, 0, 0.03)',
+                padding: '22px 24px',
+                border: ver.isLive ? '1.5px solid var(--color-brand-primary, #183C4A)' : '1px solid var(--color-border-subtle)',
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '10px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                  <strong style={{ fontSize: '16px', color: '#0F172A' }}>Version v{ver.version}</strong>
+                  <strong style={{ fontSize: '16px', color: 'var(--color-text-main)' }}>Version v{ver.version}</strong>
                   {ver.isLive ? (
                     <span
                       style={{
-                        background: '#0D5C46',
+                        background: '#183C4A',
                         color: '#FFFFFF',
                         fontSize: '11px',
                         fontWeight: 700,
-                        padding: '2px 8px',
-                        borderRadius: '4px',
+                        padding: '3px 10px',
+                        borderRadius: '9999px',
                         textTransform: 'uppercase',
-                        letterSpacing: '0.5px',
+                        letterSpacing: '0.04em',
                       }}
                     >
                       Live on Edge
@@ -267,18 +256,19 @@ export default function VersionHistoryPage() {
                   ) : (
                     <span
                       style={{
-                        background: '#F1F5F9',
-                        color: '#64748B',
+                        background: 'var(--color-bg-surface)',
+                        color: 'var(--color-text-muted)',
                         fontSize: '11px',
                         fontWeight: 600,
-                        padding: '2px 8px',
-                        borderRadius: '4px',
+                        padding: '3px 10px',
+                        borderRadius: '9999px',
+                        border: '1px solid var(--color-border-subtle)',
                       }}
                     >
                       Archived Snapshot
                     </span>
                   )}
-                  <span style={{ fontSize: '12px', color: '#94A3B8', fontFamily: 'monospace' }}>
+                  <span style={{ fontSize: '12px', color: 'var(--color-text-muted)', fontFamily: 'monospace' }}>
                     {ver.checksum}
                   </span>
                 </div>
@@ -288,18 +278,12 @@ export default function VersionHistoryPage() {
                     type="button"
                     onClick={() => handleRollback(ver.version)}
                     disabled={isRollingBack}
+                    className="ms-pill-light"
                     style={{
-                      padding: '6px 14px',
-                      borderRadius: '6px',
-                      border: '1px solid #CBD5E1',
-                      background: '#FFFFFF',
-                      color: '#0D5C46',
+                      padding: '7px 14px',
+                      color: 'var(--color-brand-primary, #183C4A)',
                       fontSize: '12px',
-                      fontWeight: 700,
                       cursor: isRollingBack ? 'not-allowed' : 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
                     }}
                   >
                     <RefreshCwIcon size={13} />
@@ -308,11 +292,11 @@ export default function VersionHistoryPage() {
                 )}
               </div>
 
-              <p style={{ fontSize: '13px', color: '#334155', margin: '0 0 12px 0', lineHeight: 1.5 }}>
+              <p style={{ fontSize: '13.5px', color: 'var(--color-text-main)', margin: '0 0 12px 0', lineHeight: 1.55 }}>
                 {ver.notes}
               </p>
 
-              <div style={{ display: 'flex', gap: '16px', fontSize: '12px', color: '#64748B', borderTop: '1px solid #F1F5F9', paddingTop: '10px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '16px', fontSize: '12px', color: 'var(--color-text-muted)', borderTop: '1px solid var(--color-border-subtle)', paddingTop: '10px', flexWrap: 'wrap' }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <ClockIcon size={13} />
                   <span>Published: {new Date(ver.publishedAt).toLocaleString()}</span>
@@ -327,7 +311,7 @@ export default function VersionHistoryPage() {
 
       {/* Toast Feedback */}
       {toastMessage && (
-        <div style={{ position: 'fixed', bottom: '24px', right: '24px', background: '#0D5C46', color: '#FFFFFF', padding: '12px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', zIndex: 200, display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ position: 'fixed', bottom: '24px', right: '24px', background: '#183C4A', color: '#FFFFFF', padding: '12px 20px', borderRadius: '9999px', fontSize: '13px', fontWeight: 600, boxShadow: '0 10px 24px rgba(24,60,74,0.28)', zIndex: 200, display: 'flex', alignItems: 'center', gap: '8px' }}>
           <CheckCircleIcon size={16} />
           <span>{toastMessage}</span>
         </div>

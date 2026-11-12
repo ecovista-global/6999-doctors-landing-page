@@ -60,6 +60,7 @@ export function BillingInvoicesPanel() {
   const [subscription, setSubscription] = useState<SubscriptionSummary | null>(null);
   const [invoices, setInvoices] = useState<InvoiceSummary[]>([]);
   const [clinicGstin, setClinicGstin] = useState('');
+  const [selectedPlan, setSelectedPlan] = useState<'professional' | 'premium'>('premium');
   const [orderPreview, setOrderPreview] = useState<OrderPreview | null>(null);
   const [loading, setLoading] = useState(true);
   const [creatingOrder, setCreatingOrder] = useState(false);
@@ -77,6 +78,9 @@ export function BillingInvoicesPanel() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || data.title || 'Failed to load billing summary');
         setSubscription(data.subscription || null);
+        if (data.subscription?.plan === 'professional' || data.subscription?.plan === 'premium') {
+          setSelectedPlan(data.subscription.plan);
+        }
         setInvoices(data.invoices || []);
       })
       .catch((err) => setError(err instanceof Error ? err.message : 'Unable to load billing'))
@@ -95,7 +99,7 @@ export function BillingInvoicesPanel() {
         },
         body: JSON.stringify({
           tenantId,
-          plan: 'professional',
+          plan: selectedPlan,
           billingCycle,
         }),
       });
@@ -128,17 +132,17 @@ export function BillingInvoicesPanel() {
           alignItems: 'center',
           flexWrap: 'wrap',
           gap: '12px',
-          borderBottom: '1px solid #F1F5F9',
+          borderBottom: '1px solid var(--color-border-subtle, #DFE8EB)',
           paddingBottom: '14px',
           marginBottom: '16px',
         }}
       >
         <div>
-          <h2 style={{ fontSize: '16px', fontWeight: 800, color: '#0F172A', margin: '0 0 4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <BanknoteIcon size={18} color="#0D5C46" />
+          <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--color-text-main, #121B1F)', margin: '0 0 4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <BanknoteIcon size={18} color="var(--color-brand-primary, #183C4A)" />
             <span>Subscription Billing &amp; 18% GST Tax Invoices</span>
           </h2>
-          <p style={{ fontSize: '12px', color: '#64748B', margin: 0 }}>
+          <p style={{ fontSize: '12px', color: 'var(--color-text-muted, #5A6B72)', margin: 0 }}>
             Razorpay INR billing (Professional Clinic ₹18,999 initial / ₹9,999 annual renewal, GST inclusive under SAC 998314).
           </p>
         </div>
@@ -150,11 +154,12 @@ export function BillingInvoicesPanel() {
               alignItems: 'center',
               gap: '6px',
               padding: '5px 12px',
-              borderRadius: '999px',
-              background: '#D1FAE5',
-              color: '#065F46',
+              borderRadius: '9999px',
+              background: 'var(--color-brand-surface, #E7F2F5)',
+              color: 'var(--color-brand-primary, #183C4A)',
               fontSize: '12px',
               fontWeight: 700,
+              border: '1px solid var(--color-border-subtle, #DFE8EB)',
             }}
           >
             <ShieldCheckIcon size={14} />
@@ -164,65 +169,80 @@ export function BillingInvoicesPanel() {
       </div>
 
       {error && (
-        <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#B91C1C', padding: '8px 12px', borderRadius: '6px', fontSize: '12px', marginBottom: '14px' }}>
+        <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#B91C1C', padding: '8px 12px', borderRadius: '10px', fontSize: '12px', marginBottom: '14px' }}>
           {error}
         </div>
       )}
 
       {loading ? (
-        <p style={{ fontSize: '13px', color: '#64748B' }}>Loading billing &amp; GST records...</p>
+        <p style={{ fontSize: '13px', color: 'var(--color-text-muted, #5A6B72)' }}>Loading billing &amp; GST records...</p>
       ) : (
         <>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '14px 16px', marginBottom: '18px' }}>
-            <div style={{ fontSize: '13px', color: '#334155', lineHeight: 1.6 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', background: 'var(--color-bg-base, #F5F8F9)', border: '1px solid var(--color-border-subtle, #DFE8EB)', borderRadius: '14px', padding: '14px 16px', marginBottom: '18px' }}>
+            <div style={{ fontSize: '13px', color: 'var(--color-text-main, #121B1F)', lineHeight: 1.6 }}>
               <div>
-                <strong>Annual Renewal Rate:</strong> {subscription?.renewalPriceFormatted || '₹9,999.00'} (incl. 18% GST)
+                <strong>Annual Renewal Rate:</strong>{' '}
+                {subscription?.renewalPriceFormatted ||
+                  (selectedPlan === 'premium' ? '₹14,999.00' : '₹9,999.00')}{' '}
+                (incl. 18% GST)
               </div>
-              <div style={{ fontSize: '12px', color: '#64748B' }}>
+              <div style={{ fontSize: '12px', color: 'var(--color-text-muted, #5A6B72)' }}>
                 Valid Through: <strong>{subscription?.currentPeriodEnd || 'Pending activation'}</strong>
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+              <select
+                value={selectedPlan}
+                onChange={(e) => setSelectedPlan(e.target.value as 'professional' | 'premium')}
+                aria-label="Billing Plan Tier"
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '9999px',
+                  border: '1px solid var(--color-border-subtle, #DFE8EB)',
+                  background: '#FFFFFF',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                }}
+              >
+                <option value="premium">Premium Clinic (₹24,999 / ₹14,999)</option>
+                <option value="professional">Professional Clinic (₹18,999 / ₹9,999)</option>
+              </select>
               <button
                 type="button"
                 disabled={creatingOrder}
                 onClick={() => handleCreateOrder('initial')}
+                className="ms-pill-light"
                 style={{
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  border: '1px solid #CBD5E1',
-                  background: '#FFFFFF',
-                  color: '#0F172A',
+                  padding: '8px 14px',
                   fontSize: '12px',
                   fontWeight: 600,
                   cursor: creatingOrder ? 'not-allowed' : 'pointer',
                 }}
               >
-                New Plan Checkout (₹18,999)
+                New Plan Checkout ({selectedPlan === 'premium' ? '₹24,999' : '₹18,999'})
               </button>
               <button
                 type="button"
                 disabled={creatingOrder}
                 onClick={() => handleCreateOrder('renewal')}
+                className="ms-pill-dark"
                 style={{
-                  padding: '8px 14px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  background: '#0D5C46',
-                  color: '#FFFFFF',
+                  padding: '8px 16px',
                   fontSize: '12px',
                   fontWeight: 700,
                   cursor: creatingOrder ? 'not-allowed' : 'pointer',
                 }}
               >
-                {creatingOrder ? 'Generating...' : 'Generate Renewal Order (₹9,999)'}
+                {creatingOrder
+                  ? 'Generating...'
+                  : `Generate Renewal Order (${selectedPlan === 'premium' ? '₹14,999' : '₹9,999'})`}
               </button>
             </div>
           </div>
 
           {orderPreview && (
-            <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '8px', padding: '12px 16px', marginBottom: '18px', fontSize: '12px', color: '#14532D' }}>
+            <div style={{ background: 'var(--color-brand-surface, #E7F2F5)', border: '1px solid var(--color-border-subtle, #DFE8EB)', borderRadius: '12px', padding: '12px 16px', marginBottom: '18px', fontSize: '12px', color: 'var(--color-brand-primary, #183C4A)' }}>
               <div style={{ fontWeight: 700, marginBottom: '4px' }}>
                 Razorpay Order Created: {orderPreview.orderId} ({orderPreview.amountFormatted} — {orderPreview.billingCycle})
               </div>
@@ -272,12 +292,12 @@ export function BillingInvoicesPanel() {
                     }}
                   >
                     <div>
-                      <div style={{ fontWeight: 700, color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <FileTextIcon size={14} color="#0D5C46" />
+                      <div style={{ fontWeight: 700, color: 'var(--color-text-main, #121B1F)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <FileTextIcon size={14} color="var(--color-brand-primary, #183C4A)" />
                         <span>{inv.invoiceNumber}</span>
-                        <span style={{ color: '#64748B', fontWeight: 500 }}>&bull; {inv.planLabel}</span>
+                        <span style={{ color: 'var(--color-text-muted, #5A6B72)', fontWeight: 500 }}>&bull; {inv.planLabel}</span>
                       </div>
-                      <div style={{ color: '#64748B', marginTop: '2px' }}>
+                      <div style={{ color: 'var(--color-text-muted, #5A6B72)', marginTop: '2px' }}>
                         Paid {inv.amountFormatted} (Taxable {fmtInr(inv.taxablePaise)} + 18% GST {fmtInr(inv.gstPaise)}) &bull; SAC {inv.sacCode}
                       </div>
                     </div>
@@ -286,14 +306,13 @@ export function BillingInvoicesPanel() {
                       href={invoiceHref}
                       target="_blank"
                       rel="noopener noreferrer"
+                      className="ms-pill-light"
                       style={{
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: '5px',
-                        padding: '6px 12px',
-                        borderRadius: '6px',
-                        border: '1px solid #CBD5E1',
-                        color: '#0D5C46',
+                        padding: '6px 14px',
+                        color: 'var(--color-brand-primary, #183C4A)',
                         fontWeight: 700,
                         textDecoration: 'none',
                       }}

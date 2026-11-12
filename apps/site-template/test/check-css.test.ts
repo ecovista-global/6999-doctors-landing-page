@@ -23,13 +23,13 @@ describe('MT-103: CSS pipeline & anti-FOUC verification tests', () => {
     );
     assert.strictEqual(
       styles.btnBg,
-      'rgb(13, 92, 70)',
-      'Primary action button must use clinical brand green'
+      'rgb(24, 60, 74)',
+      'Primary action button must use MedSphere slate-teal brand primary (#183C4A)'
     );
     assert.strictEqual(
       styles.btnRadius,
-      '10px',
-      'Button must use design token border-radius'
+      '9999px',
+      'Primary pill button must use full pill design token border-radius'
     );
   });
 

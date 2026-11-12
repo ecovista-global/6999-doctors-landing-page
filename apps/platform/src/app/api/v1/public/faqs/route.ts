@@ -12,7 +12,7 @@ export const GET = withGateway({ auth: 'none' }, async (req: NextRequest) => {
     await client.query("SELECT set_config('app.tenant_id', $1, true)", [tenantId]);
 
     let query = `
-      SELECT id, question, answer, category, display_order
+      SELECT id, question, answer, category, display_order, is_active
       FROM faqs
       WHERE tenant_id = $1 AND is_active = true
     `;
@@ -32,6 +32,7 @@ export const GET = withGateway({ auth: 'none' }, async (req: NextRequest) => {
       answer: r.answer,
       category: r.category,
       displayOrder: r.display_order,
+      isActive: r.is_active,
     }));
 
     return NextResponse.json({ faqs });

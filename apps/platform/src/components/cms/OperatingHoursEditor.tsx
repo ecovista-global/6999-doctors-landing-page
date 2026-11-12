@@ -133,19 +133,19 @@ export function OperatingHoursEditor({ initialSettings, onSave }: OperatingHours
       {/* 1. Operating Hours Schedule Card */}
       <div
         style={{
-          background: 'var(--color-bg-base, #FFFFFF)',
-          border: '1px solid var(--color-border-subtle, #E2E8F0)',
-          borderRadius: '10px',
+          background: 'var(--color-bg-surface, #FFFFFF)',
+          border: '1px solid var(--color-border-subtle, #DFE8EB)',
+          borderRadius: '18px',
           padding: '24px',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-          <ClockIcon size={18} color="#0D5C46" />
-          <h2 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: '#0F172A' }}>
+          <ClockIcon size={18} color="var(--color-brand-primary, #183C4A)" />
+          <h2 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: 'var(--color-text-main, #121B1F)' }}>
             Weekly Operating Hours
           </h2>
         </div>
-        <p style={{ fontSize: '13px', color: '#64748B', margin: '0 0 16px 0' }}>
+        <p style={{ fontSize: '13px', color: 'var(--color-text-muted, #5A6B72)', margin: '0 0 16px 0' }}>
           Configure clinic opening and closing times. Days marked as Closed will have slots blocked in the appointment scheduler.
         </p>
 
@@ -227,18 +227,18 @@ export function OperatingHoursEditor({ initialSettings, onSave }: OperatingHours
       <div
         style={{
           background: 'var(--color-bg-base, #FFFFFF)',
-          border: '1px solid var(--color-border-subtle, #E2E8F0)',
-          borderRadius: '10px',
+          border: '1px solid var(--color-border-subtle, #DFE8EB)',
+          borderRadius: '18px',
           padding: '24px',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-          <CalendarIcon size={18} color="#0D5C46" />
-          <h2 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: '#0F172A' }}>
+          <CalendarIcon size={18} color="var(--color-brand-primary, #183C4A)" />
+          <h2 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: 'var(--color-text-main, #121B1F)' }}>
             Slot Duration & Capacity
           </h2>
         </div>
-        <p style={{ fontSize: '13px', color: '#64748B', margin: '0 0 16px 0' }}>
+        <p style={{ fontSize: '13px', color: 'var(--color-text-muted, #5A6B72)', margin: '0 0 16px 0' }}>
           Determine how time slots are partitioned and daily booking limits.
         </p>
 
@@ -302,14 +302,14 @@ export function OperatingHoursEditor({ initialSettings, onSave }: OperatingHours
       {/* 3. Notification Recipients Card */}
       <div
         style={{
-          background: 'var(--color-bg-base, #FFFFFF)',
-          border: '1px solid var(--color-border-subtle, #E2E8F0)',
-          borderRadius: '10px',
+          background: 'var(--color-bg-surface, #FFFFFF)',
+          border: '1px solid var(--color-border-subtle, #DFE8EB)',
+          borderRadius: '18px',
           padding: '24px',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-          <h2 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: '#0F172A' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: 'var(--color-text-main, #121B1F)' }}>
             Alert & Notification Recipients
           </h2>
           <span style={{ fontSize: '12px', fontWeight: 600, color: notificationEmails.length >= 3 ? '#DC2626' : '#64748B' }}>
@@ -410,24 +410,24 @@ export function OperatingHoursEditor({ initialSettings, onSave }: OperatingHours
       {/* 4. Spam Threshold Slider Card */}
       <div
         style={{
-          background: 'var(--color-bg-base, #FFFFFF)',
-          border: '1px solid var(--color-border-subtle, #E2E8F0)',
-          borderRadius: '10px',
+          background: 'var(--color-bg-surface, #FFFFFF)',
+          border: '1px solid var(--color-border-subtle, #DFE8EB)',
+          borderRadius: '18px',
           padding: '24px',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <ShieldCheckIcon size={18} color="#0D5C46" />
-            <h2 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: '#0F172A' }}>
+            <ShieldCheckIcon size={18} color="var(--color-brand-primary, #183C4A)" />
+            <h2 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: 'var(--color-text-main, #121B1F)' }}>
               Bot & Spam Sensitivity
             </h2>
           </div>
-          <span style={{ fontSize: '13px', fontWeight: 700, color: '#0D5C46' }}>
+          <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-brand-primary, #183C4A)' }}>
             Level {spamThreshold} / 10
           </span>
         </div>
-        <p style={{ fontSize: '13px', color: '#64748B', margin: '0 0 16px 0' }}>
+        <p style={{ fontSize: '13px', color: 'var(--color-text-muted, #5A6B72)', margin: '0 0 16px 0' }}>
           Adjust Turnstile verification sensitivity and time-trap tolerance (1 = Lenient, 10 = Maximum bot protection).
         </p>
 
@@ -438,7 +438,7 @@ export function OperatingHoursEditor({ initialSettings, onSave }: OperatingHours
           max={10}
           value={spamThreshold}
           onChange={(e) => setSpamThreshold(Number(e.target.value))}
-          style={{ width: '100%', cursor: 'pointer' }}
+          style={{ width: '100%', cursor: 'pointer', accentColor: 'var(--color-brand-primary, #183C4A)' }}
         />
       </div>
 
@@ -451,11 +451,11 @@ export function OperatingHoursEditor({ initialSettings, onSave }: OperatingHours
             alignItems: 'center',
             gap: '8px',
             padding: '12px 16px',
-            borderRadius: '6px',
+            borderRadius: '12px',
             fontSize: '13px',
-            background: feedback.type === 'success' ? '#ECFDF5' : '#FEF2F2',
-            border: `1px solid ${feedback.type === 'success' ? '#6EE7B7' : '#FCA5A5'}`,
-            color: feedback.type === 'success' ? '#065F46' : '#991B1B',
+            background: feedback.type === 'success' ? 'var(--color-brand-surface, #E7F2F5)' : '#FEF2F2',
+            border: `1px solid ${feedback.type === 'success' ? 'var(--color-border-subtle, #DFE8EB)' : '#FCA5A5'}`,
+            color: feedback.type === 'success' ? 'var(--color-brand-primary, #183C4A)' : '#991B1B',
           }}
         >
           {feedback.type === 'success' ? <CheckCircleIcon size={16} /> : <AlertCircleIcon size={16} />}
@@ -469,16 +469,12 @@ export function OperatingHoursEditor({ initialSettings, onSave }: OperatingHours
           type="submit"
           data-testid="btn-save-settings"
           disabled={saving}
+          className="ms-pill-dark"
           style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: '6px',
             padding: '10px 24px',
-            borderRadius: '6px',
-            border: 'none',
-            background: 'var(--color-brand-primary, #0D5C46)',
-            color: '#FFFFFF',
-            fontWeight: 700,
             fontSize: '14px',
             cursor: saving ? 'not-allowed' : 'pointer',
             opacity: saving ? 0.7 : 1,

@@ -33,12 +33,38 @@ export const ProfessionalPageSlotsSchema = z
     { message: 'Duplicate page slots are not permitted' }
   );
 
+export const PREMIUM_ALLOWED_PAGE_SLOTS = [
+  'home',
+  'about',
+  'services',
+  'doctors',
+  'specialties',
+  'facilities',
+  'health-packages',
+  'testimonials-faq',
+  'blog',
+  'contact',
+] as const;
+
+export type PremiumPageSlot = (typeof PREMIUM_ALLOWED_PAGE_SLOTS)[number];
+
+export const PremiumPageSlotEnum = z.enum(PREMIUM_ALLOWED_PAGE_SLOTS);
+
+export const PremiumPageSlotsSchema = z
+  .array(PremiumPageSlotEnum)
+  .max(10, { message: 'Maximum of 10 enabled pages permitted on the Premium Clinic plan' })
+  .refine(
+    (slots) => new Set(slots).size === slots.length,
+    { message: 'Duplicate page slots are not permitted' }
+  );
+
 export interface PageSlotDetail {
-  id: AllowedPageSlot;
+  id: AllowedPageSlot | PremiumPageSlot;
   label: string;
   path: string;
   description: string;
   isCore: boolean;
+  tier?: 'professional' | 'premium';
 }
 
 export const PAGE_SLOTS_METADATA: PageSlotDetail[] = [
@@ -93,16 +119,51 @@ export const PAGE_SLOTS_METADATA: PageSlotDetail[] = [
   },
 ];
 
-export function validatePageSlots(slots: string[]): { valid: boolean; error?: string } {
+export const PREMIUM_PAGE_SLOTS_METADATA: PageSlotDetail[] = [
+  ...PAGE_SLOTS_METADATA.slice(0, 4).map((slot) => ({ ...slot, tier: 'professional' as const })),
+  {
+    id: 'specialties',
+    label: 'Specialties Directory',
+    path: '/specialties',
+    description: 'Department & clinical speciality directory linking symptoms to resident consultants.',
+    isCore: false,
+    tier: 'premium',
+  },
+  {
+    id: 'facilities',
+    label: 'Clinic Facilities & Lab',
+    path: '/facilities',
+    description: 'Diagnostics, day-care observation bay, pharmacy, and patient safety infrastructure.',
+    isCore: false,
+    tier: 'premium',
+  },
+  {
+    id: 'health-packages',
+    label: 'Preventive Health Packages',
+    path: '/health-packages',
+    description: 'Annual metabolic panels, diabetes screening, and senior wellness checkup bundles.',
+    isCore: false,
+    tier: 'premium',
+  },
+  ...PAGE_SLOTS_METADATA.slice(4).map((slot) => ({ ...slot, tier: 'professional' as const })),
+];
+
+export function validatePageSlots(
+  slots: string[],
+  plan: 'basic' | 'growth' | 'professional' | 'premium' = 'professional'
+): { valid: boolean; error?: string } {
   if (!Array.isArray(slots)) {
     return { valid: false, error: 'Page slots must be an array' };
   }
-  if (slots.length > 7) {
-    return { valid: false, error: 'Maximum of 7 enabled pages permitted on this plan' };
+  const maxAllowed = plan === 'premium' ? 10 : 7;
+  const allowedList: readonly string[] = plan === 'premium' ? PREMIUM_ALLOWED_PAGE_SLOTS : ALLOWED_PAGE_SLOTS;
+
+  if (slots.length > maxAllowed) {
+    return { valid: false, error: `Maximum of ${maxAllowed} enabled pages permitted on this plan` };
   }
   for (const slot of slots) {
-    if (!ALLOWED_PAGE_SLOTS.includes(slot as AllowedPageSlot)) {
-      return { valid: false, error: `Invalid page slot: '${slot}'. Allowed slots: ${ALLOWED_PAGE_SLOTS.join(', ')}` };
+    if (!allowedList.includes(slot)) {
+      return { valid: false, error: `Invalid page slot: '${slot}'. Allowed slots: ${allowedList.join(', ')}` };
     }
   }
   if (new Set(slots).size !== slots.length) {

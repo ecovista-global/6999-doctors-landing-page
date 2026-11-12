@@ -12,7 +12,7 @@ export const GET = withGateway({ auth: 'none' }, async (req: NextRequest) => {
 
     // DPDP Act: Only serve approved reviews with documented consent
     const res = await client.query(
-      `SELECT id, patient_initials, review_text, rating, treatment, display_order, created_at
+      `SELECT id, patient_initials, review_text, rating, treatment, display_order, moderation_status, consent_recorded, created_at
        FROM testimonials
        WHERE tenant_id = $1 AND moderation_status = 'approved' AND consent_recorded = true
        ORDER BY display_order ASC, created_at DESC`,
@@ -25,6 +25,8 @@ export const GET = withGateway({ auth: 'none' }, async (req: NextRequest) => {
       reviewText: r.review_text,
       rating: r.rating,
       treatment: r.treatment || 'General Consultation',
+      moderationStatus: r.moderation_status,
+      consentRecorded: r.consent_recorded,
       date: r.created_at ? r.created_at.toISOString().slice(0, 10) : 'Recent',
       verified: true,
     }));

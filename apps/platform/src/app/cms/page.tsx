@@ -147,7 +147,7 @@ const THEME_PRESETS: Array<{
   },
 ];
 
-function renderEditorIconPreview(iconName: string, color = '#0F766E') {
+function renderEditorIconPreview(iconName: string, color = 'var(--color-brand-primary, #183C4A)') {
   switch (iconName) {
     case 'heartPulse': return <HeartPulseIcon size={20} color={color} />;
     case 'thermometer': return <ThermometerIcon size={20} color={color} />;
@@ -203,7 +203,7 @@ export default function CmsPanelPage() {
       appointments: 'Appointments',
       enquiries: 'Patient Enquiries',
       editor: 'Site Block Editor',
-      pages: 'Page Slots (7-Page Architecture)',
+      pages: 'Page Slots (10-Page Architecture)',
       blog: 'Health & Wellness Blog',
       services: 'Services Catalog',
       reviews: 'Patient Reviews',
@@ -220,7 +220,7 @@ export default function CmsPanelPage() {
         ? 'Clinical Operations'
         : activeTab === 'settings' || activeTab === 'versions'
         ? 'Governance & Audit'
-        : '7-Page Site CMS';
+        : '10-Page Site CMS';
     setBreadcrumbs((prev) => {
       if (
         prev.length === 3 &&
@@ -1169,18 +1169,27 @@ export default function CmsPanelPage() {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '20px',
+          flexWrap: 'wrap',
+          gap: '12px',
+          marginBottom: '22px',
           paddingBottom: '16px',
-          borderBottom: '1px solid var(--color-border-subtle, #E2E8F0)',
+          borderBottom: '1px solid var(--color-border-subtle, rgba(24, 60, 74, 0.10))',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <h1 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--color-text-main, #0F172A)' }}>
-            {activeTab === 'dashboard' && 'Clinical Practice Overview'}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <h1 style={{ fontSize: '22px', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--color-text-main, #162228)' }}>
+            {activeTab === 'dashboard' && (
+              <>
+                Clinical Practice{' '}
+                <span className="ms-serif-italic" style={{ fontSize: '25px', fontWeight: 400 }}>
+                  Overview
+                </span>
+              </>
+            )}
             {activeTab === 'opd_board' && "Today's Patient Queue (OPD)"}
             {activeTab === 'appointments' && 'Appointment Records'}
             {activeTab === 'editor' && 'Site Block Editor'}
-            {activeTab === 'pages' && 'Page Slots (7-Page Architecture)'}
+            {activeTab === 'pages' && 'Page Slots (10-Page Architecture)'}
             {activeTab === 'blog' && 'Health & Wellness Blog Management'}
             {activeTab === 'services' && 'Clinical Services Catalog'}
             {activeTab === 'reviews' && 'Patient Reviews & Testimonials'}
@@ -1194,8 +1203,11 @@ export default function CmsPanelPage() {
           <span
             style={{
               fontSize: '12px',
-              color: 'var(--color-text-muted, #64748B)',
-              fontWeight: 600,
+              color: 'var(--color-text-muted, #54666E)',
+              fontWeight: 500,
+              background: 'var(--color-brand-surface, #E7F2F5)',
+              padding: '4px 10px',
+              borderRadius: '9999px',
             }}
           >
             Last synced: {lastPublishedAt}
@@ -1206,81 +1218,60 @@ export default function CmsPanelPage() {
           <button
             onClick={() => handlePublish()}
             disabled={publishStatus === 'publishing'}
-            className="ux-btn cms-focus-ring"
+            className="ms-pill-dark cms-focus-ring"
             title="Save changes and immediately update the live patient page"
             style={{
               background:
                 publishStatus === 'published'
-                  ? 'var(--color-status-confirmed, #059669)'
+                  ? '#059669'
                   : hasUnsavedChanges
-                  ? 'var(--color-status-pending, #D97706)'
-                  : 'var(--color-brand-primary, #0D5C46)',
-              color: '#FFFFFF',
-              border: 'none',
-              padding: '8px 18px',
-              borderRadius: 'var(--radius-md, 10px)',
-              fontWeight: 700,
-              fontSize: '13px',
+                  ? '#D97706'
+                  : '#183C4A',
+              borderColor:
+                publishStatus === 'published'
+                  ? '#059669'
+                  : hasUnsavedChanges
+                  ? '#D97706'
+                  : '#183C4A',
               cursor: publishStatus === 'publishing' ? 'not-allowed' : 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '7px',
-              boxShadow: 'var(--shadow-sm)',
             }}
           >
-            {publishStatus === 'publishing' && (
-              <>
-                <RefreshCwIcon size={14} color="#FFFFFF" className="spin" />
-                <span>Publishing Pipeline...</span>
-              </>
-            )}
-            {publishStatus === 'published' && (
-              <>
-                <CheckCircleIcon size={15} color="#FFFFFF" />
-                <span>Live on Patient Page!</span>
-              </>
-            )}
-            {publishStatus === 'idle' && (
-              <>
-                <SendIcon size={14} color="#FFFFFF" />
-                <span>{hasUnsavedChanges ? 'Publish Draft Changes' : 'Publish to Live Site'}</span>
-              </>
-            )}
-            {publishStatus === 'error' && (
-              <>
-                <XCircleIcon size={15} color="#FFFFFF" />
-                <span>Retry Publishing</span>
-              </>
-            )}
+            <span className="ms-pill-circle">
+              {publishStatus === 'publishing' && <RefreshCwIcon size={14} color="#183C4A" className="spin" />}
+              {publishStatus === 'published' && <CheckCircleIcon size={14} color="#059669" />}
+              {publishStatus === 'idle' && <SendIcon size={13} color="#183C4A" />}
+              {publishStatus === 'error' && <XCircleIcon size={14} color="#DC2626" />}
+            </span>
+            <span>
+              {publishStatus === 'publishing' && 'Publishing Pipeline...'}
+              {publishStatus === 'published' && 'Live on Patient Page!'}
+              {publishStatus === 'idle' && (hasUnsavedChanges ? 'Publish Draft Changes' : 'Publish to Live Site')}
+              {publishStatus === 'error' && 'Retry Publishing'}
+            </span>
           </button>
         </div>
       </div>
 
         {/* Unsaved Changes Banner */}
         {hasUnsavedChanges && (
-          <div style={{ background: '#FEF3C7', borderBottom: '1px solid #FCD34D', padding: '10px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', color: '#92400E' }}>
+          <div style={{ background: '#FEF3C7', border: '1px solid #FCD34D', borderRadius: '14px', padding: '10px 20px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', color: '#92400E' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <AlertTriangleIcon size={16} color="#D97706" />
               <span><strong>You have unsaved changes!</strong> Content updates will not appear on the patient site until published.</span>
             </div>
             <button
               onClick={() => handlePublish()}
-              className="ux-btn"
+              className="ms-pill-dark"
               style={{
                 background: '#D97706',
-                color: '#FFFFFF',
-                border: 'none',
-                padding: '5px 14px',
-                borderRadius: '6px',
-                fontWeight: '700',
+                borderColor: '#D97706',
+                padding: '4px 14px 4px 4px',
                 fontSize: '12px',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
               }}
             >
-              <SendIcon size={13} color="#FFFFFF" />
+              <span className="ms-pill-circle" style={{ width: '24px', height: '24px' }}>
+                <SendIcon size={12} color="#D97706" />
+              </span>
               <span>Publish Now</span>
             </button>
           </div>
@@ -1292,222 +1283,476 @@ export default function CmsPanelPage() {
         <div style={{ maxWidth: '1440px', width: '100%', boxSizing: 'border-box' }}>
           
           {/* ======================================================= */}
-          {/* TAB 1: MEDICORE-INSPIRED DASHBOARD COMMAND CENTER       */}
+          {/* TAB 1: MEDSPHERE REFERENCE CONTROL PLANE OVERVIEW       */}
           {/* ======================================================= */}
           {activeTab === 'dashboard' && (
             <div>
-              {/* Top Greeting & Clinical AI Assistant Card */}
-              <div
-                className="ux-card"
-                style={{
-                  background: 'linear-gradient(135deg, #FFFFFF 0%, #F0FDF4 100%)',
-                  borderRadius: '16px',
-                  border: '1px solid #E2E8F0',
-                  padding: '28px 32px',
-                  marginBottom: '24px',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  gap: '24px',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-                }}
-              >
-                <div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#CCFBF1', color: '#0F766E', padding: '4px 10px', borderRadius: '999px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', marginBottom: '8px' }}>
-                    <span className="pulse-beacon" style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#0F766E', display: 'inline-block' }} />
-                    <span>Control Plane Live &bull; http://localhost:3000/</span>
-                  </div>
-                  <h1 style={{ margin: '0 0 6px 0', fontSize: '26px', fontWeight: '800', color: '#0F172A' }}>
-                    Good morning, {content.doctor.name}!
-                  </h1>
-                  <p style={{ margin: '0 0 16px 0', fontSize: '14px', color: '#475569', maxWidth: '620px' }}>
-                    Here is what is happening at <strong>{content.clinic.name}</strong> today. Your patient site is accepting appointment inquiries with real-time sync.
-                  </p>
-                  <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', fontSize: '12px', color: '#475569' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <ClockIcon size={15} color="#0F766E" />
-                      <span>09:30 AM &bull; Today&apos;s OPD Active</span>
-                    </span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <MapPinIcon size={15} color="#0F766E" />
-                      <span>{content.clinic.area}, {content.clinic.city}</span>
-                    </span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <BanknoteIcon size={15} color="#0F766E" />
-                      <span>Fee: ₹{content.doctor.consultationFee} (7-Day Free Follow-up)</span>
-                    </span>
-                  </div>
-                </div>
-
-                <div style={{ background: '#FFFFFF', border: '1px solid #BBF7D0', padding: '18px 22px', borderRadius: '12px', maxWidth: '360px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '700', fontSize: '13px', color: '#0F766E' }}>
-                      <SparklesIcon size={16} color="#0F766E" />
-                      <span>Clinical Site Assistant</span>
+              {/* 1. Reference Hero Banner with Mixed Sans/Serif Display, Dual Pills, Hairline Columns & Floating Badges */}
+              <div className="ms-hero-card" style={{ marginBottom: '28px' }}>
+                <div className="ms-hero-grid">
+                  {/* Left: Editorial Copy & Pill Actions */}
+                  <div>
+                    <div
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        color: 'var(--color-text-muted, #54666E)',
+                        marginBottom: '14px',
+                      }}
+                    >
+                      <span
+                        className="pulse-beacon"
+                        style={{
+                          width: '7px',
+                          height: '7px',
+                          borderRadius: '50%',
+                          background: '#059669',
+                          display: 'inline-block',
+                        }}
+                      />
+                      <span>Control Plane Live &bull; {content.clinic.area}, {content.clinic.city} OPD</span>
                     </div>
-                    <span style={{ background: '#0F766E', color: '#FFF', fontSize: '10px', fontWeight: 'bold', padding: '2px 6px', borderRadius: '4px' }}>
-                      PRO 2.0
-                    </span>
+
+                    <h2
+                      style={{
+                        margin: '0 0 12px 0',
+                        fontSize: 'clamp(28px, 3vw, 40px)',
+                        fontWeight: 700,
+                        lineHeight: 1.08,
+                        letterSpacing: '-0.03em',
+                        color: 'var(--color-text-main, #162228)',
+                      }}
+                    >
+                      Good morning, <br />
+                      <span className="ms-serif-italic" style={{ fontSize: 'clamp(34px, 3.6vw, 48px)', fontWeight: 400 }}>
+                        {content.doctor.name}
+                      </span>
+                    </h2>
+
+                    <p
+                      style={{
+                        margin: '0 0 22px 0',
+                        fontSize: '14.5px',
+                        lineHeight: 1.55,
+                        color: 'var(--color-text-muted, #54666E)',
+                        maxWidth: '500px',
+                      }}
+                    >
+                      Connect patient appointment requests, 7-page clinical blocks, and real-time OPD queues at <strong>{content.clinic.name}</strong> from one workspace.
+                    </p>
+
+                    {/* Signature Reference Action Pills */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('editor')}
+                        className="ms-pill-dark cms-focus-ring"
+                      >
+                        <span className="ms-pill-circle">
+                          <Edit3Icon size={13} color="#183C4A" />
+                        </span>
+                        <span>Open Block Editor</span>
+                      </button>
+
+                      <a
+                        href="/"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="ms-pill-light cms-focus-ring"
+                      >
+                        <ExternalLinkIcon size={14} color="var(--color-brand-primary, #183C4A)" />
+                        <span>View Live Patient Site</span>
+                      </a>
+                    </div>
+
+                    {/* Reference Hairline Divider + Unboxed 2-Column Highlights */}
+                    <div
+                      style={{
+                        marginTop: '28px',
+                        paddingTop: '18px',
+                        borderTop: '1px solid var(--color-border-subtle, rgba(24, 60, 74, 0.12))',
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
+                        gap: '20px',
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--color-text-main, #162228)', marginBottom: '4px' }}>
+                          Active OPD Queue
+                        </div>
+                        <p style={{ margin: 0, fontSize: '12px', lineHeight: 1.5, color: 'var(--color-text-muted, #54666E)' }}>
+                          Serving from 09:30 AM IST. Fee ₹{content.doctor.consultationFee} includes 7-day follow-up review.
+                        </p>
+                      </div>
+
+                      <div>
+                        <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--color-text-main, #162228)', marginBottom: '4px' }}>
+                          Clinical Site Assistant
+                        </div>
+                        <p style={{ margin: 0, fontSize: '12px', lineHeight: 1.5, color: 'var(--color-text-muted, #54666E)' }}>
+                          All web requests on <code>localhost:3000</code> sync instantly with audit-logged statuses.
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <p style={{ fontSize: '12px', color: '#475569', lineHeight: 1.5, margin: '0 0 12px 0' }}>
-                    All patient requests submitted on <code>localhost:3000</code> arrive instantly in your reception inbox.
-                  </p>
-                  <button
-                    onClick={() => setActiveTab('editor')}
-                    className="ux-btn"
+
+                  {/* Right: Doctor Portrait & 3 Reference Floating Frosted Badges */}
+                  <div
                     style={{
-                      width: '100%',
-                      background: '#0F766E',
-                      color: '#FFFFFF',
-                      border: 'none',
-                      padding: '8px 14px',
-                      borderRadius: '6px',
-                      fontSize: '12px',
-                      fontWeight: '700',
-                      cursor: 'pointer',
+                      position: 'relative',
+                      minHeight: '300px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '6px',
                     }}
                   >
-                    <span>Open Live Block Editor</span>
-                    <ArrowRightIcon size={13} color="#FFFFFF" />
-                  </button>
+                    <div
+                      style={{
+                        width: '100%',
+                        maxWidth: '380px',
+                        height: '300px',
+                        borderRadius: '20px',
+                        overflow: 'hidden',
+                        position: 'relative',
+                        background: '#D5E7EB',
+                        boxShadow: '0 20px 44px -16px rgba(24, 60, 74, 0.22)',
+                      }}
+                    >
+                      <img
+                        src={content.doctor.photoUrl && !content.doctor.photoUrl.endsWith('.svg') ? content.doctor.photoUrl : '/images/hero-doctor.jpg'}
+                        alt={content.doctor.name}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          objectPosition: 'center top',
+                          display: 'block',
+                        }}
+                      />
+                    </div>
+
+                    {/* Floating Badge 1: Avatar Stack + Inquiry Count */}
+                    <div
+                      className="ms-floating-badge"
+                      onClick={() => setActiveTab('appointments')}
+                      style={{
+                        position: 'absolute',
+                        left: '0px',
+                        bottom: '54px',
+                        maxWidth: '215px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '6px' }}>
+                        <img
+                          src="/images/avatar-1.jpg"
+                          alt="Patient A"
+                          style={{ width: '26px', height: '26px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #FFFFFF' }}
+                        />
+                        <img
+                          src="/images/avatar-2.jpg"
+                          alt="Patient B"
+                          style={{ width: '26px', height: '26px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #FFFFFF', marginLeft: '-8px' }}
+                        />
+                        <img
+                          src="/images/avatar-3.jpg"
+                          alt="Patient C"
+                          style={{ width: '26px', height: '26px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #FFFFFF', marginLeft: '-8px' }}
+                        />
+                        <span
+                          style={{
+                            marginLeft: '-6px',
+                            background: '#183C4A',
+                            color: '#FFFFFF',
+                            fontSize: '10px',
+                            fontWeight: 700,
+                            padding: '4px 8px',
+                            borderRadius: '9999px',
+                            border: '2px solid #FFFFFF',
+                          }}
+                        >
+                          {appointments.length}+
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '11px', lineHeight: 1.35, color: 'var(--color-text-main, #162228)', fontWeight: 500 }}>
+                        Patient inquiries synced live to your front-desk inbox.
+                      </div>
+                    </div>
+
+                    {/* Floating Badge 2: Top Right Shield Security Pill */}
+                    <div
+                      className="ms-floating-badge"
+                      onClick={() => setActiveTab('settings')}
+                      style={{
+                        position: 'absolute',
+                        right: '0px',
+                        top: '28px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '8px 12px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: '26px',
+                          height: '26px',
+                          borderRadius: '50%',
+                          background: '#183C4A',
+                          color: '#FFFFFF',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                        }}
+                      >
+                        <ShieldCheckIcon size={13} color="#FFFFFF" />
+                      </span>
+                      <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--color-text-main, #162228)', lineHeight: 1.25, maxWidth: '140px' }}>
+                        DPDP encrypted records &amp; audit trail
+                      </span>
+                    </div>
+
+                    {/* Floating Badge 3: Bottom Right Mini Team Card */}
+                    <div
+                      className="ms-floating-badge"
+                      onClick={() => setActiveTab('pages')}
+                      style={{
+                        position: 'absolute',
+                        right: '6px',
+                        bottom: '10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '8px 12px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <img
+                        src="/images/care-team-doctor.jpg"
+                        alt="CMS Assistant"
+                        style={{ width: '40px', height: '40px', borderRadius: '10px', objectFit: 'cover', flexShrink: 0 }}
+                      />
+                      <div>
+                        <div style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--color-text-main, #162228)' }}>
+                          10-Page CMS Active
+                        </div>
+                        <div style={{ fontSize: '10.5px', color: 'var(--color-text-muted, #54666E)' }}>
+                          {content.services.length} procedures live
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* 5 KPI Metric Cards Row */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+              {/* 2. Reference "(Practice overview)" Editorial Statement + Asymmetric Bento Metrics */}
+              <div className="ms-about-bento-grid">
+                {/* Left Editorial Statement */}
                 <div
-                  onClick={() => setActiveTab('appointments')}
-                  className="ux-card"
-                  style={{ background: '#FFFFFF', padding: '18px 20px', borderRadius: '12px', border: '1px solid #E2E8F0', cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    padding: '6px 4px',
+                  }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                    <span style={{ color: '#64748B', fontSize: '12px', fontWeight: '600' }}>Total Inquiries</span>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#CCFBF1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <UsersIcon size={16} color="#0F766E" />
+                  <div>
+                    <div
+                      style={{
+                        fontSize: '12px',
+                        fontWeight: 500,
+                        color: 'var(--color-text-muted, #54666E)',
+                        marginBottom: '12px',
+                      }}
+                    >
+                      (Practice overview)
                     </div>
+                    <h3
+                      style={{
+                        margin: '0 0 18px 0',
+                        fontSize: 'clamp(20px, 2vw, 25px)',
+                        fontWeight: 600,
+                        lineHeight: 1.32,
+                        letterSpacing: '-0.02em',
+                        color: 'var(--color-text-main, #162228)',
+                      }}
+                    >
+                      Dedicated clinical operations, patient enquiries, and 7-page publishing workflows — built to keep care{' '}
+                      <span className="ms-serif-italic" style={{ fontSize: '1.14em', fontWeight: 400 }}>
+                        fast and effortless.
+                      </span>
+                    </h3>
                   </div>
-                  <div style={{ fontSize: '26px', fontWeight: '800', color: '#0F766E', margin: '2px 0' }}>
-                    {appointments.length}
-                  </div>
-                  <div style={{ fontSize: '11px', color: '#16A34A', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <TrendingUpIcon size={13} color="#16A34A" />
-                    <span>+12% web conversions</span>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      onClick={() => setShowAddAptModal(true)}
+                      className="ms-pill-dark cms-focus-ring"
+                    >
+                      <span className="ms-pill-circle">
+                        <PlusIcon size={14} color="#183C4A" />
+                      </span>
+                      <span>Add Walk-in Consultation</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={downloadDPDPExport}
+                      className="ms-pill-light cms-focus-ring"
+                    >
+                      <DownloadIcon size={14} color="var(--color-brand-primary, #183C4A)" />
+                      <span>Export DPDP Audit</span>
+                    </button>
                   </div>
                 </div>
 
-                <div
-                  onClick={() => setActiveTab('appointments')}
-                  className="ux-card"
-                  style={{ background: '#FFFFFF', padding: '18px 20px', borderRadius: '12px', border: '1px solid #E2E8F0', cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                    <span style={{ color: '#64748B', fontSize: '12px', fontWeight: '600' }}>Pending Action</span>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#FEF3C7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <ClockIcon size={16} color="#D97706" />
+                {/* Right Asymmetric Bento Metrics (Reference 5k+ Light Tile, 100% Dark Petrol Tile & Consultation Photo Tile) */}
+                <div className="ms-bento-metrics">
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    {/* Light Mist Tile */}
+                    <div
+                      onClick={() => setActiveTab('appointments')}
+                      className="ms-bento-tile-light"
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div style={{ fontSize: '38px', fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1, color: 'var(--color-text-main, #162228)' }}>
+                          {appointments.length}+
+                        </div>
+                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#059669', background: '#DCFCE7', padding: '3px 8px', borderRadius: '9999px' }}>
+                          +12% growth
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-text-main, #162228)', marginTop: '10px' }}>
+                        Total Patient Inquiries
+                      </div>
+                      <div style={{ fontSize: '11.5px', color: 'var(--color-text-muted, #54666E)', marginTop: '2px' }}>
+                        {newAppointmentsCount > 0 ? `${newAppointmentsCount} pending WhatsApp outreach` : 'All bookings confirmed'}
+                      </div>
                     </div>
-                  </div>
-                  <div style={{ fontSize: '26px', fontWeight: '800', color: '#D97706', margin: '2px 0' }}>
-                    {newAppointmentsCount}
-                  </div>
-                  <div style={{ fontSize: '11px', color: '#B45309', fontWeight: '600' }}>
-                    {newAppointmentsCount > 0 ? 'Awaiting WhatsApp outreach' : 'All confirmed'}
-                  </div>
-                </div>
 
-                <div
-                  onClick={() => setActiveTab('services')}
-                  className="ux-card"
-                  style={{ background: '#FFFFFF', padding: '18px 20px', borderRadius: '12px', border: '1px solid #E2E8F0', cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                    <span style={{ color: '#64748B', fontSize: '12px', fontWeight: '600' }}>Live Procedures</span>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#E0F2FE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <MicroscopeIcon size={16} color="#0284C7" />
+                    {/* Dark Petrol Slate Tile */}
+                    <div
+                      onClick={() => setActiveTab('themes')}
+                      className="ms-bento-tile-dark"
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ fontSize: '38px', fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1, color: '#FFFFFF' }}>
+                          0.9s
+                        </div>
+                        <ZapIcon size={18} color="#94D2C7" />
+                      </div>
+                      <div style={{ fontSize: '13px', fontWeight: 600, color: '#FFFFFF', marginTop: '10px' }}>
+                        Mobile LCP &amp; WCAG 2.2 AA
+                      </div>
+                      <div style={{ fontSize: '11.5px', color: '#BFE3DC', marginTop: '2px', textTransform: 'capitalize' }}>
+                        Active theme: {content.theme} &bull; 6 presets
+                      </div>
                     </div>
                   </div>
-                  <div style={{ fontSize: '26px', fontWeight: '800', color: '#0284C7', margin: '2px 0' }}>
-                    {content.services.length}
-                  </div>
-                  <div style={{ fontSize: '11px', color: '#0369A1', fontWeight: '600' }}>
-                    Displayed on patient site
-                  </div>
-                </div>
 
-                <div
-                  className="ux-card"
-                  style={{ background: '#FFFFFF', padding: '18px 20px', borderRadius: '12px', border: '1px solid #E2E8F0', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                    <span style={{ color: '#64748B', fontSize: '12px', fontWeight: '600' }}>Mobile Performance</span>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#DCFCE7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <ZapIcon size={16} color="#15803D" />
+                  {/* Right Photo Bento Card */}
+                  <div
+                    onClick={() => setActiveTab('services')}
+                    style={{
+                      position: 'relative',
+                      borderRadius: '20px',
+                      overflow: 'hidden',
+                      minHeight: '220px',
+                      cursor: 'pointer',
+                      border: '1px solid var(--color-border-subtle, rgba(24, 60, 74, 0.10))',
+                      boxShadow: '0 10px 28px -12px rgba(24, 60, 74, 0.22)',
+                    }}
+                  >
+                    <img
+                      src="/images/about-consultation.jpg"
+                      alt="Patient Consultation at MedSphere Clinic"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                      }}
+                    />
+                    <div
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        background: 'linear-gradient(180deg, rgba(24, 60, 74, 0.04) 40%, rgba(16, 43, 54, 0.78) 100%)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'flex-end',
+                        padding: '18px',
+                      }}
+                    >
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        <span
+                          style={{
+                            background: 'rgba(255, 255, 255, 0.94)',
+                            color: '#183C4A',
+                            fontSize: '11.5px',
+                            fontWeight: 700,
+                            padding: '5px 11px',
+                            borderRadius: '9999px',
+                          }}
+                        >
+                          {content.services.length} Live Procedures
+                        </span>
+                        <span
+                          style={{
+                            background: newAppointmentsCount > 0 ? '#FEF3C7' : '#D1FAE5',
+                            color: newAppointmentsCount > 0 ? '#92400E' : '#065F46',
+                            fontSize: '11.5px',
+                            fontWeight: 700,
+                            padding: '5px 11px',
+                            borderRadius: '9999px',
+                          }}
+                        >
+                          {newAppointmentsCount} Pending Action
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  <div style={{ fontSize: '26px', fontWeight: '800', color: '#15803D', margin: '2px 0' }}>
-                    0.9s
-                  </div>
-                  <div style={{ fontSize: '11px', color: '#166534', fontWeight: '600' }}>
-                    LCP &lt; 2.0s &bull; WCAG 2.2 AA
-                  </div>
-                </div>
-
-                <div
-                  onClick={() => setActiveTab('themes')}
-                  className="ux-card"
-                  style={{ background: '#FFFFFF', padding: '18px 20px', borderRadius: '12px', border: '1px solid #E2E8F0', cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                    <span style={{ color: '#64748B', fontSize: '12px', fontWeight: '600' }}>Active Theme</span>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <PaletteIcon size={16} color="#0F766E" />
-                    </div>
-                  </div>
-                  <div style={{ fontSize: '20px', fontWeight: '800', color: '#334155', margin: '4px 0' }}>
-                    {content.theme}
-                  </div>
-                  <div style={{ fontSize: '11px', color: '#0F766E', fontWeight: '600' }}>
-                    6 presets available &rarr;
                   </div>
                 </div>
               </div>
 
-              {/* Main Dashboard Two-Column Grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: '24px', alignItems: 'flex-start' }}>
+              {/* 3. Main Dashboard Two-Column Operational Grid */}
+              <div className="ms-dashboard-lower-grid">
                 
                 {/* Left Column: Today's Appointments & Quick Links */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                   
                   {/* Today's Schedule Timeline */}
-                  <div className="ux-card" style={{ background: '#FFFFFF', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '22px' }}>
+                  <div className="ms-card">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                       <div>
-                        <h3 style={{ margin: '0 0 4px 0', fontSize: '16px', fontWeight: '700', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <CalendarIcon size={18} color="#0F766E" />
+                        <h3 style={{ margin: '0 0 4px 0', fontSize: '16px', fontWeight: '700', color: 'var(--color-text-main, #162228)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <CalendarIcon size={18} color="var(--color-brand-primary, #183C4A)" />
                           <span>Today&apos;s Appointments &bull; Patient Queue</span>
                         </h3>
-                        <p style={{ margin: 0, fontSize: '12px', color: '#64748B' }}>
+                        <p style={{ margin: 0, fontSize: '12px', color: 'var(--color-text-muted, #54666E)' }}>
                           Live bookings from web patient form. Confirm slots directly with patients via WhatsApp.
                         </p>
                       </div>
                       <button
                         onClick={() => setActiveTab('appointments')}
-                        className="ux-btn"
-                        style={{ background: 'none', border: 'none', color: '#0F766E', fontSize: '12px', fontWeight: '700', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                        className="ms-pill-light"
+                        style={{ padding: '6px 12px', fontSize: '12px' }}
                       >
                         <span>View All ({appointments.length})</span>
-                        <ArrowRightIcon size={13} color="#0F766E" />
+                        <ArrowRightIcon size={13} color="var(--color-brand-primary, #183C4A)" />
                       </button>
                     </div>
 
                     {searchQuery.trim() && (
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 12px', background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '6px', fontSize: '12px', color: '#166534', marginBottom: '10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 14px', background: 'var(--color-brand-surface, #E7F2F5)', border: '1px solid var(--color-border-subtle, rgba(24, 60, 74, 0.12))', borderRadius: '12px', fontSize: '12px', color: 'var(--color-brand-primary, #183C4A)', marginBottom: '12px' }}>
                         <span>Search filter active: <strong>&quot;{searchQuery}&quot;</strong></span>
-                        <button onClick={() => setSearchQuery('')} style={{ background: 'none', border: 'none', color: '#166534', cursor: 'pointer', fontWeight: 'bold' }}>Clear</button>
+                        <button onClick={() => setSearchQuery('')} style={{ background: 'none', border: 'none', color: 'var(--color-brand-primary, #183C4A)', cursor: 'pointer', fontWeight: 'bold' }}>Clear</button>
                       </div>
                     )}
 
@@ -1525,10 +1770,10 @@ export default function CmsPanelPage() {
                         <div
                           key={apt.id}
                           style={{
-                            padding: '12px 16px',
-                            background: '#F8FAFC',
-                            borderRadius: '10px',
-                            border: '1px solid #E2E8F0',
+                            padding: '13px 16px',
+                            background: 'var(--color-bg-surface, #F5F8F9)',
+                            borderRadius: '14px',
+                            border: '1px solid var(--color-border-subtle, rgba(24, 60, 74, 0.08))',
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
@@ -1537,10 +1782,10 @@ export default function CmsPanelPage() {
                           }}
                         >
                           <div>
-                            <div style={{ fontWeight: '700', fontSize: '14px', color: '#0F172A' }}>
+                            <div style={{ fontWeight: '700', fontSize: '14px', color: 'var(--color-text-main, #162228)' }}>
                               {apt.patientName}
                             </div>
-                            <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>
+                            <div style={{ fontSize: '12px', color: 'var(--color-text-muted, #54666E)', marginTop: '2px' }}>
                               {apt.service} &bull; {apt.preferredDate} ({apt.shift})
                             </div>
                           </div>
@@ -1550,23 +1795,16 @@ export default function CmsPanelPage() {
                               href={`https://wa.me/${apt.phone.replace(/[^0-9]/g, '')}?text=Hello%20${encodeURIComponent(apt.patientName)},%20this%20is%20Sunita%20from%20${encodeURIComponent(content.clinic.name)}%20regarding%20your%20consultation%20request%20with%20${encodeURIComponent(content.doctor.name)}.`}
                               target="_blank"
                               rel="noreferrer"
-                              className="ux-btn"
+                              className="ms-pill-light"
                               title="Chat with patient on WhatsApp"
                               style={{
-                                background: '#DCFCE7',
-                                color: '#166534',
-                                border: '1px solid #86EFAC',
-                                padding: '5px 10px',
-                                borderRadius: '6px',
+                                padding: '5px 11px',
                                 fontSize: '11px',
                                 fontWeight: '700',
-                                textDecoration: 'none',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '4px',
+                                color: '#183C4A',
                               }}
                             >
-                              <MessageCircleIcon size={13} color="#166534" />
+                              <MessageCircleIcon size={13} color="#183C4A" />
                               <span>WhatsApp</span>
                             </a>
 
@@ -1581,17 +1819,17 @@ export default function CmsPanelPage() {
                                   apt.status === 'new'
                                     ? '#FEF3C7'
                                     : apt.status === 'contacted'
-                                    ? '#E0F2FE'
+                                    ? '#E7F2F5'
                                     : apt.status === 'confirmed'
-                                    ? '#DCFCE7'
+                                    ? '#D1FAE5'
                                     : '#F1F5F9',
                                 color:
                                   apt.status === 'new'
                                     ? '#92400E'
                                     : apt.status === 'contacted'
-                                    ? '#0369A1'
+                                    ? '#183C4A'
                                     : apt.status === 'confirmed'
-                                    ? '#15803D'
+                                    ? '#065F46'
                                     : '#475569',
                               }}
                             >
@@ -1603,155 +1841,82 @@ export default function CmsPanelPage() {
                     </div>
                   </div>
 
-                  {/* 6 Quick Action Control Shortcuts */}
-                  <div className="ux-card" style={{ background: '#FFFFFF', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '22px' }}>
-                    <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: '700', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <ZapIcon size={18} color="#0F766E" />
+                  {/* Quick Action Control Shortcuts — Cohesive MedSphere Palette */}
+                  <div className="ms-card">
+                    <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: '700', color: 'var(--color-text-main, #162228)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <ZapIcon size={18} color="var(--color-brand-primary, #183C4A)" />
                       <span>Control Plane Quick Actions</span>
                     </h3>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-                      <button
-                        onClick={() => setActiveTab('editor')}
-                        className="ux-btn"
-                        style={{ padding: '14px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', textAlign: 'left', cursor: 'pointer' }}
-                      >
-                        <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#CCFBF1', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
-                          <Edit3Icon size={18} color="#0F766E" />
-                        </div>
-                        <div style={{ fontWeight: '700', fontSize: '13px', color: '#0F172A' }}>Site Block Editor</div>
-                        <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>Edit text &amp; announcements</div>
-                      </button>
-
-                      <button
-                        onClick={() => setActiveTab('clinic_hours')}
-                        className="ux-btn"
-                        style={{ padding: '14px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', textAlign: 'left', cursor: 'pointer' }}
-                      >
-                        <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#FEF3C7', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
-                          <BuildingIcon size={18} color="#D97706" />
-                        </div>
-                        <div style={{ fontWeight: '700', fontSize: '13px', color: '#0F172A' }}>Clinic Hours &amp; Map</div>
-                        <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>OPD shifts &amp; transit guide</div>
-                      </button>
-
-                      <button
-                        onClick={() => setActiveTab('services')}
-                        className="ux-btn"
-                        style={{ padding: '14px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', textAlign: 'left', cursor: 'pointer' }}
-                      >
-                        <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#E0F2FE', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
-                          <MicroscopeIcon size={18} color="#0284C7" />
-                        </div>
-                        <div style={{ fontWeight: '700', fontSize: '13px', color: '#0F172A' }}>Manage 9 Services</div>
-                        <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>Clinical treatments</div>
-                      </button>
-
-                      <button
-                        onClick={() => setActiveTab('reviews')}
-                        className="ux-btn"
-                        style={{ padding: '14px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', textAlign: 'left', cursor: 'pointer' }}
-                      >
-                        <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#FCE7F3', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
-                          <MessageCircleIcon size={18} color="#BE123C" />
-                        </div>
-                        <div style={{ fontWeight: '700', fontSize: '13px', color: '#0F172A' }}>Patient Reviews</div>
-                        <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>Testimonial moderation</div>
-                      </button>
-
-                      <button
-                        onClick={() => setActiveTab('themes')}
-                        className="ux-btn"
-                        style={{ padding: '14px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', textAlign: 'left', cursor: 'pointer' }}
-                      >
-                        <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
-                          <PaletteIcon size={18} color="#334155" />
-                        </div>
-                        <div style={{ fontWeight: '700', fontSize: '13px', color: '#0F172A' }}>6 Themes Preset</div>
-                        <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>Instant palette switch</div>
-                      </button>
-
-                      <button
-                        onClick={() => setActiveTab('pages')}
-                        className="ux-btn"
-                        style={{ padding: '14px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', textAlign: 'left', cursor: 'pointer' }}
-                      >
-                        <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#CCFBF1', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
-                          <GlobeIcon size={18} color="#0D5C46" />
-                        </div>
-                        <div style={{ fontWeight: '700', fontSize: '13px', color: '#0F172A' }}>Page Slots Manager</div>
-                        <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>7-Page Architecture</div>
-                      </button>
-
-                      <button
-                        onClick={() => setActiveTab('blog')}
-                        className="ux-btn"
-                        style={{ padding: '14px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', textAlign: 'left', cursor: 'pointer' }}
-                      >
-                        <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#E0F2FE', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
-                          <FileTextIcon size={18} color="#0284C7" />
-                        </div>
-                        <div style={{ fontWeight: '700', fontSize: '13px', color: '#0F172A' }}>Health Blog Posts</div>
-                        <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>Patient education guides</div>
-                      </button>
-
-                      <button
-                        onClick={() => setActiveTab('versions')}
-                        className="ux-btn"
-                        style={{ padding: '14px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', textAlign: 'left', cursor: 'pointer' }}
-                      >
-                        <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#EDE9FE', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
-                          <RefreshCwIcon size={18} color="#7C3AED" />
-                        </div>
-                        <div style={{ fontWeight: '700', fontSize: '13px', color: '#0F172A' }}>Version History</div>
-                        <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>Audit snapshots &amp; rollback</div>
-                      </button>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(195px, 1fr))', gap: '12px' }}>
+                      {[
+                        { tab: 'editor' as Tab, icon: <Edit3Icon size={18} color="#183C4A" />, title: 'Site Block Editor', desc: 'Edit text & announcements' },
+                        { tab: 'clinic_hours' as Tab, icon: <BuildingIcon size={18} color="#183C4A" />, title: 'Clinic Hours & Map', desc: 'OPD shifts & transit guide' },
+                        { tab: 'services' as Tab, icon: <MicroscopeIcon size={18} color="#183C4A" />, title: `Manage ${content.services.length} Services`, desc: 'Clinical treatments' },
+                        { tab: 'reviews' as Tab, icon: <MessageCircleIcon size={18} color="#183C4A" />, title: 'Patient Reviews', desc: 'Testimonial moderation' },
+                        { tab: 'themes' as Tab, icon: <PaletteIcon size={18} color="#183C4A" />, title: '6 Themes Preset', desc: 'Instant palette switch' },
+                        { tab: 'pages' as Tab, icon: <GlobeIcon size={18} color="#183C4A" />, title: 'Page Slots Manager', desc: '10-Page Architecture' },
+                        { tab: 'blog' as Tab, icon: <FileTextIcon size={18} color="#183C4A" />, title: 'Health Blog Posts', desc: 'Patient education guides' },
+                        { tab: 'versions' as Tab, icon: <RefreshCwIcon size={18} color="#183C4A" />, title: 'Version History', desc: 'Audit snapshots & rollback' },
+                      ].map((action) => (
+                        <button
+                          key={action.tab}
+                          onClick={() => setActiveTab(action.tab)}
+                          className="ms-bento-tile-light"
+                          style={{ padding: '15px', textAlign: 'left', borderRadius: '16px' }}
+                        >
+                          <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#FFFFFF', border: '1px solid rgba(24, 60, 74, 0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
+                            {action.icon}
+                          </div>
+                          <div style={{ fontWeight: '700', fontSize: '13px', color: 'var(--color-text-main, #162228)' }}>{action.title}</div>
+                          <div style={{ fontSize: '11.5px', color: 'var(--color-text-muted, #54666E)', marginTop: '2px' }}>{action.desc}</div>
+                        </button>
+                      ))}
 
                       <button
                         onClick={downloadDPDPExport}
-                        className="ux-btn"
-                        style={{ padding: '14px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', textAlign: 'left', cursor: 'pointer' }}
+                        className="ms-bento-tile-light"
+                        style={{ padding: '15px', textAlign: 'left', borderRadius: '16px' }}
                       >
-                        <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#E0E7FF', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
-                          <ShieldCheckIcon size={18} color="#4338CA" />
+                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#FFFFFF', border: '1px solid rgba(24, 60, 74, 0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
+                          <ShieldCheckIcon size={18} color="#183C4A" />
                         </div>
-                        <div style={{ fontWeight: '700', fontSize: '13px', color: '#0F172A' }}>DPDP Data Export</div>
-                        <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>Compliance consent audit</div>
+                        <div style={{ fontWeight: '700', fontSize: '13px', color: 'var(--color-text-main, #162228)' }}>DPDP Data Export</div>
+                        <div style={{ fontSize: '11.5px', color: 'var(--color-text-muted, #54666E)', marginTop: '2px' }}>Compliance consent audit</div>
                       </button>
                     </div>
                   </div>
 
                 </div>
 
-                {/* Right Column: Mini Calendar & Live Activity Feed */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                {/* Right Column: Mini Calendar & Today's Shifts */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                   
                   {/* Interactive Mini Calendar Widget */}
-                  <div className="ux-card" style={{ background: '#FFFFFF', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '22px' }}>
+                  <div className="ms-card">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                      <strong style={{ fontSize: '15px', color: '#0F172A' }}>November 2026</strong>
-                      <span style={{ fontSize: '12px', color: '#0F766E', fontWeight: '700' }}>OPD Calendar</span>
+                      <strong style={{ fontSize: '15px', color: 'var(--color-text-main, #162228)' }}>November 2026</strong>
+                      <span style={{ fontSize: '11px', color: '#183C4A', fontWeight: '700', background: '#E7F2F5', padding: '3px 9px', borderRadius: '9999px' }}>OPD Calendar</span>
                     </div>
 
                     {/* Weekday Header */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', textAlign: 'center', fontSize: '11px', fontWeight: '700', color: '#94A3B8', marginBottom: '10px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', textAlign: 'center', fontSize: '11px', fontWeight: '700', color: 'var(--color-text-muted, #54666E)', marginBottom: '10px' }}>
                       <span>SU</span><span>MO</span><span>TU</span><span>WE</span><span>TH</span><span>FR</span><span>SA</span>
                     </div>
 
                     {/* Month Days */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '6px', textAlign: 'center', fontSize: '12px' }}>
                       {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30].map((d) => {
-                        const isToday = d === 3;
+                        const isToday = d === 12;
                         return (
                           <div
                             key={d}
                             style={{
                               padding: '8px 0',
-                              borderRadius: '8px',
-                              background: isToday ? '#0F766E' : 'transparent',
-                              color: isToday ? '#FFFFFF' : '#334155',
-                              fontWeight: isToday ? '800' : '500',
-                              border: isToday ? 'none' : '1px solid transparent',
+                              borderRadius: '9999px',
+                              background: isToday ? '#183C4A' : 'transparent',
+                              color: isToday ? '#FFFFFF' : 'var(--color-text-main, #162228)',
+                              fontWeight: isToday ? '700' : '500',
                             }}
                           >
                             {d}
@@ -1762,31 +1927,30 @@ export default function CmsPanelPage() {
                   </div>
 
                   {/* Today's Shift Card */}
-                  <div className="ux-card" style={{ background: '#FFFFFF', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '20px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                      <h4 style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <ClockIcon size={16} color="#0F766E" />
+                  <div className="ms-card">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                      <h4 style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: 'var(--color-text-main, #162228)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <ClockIcon size={16} color="var(--color-brand-primary, #183C4A)" />
                         <span>Today&apos;s OPD Shifts</span>
                       </h4>
                       <button
                         onClick={() => setActiveTab('clinic_hours')}
-                        className="ux-btn"
-                        style={{ background: 'none', border: 'none', color: '#0F766E', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}
+                        style={{ background: 'none', border: 'none', color: 'var(--color-brand-primary, #183C4A)', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}
                       >
                         Edit Hours &rarr;
                       </button>
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 10px', background: '#F0FDF4', borderRadius: '6px', border: '1px solid #BBF7D0' }}>
-                        <span style={{ color: '#166534', fontWeight: '600' }}>Morning OPD</span>
-                        <strong style={{ color: '#14532D' }}>{(content.clinic.schedule.weekdayHours.split('–')[0] ?? '').replace('Monday', '').trim()}</strong>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', background: '#E7F2F5', borderRadius: '12px' }}>
+                        <span style={{ color: '#183C4A', fontWeight: '600' }}>Morning OPD</span>
+                        <strong style={{ color: '#162228' }}>{(content.clinic.schedule.weekdayHours.split('–')[0] ?? '').replace('Monday', '').trim()}</strong>
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 10px', background: '#F8FAFC', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
-                        <span style={{ color: '#475569' }}>Saturday Shift</span>
-                        <strong style={{ color: '#0F172A' }}>{content.clinic.schedule.saturdayHours}</strong>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', background: 'var(--color-bg-surface, #F5F8F9)', borderRadius: '12px' }}>
+                        <span style={{ color: 'var(--color-text-muted, #54666E)' }}>Saturday Shift</span>
+                        <strong style={{ color: 'var(--color-text-main, #162228)' }}>{content.clinic.schedule.saturdayHours}</strong>
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 10px', background: '#FEF2F2', borderRadius: '6px', border: '1px solid #FECACA' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', background: '#FEF2F2', borderRadius: '12px' }}>
                         <span style={{ color: '#991B1B' }}>Sunday</span>
                         <strong style={{ color: '#991B1B' }}>Emergency On-Call</strong>
                       </div>
@@ -1796,25 +1960,17 @@ export default function CmsPanelPage() {
                   {/* Add Walk-in Patient Action */}
                   <button
                     onClick={() => setShowAddAptModal(true)}
-                    className="ux-btn"
+                    className="ms-pill-dark cms-focus-ring"
                     style={{
-                      background: '#0F766E',
-                      color: '#FFFFFF',
-                      border: 'none',
-                      padding: '12px 18px',
-                      borderRadius: '10px',
-                      fontSize: '13px',
-                      fontWeight: '700',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
+                      width: '100%',
                       justifyContent: 'center',
-                      gap: '8px',
-                      boxShadow: '0 4px 12px rgba(15,118,110,0.2)',
+                      padding: '8px 20px 8px 8px',
                     }}
                   >
-                    <PlusIcon size={16} color="#FFFFFF" />
-                    <span>+ Add Walk-in / Phone Consultation</span>
+                    <span className="ms-pill-circle">
+                      <PlusIcon size={15} color="#183C4A" />
+                    </span>
+                    <span>Add Walk-in / Phone Consultation</span>
                   </button>
 
                 </div>
@@ -1830,27 +1986,24 @@ export default function CmsPanelPage() {
             <div>
               {/* Top Banner & Real-Time OPD Control Strip */}
               <div
-                className="ux-card"
+                className="ms-hero-card"
                 style={{
-                  background: '#FFFFFF',
-                  borderRadius: '16px',
-                  border: '1px solid #E2E8F0',
-                  padding: '22px 24px',
-                  marginBottom: '20px',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+                  padding: '28px 30px',
+                  marginBottom: '22px',
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
                   <div>
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#DCFCE7', color: '#166534', padding: '3px 10px', borderRadius: '999px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', marginBottom: '6px' }}>
-                      <span className="pulse-beacon" style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#16A34A', display: 'inline-block' }} />
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.88)', color: 'var(--color-brand-primary, #183C4A)', border: '1px solid var(--color-border-subtle)', padding: '5px 12px', borderRadius: '9999px', fontSize: '11px', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: '10px' }}>
+                      <span className="pulse-beacon" style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#10B981', display: 'inline-block' }} />
                       <span>Live Clinic Operations &bull; Receptionist Desk</span>
                     </div>
-                    <h2 style={{ margin: '0 0 4px 0', fontSize: '22px', fontWeight: '800', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <ActivityIcon size={24} color="#0F766E" />
-                      <span>Today&apos;s OPD Board &bull; Queue &amp; Availability Control</span>
+                    <h2 style={{ margin: '0 0 6px 0', fontSize: '26px', fontWeight: 600, color: 'var(--color-text-main, #162228)', letterSpacing: '-0.025em', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                      <ActivityIcon size={22} color="var(--color-brand-primary, #183C4A)" />
+                      <span>Today&apos;s OPD Board</span>
+                      <span className="ms-serif-italic" style={{ fontSize: '30px', fontWeight: 400 }}>&amp; live queue</span>
                     </h2>
-                    <p style={{ margin: 0, fontSize: '13px', color: '#64748B' }}>
+                    <p style={{ margin: 0, fontSize: '13.5px', color: 'var(--color-text-muted, #54666E)' }}>
                       Control live patient token sequence, 1-tap WhatsApp notifications, broadcast doctor delays, and dispatch Google review requests.
                     </p>
                   </div>
@@ -1858,24 +2011,12 @@ export default function CmsPanelPage() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                     <button
                       onClick={() => setShowWeeklySummaryModal(true)}
-                      className="ux-btn"
-                      style={{
-                        background: '#0F766E',
-                        color: '#FFFFFF',
-                        border: 'none',
-                        padding: '9px 16px',
-                        borderRadius: '8px',
-                        fontSize: '13px',
-                        fontWeight: '700',
-                        cursor: 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        boxShadow: '0 2px 4px rgba(15,118,110,0.2)',
-                      }}
+                      className="ms-pill-dark"
                     >
-                      <Share2Icon size={15} color="#FFFFFF" />
-                      <span>Dr. Maanvita Weekly WhatsApp Digest</span>
+                      <span className="ms-pill-circle">
+                        <Share2Icon size={13} color="#183C4A" />
+                      </span>
+                      <span>Dr. Maanvita Weekly Digest</span>
                     </button>
 
                     <button
@@ -1884,71 +2025,58 @@ export default function CmsPanelPage() {
                         fetchContent();
                         showToast('OPD Board refreshed');
                       }}
-                      className="ux-btn"
-                      style={{
-                        background: '#F1F5F9',
-                        color: '#334155',
-                        border: '1px solid #CBD5E1',
-                        padding: '9px 14px',
-                        borderRadius: '8px',
-                        fontSize: '13px',
-                        fontWeight: '600',
-                        cursor: 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                      }}
+                      className="ms-pill-light"
                     >
-                      <RefreshCwIcon size={14} color="#334155" />
+                      <RefreshCwIcon size={14} color="currentColor" />
                       <span>Refresh Board</span>
                     </button>
                   </div>
                 </div>
 
                 {/* 3 Real-time Control Cards */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px', paddingTop: '16px', borderTop: '1px solid #F1F5F9' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px', paddingTop: '18px', borderTop: '1px solid var(--color-border-subtle)' }}>
                   
                   {/* Control 1: Currently Serving Token */}
-                  <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', padding: '14px' }}>
-                    <div style={{ fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', marginBottom: '8px' }}>
+                  <div className="ms-bento-tile-dark" style={{ padding: '18px 20px', cursor: 'default' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.72)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>
                       Currently Serving In Cabin
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '24px', fontWeight: '900', color: '#0F766E', letterSpacing: '-0.5px' }}>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
+                        <span style={{ fontSize: '32px', fontWeight: 600, color: '#FFFFFF', letterSpacing: '-0.03em' }}>
                           #{String(content?.availability?.currentServingToken || 1).padStart(2, '0')}
                         </span>
-                        <span style={{ fontSize: '11px', color: '#64748B' }}>Live on patient site</span>
+                        <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.72)' }}>Live on patient site</span>
                       </div>
                       <div style={{ display: 'flex', gap: '6px' }}>
                         <button
                           onClick={() => handleStepServingToken(-1)}
-                          className="ux-btn"
-                          style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', background: '#FFF', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
+                          className="ms-pill-light"
+                          style={{ padding: '7px 12px', fontSize: '12px' }}
                           title="Previous Token"
                         >
-                          ◀
+                          Prev
                         </button>
                         <button
                           onClick={() => handleStepServingToken(1)}
-                          className="ux-btn"
-                          style={{ padding: '6px 14px', borderRadius: '6px', border: 'none', background: '#0F766E', color: '#FFF', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
+                          className="ms-pill-light"
+                          style={{ padding: '7px 14px', fontSize: '12px', background: '#FFFFFF', color: '#183C4A' }}
                           title="Advance to Next Token"
                         >
-                          Next Token ▶
+                          Next Token &rarr;
                         </button>
                       </div>
                     </div>
                   </div>
 
                   {/* Control 2: Running Late Broadcast */}
-                  <div style={{ background: (content?.availability?.runningLateMinutes || 0) > 0 ? '#FFFBEB' : '#F8FAFC', border: (content?.availability?.runningLateMinutes || 0) > 0 ? '1px solid #FCD34D' : '1px solid #E2E8F0', borderRadius: '10px', padding: '14px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                      <div style={{ fontSize: '11px', fontWeight: '700', color: (content?.availability?.runningLateMinutes || 0) > 0 ? '#B45309' : '#64748B', textTransform: 'uppercase' }}>
+                  <div className="ms-bento-tile-light" style={{ background: (content?.availability?.runningLateMinutes || 0) > 0 ? '#FFFBEB' : 'rgba(255,255,255,0.88)', borderColor: (content?.availability?.runningLateMinutes || 0) > 0 ? '#FCD34D' : 'var(--color-border-subtle)', padding: '18px 20px', cursor: 'default' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 700, color: (content?.availability?.runningLateMinutes || 0) > 0 ? '#B45309' : 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                         Doctor Delay Broadcast
                       </div>
                       {(content?.availability?.runningLateMinutes || 0) > 0 && (
-                        <span style={{ fontSize: '11px', fontWeight: '800', color: '#D97706', background: '#FEF3C7', padding: '2px 6px', borderRadius: '4px' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 800, color: '#D97706', background: '#FEF3C7', padding: '2px 8px', borderRadius: '9999px' }}>
                           ~{content?.availability?.runningLateMinutes}m Late Live
                         </span>
                       )}
@@ -1958,72 +2086,43 @@ export default function CmsPanelPage() {
                         onClick={() => handleBroadcastLate(0)}
                         className="ux-btn"
                         style={{
-                          padding: '5px 10px',
-                          borderRadius: '6px',
-                          border: (content?.availability?.runningLateMinutes || 0) === 0 ? '2px solid #16A34A' : '1px solid #CBD5E1',
-                          background: (content?.availability?.runningLateMinutes || 0) === 0 ? '#DCFCE7' : '#FFFFFF',
-                          color: (content?.availability?.runningLateMinutes || 0) === 0 ? '#166534' : '#475569',
-                          fontSize: '11px',
-                          fontWeight: '700',
+                          padding: '6px 12px',
+                          borderRadius: '9999px',
+                          border: (content?.availability?.runningLateMinutes || 0) === 0 ? '1px solid #183C4A' : '1px solid var(--color-border-subtle)',
+                          background: (content?.availability?.runningLateMinutes || 0) === 0 ? '#183C4A' : '#FFFFFF',
+                          color: (content?.availability?.runningLateMinutes || 0) === 0 ? '#FFFFFF' : 'var(--color-text-muted)',
+                          fontSize: '11.5px',
+                          fontWeight: 600,
                           cursor: 'pointer',
                         }}
                       >
                         On Time (Clear)
                       </button>
-                      <button
-                        onClick={() => handleBroadcastLate(15)}
-                        className="ux-btn"
-                        style={{
-                          padding: '5px 10px',
-                          borderRadius: '6px',
-                          border: content?.availability?.runningLateMinutes === 15 ? '2px solid #D97706' : '1px solid #CBD5E1',
-                          background: content?.availability?.runningLateMinutes === 15 ? '#FEF3C7' : '#FFFFFF',
-                          color: content?.availability?.runningLateMinutes === 15 ? '#92400E' : '#475569',
-                          fontSize: '11px',
-                          fontWeight: '700',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        +15 min
-                      </button>
-                      <button
-                        onClick={() => handleBroadcastLate(20)}
-                        className="ux-btn"
-                        style={{
-                          padding: '5px 10px',
-                          borderRadius: '6px',
-                          border: content?.availability?.runningLateMinutes === 20 ? '2px solid #D97706' : '1px solid #CBD5E1',
-                          background: content?.availability?.runningLateMinutes === 20 ? '#FEF3C7' : '#FFFFFF',
-                          color: content?.availability?.runningLateMinutes === 20 ? '#92400E' : '#475569',
-                          fontSize: '11px',
-                          fontWeight: '700',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        +20 min
-                      </button>
-                      <button
-                        onClick={() => handleBroadcastLate(30)}
-                        className="ux-btn"
-                        style={{
-                          padding: '5px 10px',
-                          borderRadius: '6px',
-                          border: content?.availability?.runningLateMinutes === 30 ? '2px solid #DC2626' : '1px solid #CBD5E1',
-                          background: content?.availability?.runningLateMinutes === 30 ? '#FEE2E2' : '#FFFFFF',
-                          color: content?.availability?.runningLateMinutes === 30 ? '#991B1B' : '#475569',
-                          fontSize: '11px',
-                          fontWeight: '700',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        +30 min
-                      </button>
+                      {[15, 20, 30].map((mins) => (
+                        <button
+                          key={mins}
+                          onClick={() => handleBroadcastLate(mins)}
+                          className="ux-btn"
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: '9999px',
+                            border: content?.availability?.runningLateMinutes === mins ? '1px solid #D97706' : '1px solid var(--color-border-subtle)',
+                            background: content?.availability?.runningLateMinutes === mins ? '#FEF3C7' : '#FFFFFF',
+                            color: content?.availability?.runningLateMinutes === mins ? '#92400E' : 'var(--color-text-muted)',
+                            fontSize: '11.5px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          +{mins} min
+                        </button>
+                      ))}
                     </div>
                   </div>
 
                   {/* Control 3: Live Next Available Slot Chip */}
-                  <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', padding: '14px' }}>
-                    <div style={{ fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', marginBottom: '8px' }}>
+                  <div className="ms-bento-tile-light" style={{ background: 'rgba(255,255,255,0.88)', padding: '18px 20px', cursor: 'default' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>
                       Live Next Available Slot Chip
                     </div>
                     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
@@ -2040,13 +2139,13 @@ export default function CmsPanelPage() {
                             onClick={() => handleUpdateNextSlot(slot)}
                             className="ux-btn"
                             style={{
-                              padding: '5px 9px',
-                              borderRadius: '6px',
-                              border: isSelected ? '2px solid #0F766E' : '1px solid #CBD5E1',
-                              background: isSelected ? '#CCFBF1' : '#FFFFFF',
-                              color: isSelected ? '#0F766E' : '#475569',
-                              fontSize: '11px',
-                              fontWeight: isSelected ? '700' : '500',
+                              padding: '6px 12px',
+                              borderRadius: '9999px',
+                              border: isSelected ? '1px solid #183C4A' : '1px solid var(--color-border-subtle)',
+                              background: isSelected ? '#183C4A' : '#FFFFFF',
+                              color: isSelected ? '#FFFFFF' : 'var(--color-text-muted)',
+                              fontSize: '11.5px',
+                              fontWeight: isSelected ? 600 : 500,
                               cursor: 'pointer',
                             }}
                           >
@@ -2062,22 +2161,18 @@ export default function CmsPanelPage() {
 
               {/* 10-Second Quick Walk-in Add Bar */}
               <div
-                className="ux-card"
+                className="ms-card"
                 style={{
-                  background: '#FFFFFF',
-                  borderRadius: '14px',
-                  border: '1px solid #E2E8F0',
-                  padding: '16px 20px',
-                  marginBottom: '20px',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
+                  padding: '20px 24px',
+                  marginBottom: '22px',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                  <div style={{ fontSize: '13px', fontWeight: '700', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <PlusIcon size={16} color="#0F766E" />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+                  <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <PlusIcon size={16} color="var(--color-brand-primary, #183C4A)" />
                     <span>10-Second Walk-In Add (Front Desk Sunita)</span>
                   </div>
-                  <span style={{ fontSize: '12px', color: '#64748B' }}>
+                  <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
                     Auto-assigns next sequential token number into the Waiting queue
                   </span>
                 </div>
@@ -2089,7 +2184,7 @@ export default function CmsPanelPage() {
                     placeholder="Patient Name (e.g. Ramesh Verma)"
                     value={quickWalkIn.patientName}
                     onChange={(e) => setQuickWalkIn({ ...quickWalkIn, patientName: e.target.value })}
-                    style={{ flex: '1 1 200px', minWidth: '180px', padding: '9px 12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '13px' }}
+                    style={{ flex: '1 1 200px', minWidth: '180px', padding: '10px 14px', borderRadius: '9999px', border: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-surface)', color: 'var(--color-text-main)', fontSize: '13px' }}
                   />
 
                   <input
@@ -2098,13 +2193,13 @@ export default function CmsPanelPage() {
                     placeholder="Phone (e.g. 98100 12345)"
                     value={quickWalkIn.phone}
                     onChange={(e) => setQuickWalkIn({ ...quickWalkIn, phone: e.target.value })}
-                    style={{ flex: '1 1 160px', minWidth: '140px', padding: '9px 12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '13px' }}
+                    style={{ flex: '1 1 160px', minWidth: '140px', padding: '10px 14px', borderRadius: '9999px', border: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-surface)', color: 'var(--color-text-main)', fontSize: '13px' }}
                   />
 
                   <select
                     value={quickWalkIn.service}
                     onChange={(e) => setQuickWalkIn({ ...quickWalkIn, service: e.target.value })}
-                    style={{ flex: '1 1 200px', minWidth: '180px', padding: '9px 12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '13px', background: '#FFF' }}
+                    style={{ flex: '1 1 200px', minWidth: '180px', padding: '10px 14px', borderRadius: '9999px', border: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-surface)', color: 'var(--color-text-main)', fontSize: '13px' }}
                   >
                     {content?.services.map((s) => (
                       <option key={s.id} value={s.title}>{s.title}</option>
@@ -2114,7 +2209,7 @@ export default function CmsPanelPage() {
                   <select
                     value={quickWalkIn.shift}
                     onChange={(e) => setQuickWalkIn({ ...quickWalkIn, shift: e.target.value as 'Morning' | 'Evening' })}
-                    style={{ flex: '0 0 130px', padding: '9px 12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '13px', background: '#FFF' }}
+                    style={{ flex: '0 0 140px', padding: '10px 14px', borderRadius: '9999px', border: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-surface)', color: 'var(--color-text-main)', fontSize: '13px' }}
                   >
                     <option value="Morning">Morning OPD</option>
                     <option value="Evening">Evening OPD</option>
@@ -2122,42 +2217,30 @@ export default function CmsPanelPage() {
 
                   <button
                     type="submit"
-                    className="ux-btn"
-                    style={{
-                      background: '#0F766E',
-                      color: '#FFFFFF',
-                      border: 'none',
-                      padding: '9px 20px',
-                      borderRadius: '8px',
-                      fontSize: '13px',
-                      fontWeight: '700',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      whiteSpace: 'nowrap',
-                    }}
+                    className="ms-pill-dark"
                   >
-                    <PlusIcon size={16} color="#FFFFFF" />
+                    <span className="ms-pill-circle">
+                      <PlusIcon size={14} color="#183C4A" />
+                    </span>
                     <span>Add Walk-In Patient</span>
                   </button>
                 </form>
               </div>
 
               {/* 3-Column Kanban Board */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', alignItems: 'flex-start' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', alignItems: 'flex-start' }}>
                 
                 {/* COLUMN 1: WAITING */}
-                <div style={{ background: '#F8FAFC', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', paddingBottom: '10px', borderBottom: '2px solid #0F766E' }}>
+                <div className="ms-bento-tile-light" style={{ padding: '18px', cursor: 'default' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', paddingBottom: '12px', borderBottom: '2px solid var(--color-brand-primary, #183C4A)' }}>
                     <div>
-                      <div style={{ fontSize: '14px', fontWeight: '800', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span>WAITING</span>
-                        <span style={{ background: '#CCFBF1', color: '#0F766E', fontSize: '11px', fontWeight: '800', padding: '2px 8px', borderRadius: '999px' }}>
+                        <span style={{ background: 'var(--color-brand-surface, #E7F2F5)', color: 'var(--color-brand-primary, #183C4A)', fontSize: '11px', fontWeight: 800, padding: '2px 9px', borderRadius: '9999px' }}>
                           {appointments.filter((a) => (a.opdStage || 'waiting') === 'waiting' && a.status !== 'cancelled').length}
                         </span>
                       </div>
-                      <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>Patients in clinic waiting lounge</div>
+                      <div style={{ fontSize: '11.5px', color: 'var(--color-text-muted)', marginTop: '2px' }}>Patients in clinic waiting lounge</div>
                     </div>
                   </div>
 
@@ -2167,55 +2250,43 @@ export default function CmsPanelPage() {
                       .map((apt) => (
                         <div
                           key={apt.id}
-                          className="ux-card"
+                          className="ms-card"
                           style={{
-                            background: '#FFFFFF',
-                            borderRadius: '12px',
-                            border: '1px solid #E2E8F0',
-                            padding: '14px',
-                            boxShadow: '0 2px 5px rgba(0,0,0,0.02)',
+                            borderRadius: '16px',
+                            padding: '16px',
                           }}
                         >
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                            <span style={{ background: '#F0FDF4', color: '#166534', border: '1px solid #BBF7D0', fontWeight: '800', fontSize: '13px', padding: '3px 8px', borderRadius: '6px' }}>
+                            <span style={{ background: 'var(--color-brand-surface, #E7F2F5)', color: 'var(--color-brand-primary, #183C4A)', border: '1px solid var(--color-border-subtle)', fontWeight: 700, fontSize: '12px', padding: '3px 10px', borderRadius: '9999px' }}>
                               Token #{String(apt.tokenNumber || 1).padStart(2, '0')}
                             </span>
-                            <span style={{ fontSize: '11px', fontWeight: '600', color: '#64748B' }}>
+                            <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--color-text-muted)' }}>
                               {apt.shift || 'Evening'}
                             </span>
                           </div>
 
-                          <div style={{ fontWeight: '700', fontSize: '14px', color: '#0F172A', marginBottom: '2px' }}>
+                          <div style={{ fontWeight: 700, fontSize: '14.5px', color: 'var(--color-text-main)', marginBottom: '2px' }}>
                             {apt.patientName}
                           </div>
-                          <div style={{ fontSize: '12px', color: '#475569', marginBottom: '8px' }}>
+                          <div style={{ fontSize: '12.5px', color: 'var(--color-text-muted)', marginBottom: '8px' }}>
                             {apt.service}
                           </div>
-                          <div style={{ fontSize: '11px', color: '#64748B', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <PhoneIcon size={12} color="#64748B" />
+                          <div style={{ fontSize: '11.5px', color: 'var(--color-text-muted)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            <PhoneIcon size={12} color="var(--color-text-muted)" />
                             <span>{apt.phone}</span>
                             <span>&bull; {apt.preferredDate}</span>
                           </div>
 
                           {/* Quick 1-Tap Actions */}
-                          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', paddingTop: '10px', borderTop: '1px solid #F1F5F9' }}>
+                          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', paddingTop: '10px', borderTop: '1px solid var(--color-border-subtle)' }}>
                             <button
                               onClick={() => handleUpdateOpdStage(apt.id, 'in_consultation')}
-                              className="ux-btn"
+                              className="ms-pill-dark"
                               style={{
                                 flex: '1 1 100%',
-                                background: '#0F766E',
-                                color: '#FFFFFF',
-                                border: 'none',
-                                padding: '7px 12px',
-                                borderRadius: '6px',
-                                fontSize: '12px',
-                                fontWeight: '700',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
                                 justifyContent: 'center',
-                                gap: '6px',
+                                padding: '8px 14px',
+                                fontSize: '12px',
                               }}
                             >
                               <span>Call Inside Cabin &rarr;</span>
@@ -2227,13 +2298,13 @@ export default function CmsPanelPage() {
                               title="Send WhatsApp confirmation & reply options"
                               style={{
                                 flex: '1',
-                                background: '#F0FDF4',
-                                color: '#166534',
-                                border: '1px solid #BBF7D0',
-                                padding: '5px 8px',
-                                borderRadius: '6px',
+                                background: 'var(--color-brand-surface, #E7F2F5)',
+                                color: 'var(--color-brand-primary, #183C4A)',
+                                border: '1px solid var(--color-border-subtle)',
+                                padding: '6px 8px',
+                                borderRadius: '9999px',
                                 fontSize: '11px',
-                                fontWeight: '600',
+                                fontWeight: 600,
                                 cursor: 'pointer',
                                 display: 'inline-flex',
                                 alignItems: 'center',
@@ -2241,7 +2312,7 @@ export default function CmsPanelPage() {
                                 gap: '4px',
                               }}
                             >
-                              <MessageCircleIcon size={12} color="#166534" />
+                              <MessageCircleIcon size={12} color="var(--color-brand-primary, #183C4A)" />
                               <span>{apt.whatsappConfirmationSent ? 'Sent' : 'WA Confirm'}</span>
                             </button>
 
@@ -2251,13 +2322,13 @@ export default function CmsPanelPage() {
                               title="Send 2-hour reminder with quick reply"
                               style={{
                                 flex: '1',
-                                background: '#F0FDF4',
-                                color: '#166534',
-                                border: '1px solid #BBF7D0',
-                                padding: '5px 8px',
-                                borderRadius: '6px',
+                                background: 'var(--color-brand-surface, #E7F2F5)',
+                                color: 'var(--color-brand-primary, #183C4A)',
+                                border: '1px solid var(--color-border-subtle)',
+                                padding: '6px 8px',
+                                borderRadius: '9999px',
                                 fontSize: '11px',
-                                fontWeight: '600',
+                                fontWeight: 600,
                                 cursor: 'pointer',
                                 display: 'inline-flex',
                                 alignItems: 'center',
@@ -2265,7 +2336,7 @@ export default function CmsPanelPage() {
                                 gap: '4px',
                               }}
                             >
-                              <ClockIcon size={12} color="#166534" />
+                              <ClockIcon size={12} color="var(--color-brand-primary, #183C4A)" />
                               <span>2h Remind</span>
                             </button>
 
@@ -2274,13 +2345,13 @@ export default function CmsPanelPage() {
                               className="ux-btn"
                               style={{
                                 flex: '1',
-                                background: '#F8FAFC',
-                                color: '#334155',
-                                border: '1px solid #CBD5E1',
-                                padding: '5px 8px',
-                                borderRadius: '6px',
+                                background: 'var(--color-bg-surface)',
+                                color: 'var(--color-text-main)',
+                                border: '1px solid var(--color-border-subtle)',
+                                padding: '6px 8px',
+                                borderRadius: '9999px',
                                 fontSize: '11px',
-                                fontWeight: '600',
+                                fontWeight: 600,
                                 textDecoration: 'none',
                                 display: 'inline-flex',
                                 alignItems: 'center',
@@ -2288,7 +2359,7 @@ export default function CmsPanelPage() {
                                 gap: '4px',
                               }}
                             >
-                              <PhoneIcon size={12} color="#334155" />
+                              <PhoneIcon size={12} color="currentColor" />
                               <span>Call</span>
                             </a>
 
@@ -2297,20 +2368,20 @@ export default function CmsPanelPage() {
                               className="ux-btn"
                               title="Print Clinic Appointment Slip"
                               style={{
-                                background: '#F8FAFC',
-                                color: '#334155',
-                                border: '1px solid #CBD5E1',
-                                padding: '5px 8px',
-                                borderRadius: '6px',
+                                background: 'var(--color-bg-surface)',
+                                color: 'var(--color-text-main)',
+                                border: '1px solid var(--color-border-subtle)',
+                                padding: '6px 10px',
+                                borderRadius: '9999px',
                                 fontSize: '11px',
-                                fontWeight: '600',
+                                fontWeight: 600,
                                 cursor: 'pointer',
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: '4px',
                               }}
                             >
-                              <PrinterIcon size={12} color="#334155" />
+                              <PrinterIcon size={12} color="currentColor" />
                               <span>Slip</span>
                             </button>
                           </div>
@@ -2318,7 +2389,7 @@ export default function CmsPanelPage() {
                       ))}
 
                     {appointments.filter((a) => (a.opdStage || 'waiting') === 'waiting' && a.status !== 'cancelled').length === 0 && (
-                      <div style={{ textAlign: 'center', padding: '36px 12px', color: '#94A3B8', fontSize: '13px' }}>
+                      <div style={{ textAlign: 'center', padding: '36px 12px', color: 'var(--color-text-muted)', fontSize: '13px' }}>
                         Waiting lounge is clear. Add walk-in above or wait for arrivals.
                       </div>
                     )}
@@ -2326,17 +2397,17 @@ export default function CmsPanelPage() {
                 </div>
 
                 {/* COLUMN 2: IN CONSULTATION */}
-                <div style={{ background: '#F0FDF4', borderRadius: '14px', border: '1px solid #BBF7D0', padding: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', paddingBottom: '10px', borderBottom: '2px solid #16A34A' }}>
+                <div style={{ background: 'var(--color-brand-surface, #E7F2F5)', borderRadius: '20px', border: '1px solid var(--color-border-strong)', padding: '18px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', paddingBottom: '12px', borderBottom: '2px solid var(--color-brand-primary, #183C4A)' }}>
                     <div>
-                      <div style={{ fontSize: '14px', fontWeight: '800', color: '#166534', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span className="pulse-beacon" style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#16A34A', display: 'inline-block' }} />
+                      <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-brand-primary, #183C4A)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span className="pulse-beacon" style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', display: 'inline-block' }} />
                         <span>IN CONSULTATION</span>
-                        <span style={{ background: '#DCFCE7', color: '#166534', fontSize: '11px', fontWeight: '800', padding: '2px 8px', borderRadius: '999px' }}>
+                        <span style={{ background: '#183C4A', color: '#FFFFFF', fontSize: '11px', fontWeight: 800, padding: '2px 9px', borderRadius: '9999px' }}>
                           {appointments.filter((a) => a.opdStage === 'in_consultation').length}
                         </span>
                       </div>
-                      <div style={{ fontSize: '11px', color: '#15803D', marginTop: '2px' }}>Active inside doctor cabin</div>
+                      <div style={{ fontSize: '11.5px', color: 'var(--color-text-muted)', marginTop: '2px' }}>Active inside doctor cabin</div>
                     </div>
                   </div>
 
@@ -2346,50 +2417,40 @@ export default function CmsPanelPage() {
                       .map((apt) => (
                         <div
                           key={apt.id}
-                          className="ux-card"
+                          className="ms-card"
                           style={{
-                            background: '#FFFFFF',
-                            borderRadius: '12px',
-                            border: '2px solid #0F766E',
+                            borderRadius: '16px',
+                            border: '2px solid var(--color-brand-primary, #183C4A)',
                             padding: '16px',
-                            boxShadow: '0 4px 12px rgba(15,118,110,0.12)',
+                            boxShadow: '0 10px 24px -8px rgba(24, 60, 74, 0.16)',
                           }}
                         >
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                            <span style={{ background: '#0F766E', color: '#FFFFFF', fontWeight: '800', fontSize: '13px', padding: '3px 8px', borderRadius: '6px' }}>
+                            <span style={{ background: '#183C4A', color: '#FFFFFF', fontWeight: 700, fontSize: '12px', padding: '3px 10px', borderRadius: '9999px' }}>
                               Token #{String(apt.tokenNumber || 1).padStart(2, '0')} &bull; In Cabin
                             </span>
-                            <span style={{ fontSize: '11px', color: '#0F766E', fontWeight: '700' }}>Active Now</span>
+                            <span style={{ fontSize: '11px', color: 'var(--color-brand-primary, #183C4A)', fontWeight: 700 }}>Active Now</span>
                           </div>
 
-                          <div style={{ fontWeight: '800', fontSize: '16px', color: '#0F172A', marginBottom: '4px' }}>
+                          <div style={{ fontWeight: 700, fontSize: '16px', color: 'var(--color-text-main)', marginBottom: '4px' }}>
                             {apt.patientName}
                           </div>
-                          <div style={{ fontSize: '13px', color: '#0F766E', fontWeight: '600', marginBottom: '8px' }}>
+                          <div style={{ fontSize: '13px', color: 'var(--color-brand-primary, #183C4A)', fontWeight: 600, marginBottom: '8px' }}>
                             {apt.service}
                           </div>
-                          <div style={{ fontSize: '12px', color: '#64748B', marginBottom: '14px' }}>
+                          <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginBottom: '14px' }}>
                             Phone: {apt.phone} &bull; Ref: {apt.id}
                           </div>
 
                           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                             <button
                               onClick={() => handleUpdateOpdStage(apt.id, 'done')}
-                              className="ux-btn"
+                              className="ms-pill-dark"
                               style={{
                                 flex: '1 1 100%',
-                                background: '#16A34A',
-                                color: '#FFFFFF',
-                                border: 'none',
-                                padding: '9px 14px',
-                                borderRadius: '6px',
-                                fontSize: '13px',
-                                fontWeight: '700',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
                                 justifyContent: 'center',
-                                gap: '6px',
+                                padding: '9px 14px',
+                                fontSize: '13px',
                               }}
                             >
                               <CheckCircleIcon size={16} color="#FFFFFF" />
@@ -2398,24 +2459,15 @@ export default function CmsPanelPage() {
 
                             <button
                               onClick={() => setPrintSlipPatient(apt)}
-                              className="ux-btn"
+                              className="ms-pill-light"
                               style={{
                                 flex: '1',
-                                background: '#F8FAFC',
-                                color: '#334155',
-                                border: '1px solid #CBD5E1',
-                                padding: '6px 10px',
-                                borderRadius: '6px',
-                                fontSize: '12px',
-                                fontWeight: '600',
-                                cursor: 'pointer',
-                                display: 'inline-flex',
-                                alignItems: 'center',
                                 justifyContent: 'center',
-                                gap: '4px',
+                                padding: '7px 10px',
+                                fontSize: '12px',
                               }}
                             >
-                              <PrinterIcon size={13} color="#334155" />
+                              <PrinterIcon size={13} color="currentColor" />
                               <span>Print Slip</span>
                             </button>
                           </div>
@@ -2423,7 +2475,7 @@ export default function CmsPanelPage() {
                       ))}
 
                     {appointments.filter((a) => a.opdStage === 'in_consultation').length === 0 && (
-                      <div style={{ textAlign: 'center', padding: '36px 12px', color: '#166534', fontSize: '13px', background: '#FFFFFF', borderRadius: '10px', border: '1px dashed #BBF7D0' }}>
+                      <div style={{ textAlign: 'center', padding: '36px 12px', color: 'var(--color-brand-primary, #183C4A)', fontSize: '13px', background: 'var(--color-bg-base)', borderRadius: '14px', border: '1px dashed var(--color-border-strong)' }}>
                         No patient currently in cabin. Click &quot;Call Inside Cabin&quot; from the Waiting queue.
                       </div>
                     )}
@@ -2431,16 +2483,16 @@ export default function CmsPanelPage() {
                 </div>
 
                 {/* COLUMN 3: DONE / COMPLETED */}
-                <div style={{ background: '#F8FAFC', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', paddingBottom: '10px', borderBottom: '2px solid #64748B' }}>
+                <div className="ms-bento-tile-light" style={{ padding: '18px', cursor: 'default' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', paddingBottom: '12px', borderBottom: '2px solid var(--color-border-strong)' }}>
                     <div>
-                      <div style={{ fontSize: '14px', fontWeight: '800', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span>DONE / COMPLETED</span>
-                        <span style={{ background: '#E2E8F0', color: '#334155', fontSize: '11px', fontWeight: '800', padding: '2px 8px', borderRadius: '999px' }}>
+                        <span style={{ background: 'var(--color-bg-base)', color: 'var(--color-text-muted)', fontSize: '11px', fontWeight: 800, padding: '2px 9px', borderRadius: '9999px', border: '1px solid var(--color-border-subtle)' }}>
                           {appointments.filter((a) => a.opdStage === 'done' || a.status === 'completed').length}
                         </span>
                       </div>
-                      <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>Post-visit Google review &amp; pharmacy</div>
+                      <div style={{ fontSize: '11.5px', color: 'var(--color-text-muted)', marginTop: '2px' }}>Post-visit Google review &amp; pharmacy</div>
                     </div>
                   </div>
 
@@ -2450,46 +2502,43 @@ export default function CmsPanelPage() {
                       .map((apt) => (
                         <div
                           key={apt.id}
-                          className="ux-card"
+                          className="ms-card"
                           style={{
-                            background: '#FFFFFF',
-                            borderRadius: '12px',
-                            border: '1px solid #E2E8F0',
-                            padding: '14px',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
+                            borderRadius: '16px',
+                            padding: '16px',
                           }}
                         >
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
-                            <span style={{ background: '#E2E8F0', color: '#334155', fontWeight: '700', fontSize: '12px', padding: '2px 7px', borderRadius: '5px' }}>
+                            <span style={{ background: 'var(--color-bg-surface)', color: 'var(--color-text-muted)', fontWeight: 700, fontSize: '12px', padding: '2px 9px', borderRadius: '9999px', border: '1px solid var(--color-border-subtle)' }}>
                               Token #{String(apt.tokenNumber || 1).padStart(2, '0')} &bull; Done
                             </span>
-                            <span style={{ fontSize: '11px', color: '#16A34A', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                              <CheckIcon size={12} color="#16A34A" />
+                            <span style={{ fontSize: '11px', color: '#10B981', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                              <CheckIcon size={12} color="#10B981" />
                               <span>Completed</span>
                             </span>
                           </div>
 
-                          <div style={{ fontWeight: '700', fontSize: '14px', color: '#0F172A', marginBottom: '2px' }}>
+                          <div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--color-text-main)', marginBottom: '2px' }}>
                             {apt.patientName}
                           </div>
-                          <div style={{ fontSize: '12px', color: '#64748B', marginBottom: '10px' }}>
+                          <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginBottom: '10px' }}>
                             {apt.service} &bull; {apt.phone}
                           </div>
 
                           {/* Post-visit Google Review Request Trigger */}
-                          <div style={{ paddingTop: '8px', borderTop: '1px solid #F1F5F9', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                          <div style={{ paddingTop: '8px', borderTop: '1px solid var(--color-border-subtle)', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                             <button
                               onClick={() => handleSendGoogleReview(apt)}
                               className="ux-btn"
                               style={{
                                 flex: '1 1 100%',
-                                background: apt.googleReviewSent ? '#F0FDF4' : '#FEF3C7',
-                                color: apt.googleReviewSent ? '#166534' : '#92400E',
-                                border: apt.googleReviewSent ? '1px solid #BBF7D0' : '1px solid #FCD34D',
+                                background: apt.googleReviewSent ? 'var(--color-brand-surface, #E7F2F5)' : '#FEF3C7',
+                                color: apt.googleReviewSent ? 'var(--color-brand-primary, #183C4A)' : '#92400E',
+                                border: apt.googleReviewSent ? '1px solid var(--color-border-subtle)' : '1px solid #FCD34D',
                                 padding: '7px 10px',
-                                borderRadius: '6px',
+                                borderRadius: '9999px',
                                 fontSize: '12px',
-                                fontWeight: '700',
+                                fontWeight: 600,
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
@@ -2497,30 +2546,21 @@ export default function CmsPanelPage() {
                                 gap: '6px',
                               }}
                             >
-                              <StarIcon size={14} color={apt.googleReviewSent ? '#166534' : '#D97706'} />
+                              <StarIcon size={14} color={apt.googleReviewSent ? 'var(--color-brand-primary, #183C4A)' : '#D97706'} />
                               <span>{apt.googleReviewSent ? 'Google Review Sent' : 'Request Google Review on WhatsApp'}</span>
                             </button>
 
                             <button
                               onClick={() => setPrintSlipPatient(apt)}
-                              className="ux-btn"
+                              className="ms-pill-light"
                               style={{
                                 flex: '1',
-                                background: '#F8FAFC',
-                                color: '#334155',
-                                border: '1px solid #CBD5E1',
-                                padding: '5px 8px',
-                                borderRadius: '6px',
-                                fontSize: '11px',
-                                fontWeight: '600',
-                                cursor: 'pointer',
-                                display: 'inline-flex',
-                                alignItems: 'center',
                                 justifyContent: 'center',
-                                gap: '4px',
+                                padding: '6px 10px',
+                                fontSize: '11.5px',
                               }}
                             >
-                              <PrinterIcon size={12} color="#334155" />
+                              <PrinterIcon size={12} color="currentColor" />
                               <span>Print Discharge Slip</span>
                             </button>
                           </div>
@@ -2528,7 +2568,7 @@ export default function CmsPanelPage() {
                       ))}
 
                     {appointments.filter((a) => a.opdStage === 'done' || a.status === 'completed').length === 0 && (
-                      <div style={{ textAlign: 'center', padding: '36px 12px', color: '#94A3B8', fontSize: '13px' }}>
+                      <div style={{ textAlign: 'center', padding: '36px 12px', color: 'var(--color-text-muted)', fontSize: '13px' }}>
                         No completed consultations yet today.
                       </div>
                     )}
@@ -2543,57 +2583,34 @@ export default function CmsPanelPage() {
           {/* TAB 2: APPOINTMENTS INBOX & CRM-LITE                    */}
           {/* ======================================================= */}
           {activeTab === 'appointments' && (
-            <div className="ux-card" style={{ background: '#FFFFFF', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '24px' }}>
+            <div className="ms-card" style={{ padding: '26px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
                 <div>
-                  <h2 style={{ margin: '0 0 6px 0', fontSize: '20px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <CalendarIcon size={22} color="#0F766E" />
-                    <span>Patient Appointments &bull; Request-First Reception Inbox</span>
+                  <h2 style={{ margin: '0 0 6px 0', fontSize: '22px', fontWeight: 600, color: 'var(--color-text-main)', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <CalendarIcon size={20} color="var(--color-brand-primary, #183C4A)" />
+                    <span>Patient Appointments</span>
+                    <span className="ms-serif-italic" style={{ fontSize: '26px', fontWeight: 400 }}>reception inbox</span>
                   </h2>
-                  <p style={{ margin: 0, fontSize: '13px', color: '#64748B' }}>
+                  <p style={{ margin: 0, fontSize: '13px', color: 'var(--color-text-muted)' }}>
                     Per ADR-104: Receptionist verifies shift capacity and confirms time slot directly on WhatsApp. Live synced with /api/appointments.
                   </p>
                 </div>
 
-                <div style={{ display: 'flex', gap: '10px' }}>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                   <button
                     onClick={() => setShowAddAptModal(true)}
-                    className="ux-btn"
-                    style={{
-                      background: '#0F766E',
-                      color: '#FFFFFF',
-                      border: 'none',
-                      padding: '8px 16px',
-                      borderRadius: '6px',
-                      fontSize: '13px',
-                      fontWeight: '700',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                    }}
+                    className="ms-pill-dark"
                   >
-                    <PlusIcon size={15} color="#FFFFFF" />
+                    <span className="ms-pill-circle">
+                      <PlusIcon size={14} color="#183C4A" />
+                    </span>
                     <span>Add Walk-in Patient</span>
                   </button>
                   <button
                     onClick={() => fetchAppointments()}
-                    className="ux-btn"
-                    style={{
-                      background: '#F1F5F9',
-                      color: '#334155',
-                      border: '1px solid #CBD5E1',
-                      padding: '8px 14px',
-                      borderRadius: '6px',
-                      fontSize: '13px',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                    }}
+                    className="ms-pill-light"
                   >
-                    <RefreshCwIcon size={14} color="#334155" />
+                    <RefreshCwIcon size={14} color="currentColor" />
                     <span>Refresh</span>
                   </button>
                 </div>
@@ -2606,7 +2623,7 @@ export default function CmsPanelPage() {
                     { id: 'all', label: `All (${appointments.length})`, dot: null },
                     { id: 'new', label: `New (${appointments.filter((a) => a.status === 'new').length})`, dot: '#EAB308' },
                     { id: 'contacted', label: `Contacted (${appointments.filter((a) => a.status === 'contacted').length})`, dot: '#0284C7' },
-                    { id: 'confirmed', label: `Confirmed (${appointments.filter((a) => a.status === 'confirmed').length})`, dot: '#16A34A' },
+                    { id: 'confirmed', label: `Confirmed (${appointments.filter((a) => a.status === 'confirmed').length})`, dot: '#10B981' },
                     { id: 'completed', label: `Completed (${appointments.filter((a) => a.status === 'completed').length})`, dot: '#64748B' },
                     { id: 'cancelled', label: `Cancelled (${appointments.filter((a) => a.status === 'cancelled').length})`, dot: '#DC2626' },
                   ].map((f) => (
@@ -2615,13 +2632,13 @@ export default function CmsPanelPage() {
                       onClick={() => setAptFilter(f.id as any)}
                       className="ux-btn"
                       style={{
-                        padding: '6px 14px',
-                        borderRadius: '6px',
+                        padding: '7px 14px',
+                        borderRadius: '9999px',
                         fontSize: '12px',
-                        fontWeight: aptFilter === f.id ? '700' : '500',
-                        border: aptFilter === f.id ? '1px solid #0F766E' : '1px solid #E2E8F0',
-                        background: aptFilter === f.id ? '#F0FDF4' : '#FFFFFF',
-                        color: aptFilter === f.id ? '#0F766E' : '#475569',
+                        fontWeight: aptFilter === f.id ? 600 : 500,
+                        border: aptFilter === f.id ? '1px solid #183C4A' : '1px solid var(--color-border-subtle)',
+                        background: aptFilter === f.id ? '#183C4A' : 'var(--color-bg-base)',
+                        color: aptFilter === f.id ? '#FFFFFF' : 'var(--color-text-muted)',
                         cursor: 'pointer',
                         display: 'inline-flex',
                         alignItems: 'center',
@@ -2629,7 +2646,7 @@ export default function CmsPanelPage() {
                       }}
                     >
                       {f.dot && (
-                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: f.dot, display: 'inline-block' }} />
+                        <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: f.dot, display: 'inline-block' }} />
                       )}
                       <span>{f.label}</span>
                     </button>
@@ -2642,10 +2659,10 @@ export default function CmsPanelPage() {
                     placeholder="Search patient, phone, service..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    style={{ padding: '8px 14px 8px 32px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', width: '260px' }}
+                    style={{ padding: '9px 14px 9px 34px', borderRadius: '9999px', border: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-surface)', color: 'var(--color-text-main)', fontSize: '13px', width: '260px' }}
                   />
-                  <span style={{ position: 'absolute', left: '10px', top: '10px', color: '#94A3B8' }}>
-                    <SearchIcon size={14} color="#94A3B8" />
+                  <span style={{ position: 'absolute', left: '12px', top: '10px', color: 'var(--color-text-muted)' }}>
+                    <SearchIcon size={14} color="currentColor" />
                   </span>
                 </div>
               </div>
@@ -2654,7 +2671,7 @@ export default function CmsPanelPage() {
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
                   <thead>
-                    <tr style={{ background: '#F8FAFC', borderBottom: '2px solid #E2E8F0', color: '#475569' }}>
+                    <tr style={{ background: 'var(--color-bg-surface)', borderBottom: '1px solid var(--color-border-subtle)', color: 'var(--color-text-muted)' }}>
                       <th style={{ padding: '12px' }}>Token</th>
                       <th style={{ padding: '12px' }}>ID &amp; Patient</th>
                       <th style={{ padding: '12px' }}>Phone / WhatsApp</th>
@@ -2668,21 +2685,21 @@ export default function CmsPanelPage() {
                   <tbody>
                     {filteredAppointments.length === 0 ? (
                       <tr>
-                        <td colSpan={8} style={{ padding: '36px', textAlign: 'center', color: '#64748B' }}>
+                        <td colSpan={8} style={{ padding: '36px', textAlign: 'center', color: 'var(--color-text-muted)' }}>
                           No appointments match the selected filter.
                         </td>
                       </tr>
                     ) : (
                       filteredAppointments.map((apt) => (
-                        <tr key={apt.id} style={{ borderBottom: '1px solid #E2E8F0' }}>
+                        <tr key={apt.id} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
                           <td style={{ padding: '12px' }}>
-                            <span style={{ background: '#F0FDF4', color: '#166534', border: '1px solid #BBF7D0', fontWeight: '800', fontSize: '12px', padding: '3px 8px', borderRadius: '6px', whiteSpace: 'nowrap' }}>
+                            <span style={{ background: 'var(--color-brand-surface, #E7F2F5)', color: 'var(--color-brand-primary, #183C4A)', border: '1px solid var(--color-border-subtle)', fontWeight: 700, fontSize: '12px', padding: '3px 10px', borderRadius: '9999px', whiteSpace: 'nowrap' }}>
                               Token #{String(apt.tokenNumber || 1).padStart(2, '0')}
                             </span>
                           </td>
-                          <td style={{ padding: '12px', fontWeight: '600' }}>
+                          <td style={{ padding: '12px', fontWeight: 600, color: 'var(--color-text-main)' }}>
                             <div>{apt.patientName}</div>
-                            <div style={{ fontSize: '11px', color: '#94A3B8' }}>{apt.id} &bull; {apt.createdAt}</div>
+                            <div style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>{apt.id} &bull; {apt.createdAt}</div>
                           </td>
                           <td style={{ padding: '12px' }}>
                             <a
@@ -2690,17 +2707,17 @@ export default function CmsPanelPage() {
                               target="_blank"
                               rel="noreferrer"
                               className="ux-btn"
-                              style={{ color: '#047857', fontWeight: '600', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                              style={{ color: 'var(--color-brand-primary, #183C4A)', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                               title="Open WhatsApp chat with patient"
                             >
-                              <MessageCircleIcon size={14} color="#047857" />
+                              <MessageCircleIcon size={14} color="var(--color-brand-primary, #183C4A)" />
                               <span>{apt.phone}</span>
                             </a>
                           </td>
-                          <td style={{ padding: '12px', color: '#334155' }}>{apt.service}</td>
-                          <td style={{ padding: '12px' }}>
-                            <span style={{ fontWeight: '600' }}>{apt.preferredDate}</span>
-                            <span style={{ marginLeft: '6px', fontSize: '11px', background: '#F1F5F9', padding: '2px 6px', borderRadius: '4px' }}>
+                          <td style={{ padding: '12px', color: 'var(--color-text-main)' }}>{apt.service}</td>
+                          <td style={{ padding: '12px', color: 'var(--color-text-main)' }}>
+                            <span style={{ fontWeight: 600 }}>{apt.preferredDate}</span>
+                            <span style={{ marginLeft: '6px', fontSize: '11px', background: 'var(--color-bg-surface)', color: 'var(--color-text-muted)', padding: '2px 8px', borderRadius: '9999px' }}>
                               {apt.shift}
                             </span>
                           </td>
@@ -2708,9 +2725,9 @@ export default function CmsPanelPage() {
                             <span
                               style={{
                                 padding: '4px 10px',
-                                borderRadius: '999px',
+                                borderRadius: '9999px',
                                 fontSize: '11px',
-                                fontWeight: '700',
+                                fontWeight: 700,
                                 textTransform: 'uppercase',
                                 background:
                                   apt.status === 'new'
@@ -2718,7 +2735,7 @@ export default function CmsPanelPage() {
                                     : apt.status === 'contacted'
                                     ? '#E0F2FE'
                                     : apt.status === 'confirmed'
-                                    ? '#DCFCE7'
+                                    ? '#E7F2F5'
                                     : '#F1F5F9',
                                 color:
                                   apt.status === 'new'
@@ -2726,14 +2743,14 @@ export default function CmsPanelPage() {
                                     : apt.status === 'contacted'
                                     ? '#0369A1'
                                     : apt.status === 'confirmed'
-                                    ? '#15803D'
+                                    ? '#183C4A'
                                     : '#475569',
                               }}
                             >
                               {apt.status}
                             </span>
                           </td>
-                          <td style={{ padding: '12px', color: '#64748B', maxWidth: '220px', fontSize: '12px' }}>
+                          <td style={{ padding: '12px', color: 'var(--color-text-muted)', maxWidth: '220px', fontSize: '12px' }}>
                             {apt.notes}
                           </td>
                           <td style={{ padding: '12px', textAlign: 'right' }}>
@@ -2742,9 +2759,9 @@ export default function CmsPanelPage() {
                                 onClick={() => handleSendWhatsAppConfirmation(apt)}
                                 className="ux-btn"
                                 title="Send WhatsApp confirmation & reply options"
-                                style={{ background: '#F0FDF4', color: '#166534', border: '1px solid #BBF7D0', padding: '5px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                                style={{ background: 'var(--color-brand-surface, #E7F2F5)', color: 'var(--color-brand-primary, #183C4A)', border: '1px solid var(--color-border-subtle)', padding: '5px 10px', borderRadius: '9999px', fontSize: '11px', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                               >
-                                <MessageCircleIcon size={12} color="#166534" />
+                                <MessageCircleIcon size={12} color="var(--color-brand-primary, #183C4A)" />
                                 <span>{apt.whatsappConfirmationSent ? 'WA Sent' : 'WA Confirm'}</span>
                               </button>
 
@@ -2752,9 +2769,9 @@ export default function CmsPanelPage() {
                                 onClick={() => setPrintSlipPatient(apt)}
                                 className="ux-btn"
                                 title="Print Clinic Appointment Slip"
-                                style={{ background: '#F8FAFC', color: '#334155', border: '1px solid #CBD5E1', padding: '5px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                                style={{ background: 'var(--color-bg-surface)', color: 'var(--color-text-main)', border: '1px solid var(--color-border-subtle)', padding: '5px 10px', borderRadius: '9999px', fontSize: '11px', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                               >
-                                <PrinterIcon size={12} color="#334155" />
+                                <PrinterIcon size={12} color="currentColor" />
                                 <span>Slip</span>
                               </button>
 
@@ -2763,7 +2780,7 @@ export default function CmsPanelPage() {
                                   disabled={actionLoadingId === apt.id}
                                   onClick={() => updateStatus(apt.id, 'contacted', 'WhatsApp outreach performed')}
                                   className="ux-btn"
-                                  style={{ background: '#0284C7', color: '#FFF', border: 'none', padding: '5px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', cursor: 'pointer' }}
+                                  style={{ background: '#0284C7', color: '#FFF', border: 'none', padding: '5px 10px', borderRadius: '9999px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
                                 >
                                   Mark Contacted
                                 </button>
@@ -2773,7 +2790,7 @@ export default function CmsPanelPage() {
                                   disabled={actionLoadingId === apt.id}
                                   onClick={() => updateStatus(apt.id, 'confirmed', 'Time slot confirmed with patient')}
                                   className="ux-btn"
-                                  style={{ background: '#16A34A', color: '#FFF', border: 'none', padding: '5px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', cursor: 'pointer' }}
+                                  style={{ background: '#183C4A', color: '#FFF', border: 'none', padding: '5px 10px', borderRadius: '9999px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
                                 >
                                   Confirm Slot
                                 </button>
@@ -2783,7 +2800,7 @@ export default function CmsPanelPage() {
                                   disabled={actionLoadingId === apt.id}
                                   onClick={() => updateStatus(apt.id, 'completed', 'Consultation finished')}
                                   className="ux-btn"
-                                  style={{ background: '#475569', color: '#FFF', border: 'none', padding: '5px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', cursor: 'pointer' }}
+                                  style={{ background: '#475569', color: '#FFF', border: 'none', padding: '5px 10px', borderRadius: '9999px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
                                 >
                                   Complete Visit
                                 </button>
@@ -2793,7 +2810,7 @@ export default function CmsPanelPage() {
                                   disabled={actionLoadingId === apt.id}
                                   onClick={() => updateStatus(apt.id, 'cancelled', 'Cancelled by patient or clinic')}
                                   className="ux-btn"
-                                  style={{ background: '#F1F5F9', color: '#991B1B', border: '1px solid #FECACA', padding: '5px 8px', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' }}
+                                  style={{ background: 'var(--color-bg-surface)', color: '#991B1B', border: '1px solid #FECACA', padding: '5px 10px', borderRadius: '9999px', fontSize: '11px', cursor: 'pointer' }}
                                 >
                                   Cancel
                                 </button>
@@ -2814,37 +2831,38 @@ export default function CmsPanelPage() {
           {/* ======================================================= */}
           {activeTab === 'editor' && (
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
-                  <h2 style={{ margin: '0 0 4px 0', fontSize: '20px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Edit3Icon size={22} color="#0F766E" />
-                    <span>Site Block Editor &bull; Live Device Preview</span>
+                  <h2 style={{ margin: '0 0 4px 0', fontSize: '24px', fontWeight: 600, color: 'var(--color-text-main)', letterSpacing: '-0.025em', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <Edit3Icon size={20} color="var(--color-brand-primary, #183C4A)" />
+                    <span>Site Block Editor</span>
+                    <span className="ms-serif-italic" style={{ fontSize: '28px', fontWeight: 400 }}>&amp; live device preview</span>
                   </h2>
-                  <p style={{ margin: 0, fontSize: '13px', color: '#64748B' }}>
+                  <p style={{ margin: 0, fontSize: '13px', color: 'var(--color-text-muted)' }}>
                     Changes edit <code>fixtures/live-store.json</code> and reflect on the patient site at <code>http://localhost:3000/</code> in real time.
                   </p>
                 </div>
 
                 {/* Viewport Width Controls */}
-                <div style={{ display: 'flex', gap: '6px', background: '#E2E8F0', padding: '4px', borderRadius: '8px' }}>
+                <div style={{ display: 'flex', gap: '4px', background: 'var(--color-bg-surface)', border: '1px solid var(--color-border-subtle)', padding: '4px', borderRadius: '9999px' }}>
                   <button
                     onClick={() => setDeviceViewport('360px')}
                     className="ux-btn"
                     style={{
                       border: 'none',
-                      padding: '6px 12px',
-                      borderRadius: '6px',
+                      padding: '7px 14px',
+                      borderRadius: '9999px',
                       fontSize: '12px',
-                      fontWeight: deviceViewport === '360px' ? '700' : '500',
-                      background: deviceViewport === '360px' ? '#FFFFFF' : 'transparent',
-                      color: deviceViewport === '360px' ? '#0F766E' : '#475569',
+                      fontWeight: deviceViewport === '360px' ? 600 : 500,
+                      background: deviceViewport === '360px' ? '#183C4A' : 'transparent',
+                      color: deviceViewport === '360px' ? '#FFFFFF' : 'var(--color-text-muted)',
                       cursor: 'pointer',
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '6px',
                     }}
                   >
-                    <SmartphoneIcon size={14} color={deviceViewport === '360px' ? '#0F766E' : '#475569'} />
+                    <SmartphoneIcon size={14} color="currentColor" />
                     <span>Mobile (360px)</span>
                   </button>
                   <button
@@ -2852,19 +2870,19 @@ export default function CmsPanelPage() {
                     className="ux-btn"
                     style={{
                       border: 'none',
-                      padding: '6px 12px',
-                      borderRadius: '6px',
+                      padding: '7px 14px',
+                      borderRadius: '9999px',
                       fontSize: '12px',
-                      fontWeight: deviceViewport === '768px' ? '700' : '500',
-                      background: deviceViewport === '768px' ? '#FFFFFF' : 'transparent',
-                      color: deviceViewport === '768px' ? '#0F766E' : '#475569',
+                      fontWeight: deviceViewport === '768px' ? 600 : 500,
+                      background: deviceViewport === '768px' ? '#183C4A' : 'transparent',
+                      color: deviceViewport === '768px' ? '#FFFFFF' : 'var(--color-text-muted)',
                       cursor: 'pointer',
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '6px',
                     }}
                   >
-                    <TabletIcon size={14} color={deviceViewport === '768px' ? '#0F766E' : '#475569'} />
+                    <TabletIcon size={14} color="currentColor" />
                     <span>Tablet (768px)</span>
                   </button>
                   <button
@@ -2872,26 +2890,26 @@ export default function CmsPanelPage() {
                     className="ux-btn"
                     style={{
                       border: 'none',
-                      padding: '6px 12px',
-                      borderRadius: '6px',
+                      padding: '7px 14px',
+                      borderRadius: '9999px',
                       fontSize: '12px',
-                      fontWeight: deviceViewport === '100%' ? '700' : '500',
-                      background: deviceViewport === '100%' ? '#FFFFFF' : 'transparent',
-                      color: deviceViewport === '100%' ? '#0F766E' : '#475569',
+                      fontWeight: deviceViewport === '100%' ? 600 : 500,
+                      background: deviceViewport === '100%' ? '#183C4A' : 'transparent',
+                      color: deviceViewport === '100%' ? '#FFFFFF' : 'var(--color-text-muted)',
                       cursor: 'pointer',
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '6px',
                     }}
                   >
-                    <MonitorIcon size={14} color={deviceViewport === '100%' ? '#0F766E' : '#475569'} />
+                    <MonitorIcon size={14} color="currentColor" />
                     <span>Desktop (1400px)</span>
                   </button>
                 </div>
               </div>
 
               {/* Sub-Navigation for Block Sections */}
-              <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '12px', marginBottom: '16px', borderBottom: '1px solid #E2E8F0' }}>
+              <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '14px', marginBottom: '18px', borderBottom: '1px solid var(--color-border-subtle)' }}>
                 {[
                   { id: 'clinic', label: 'Clinic, Timings & Map (Photo Match)', icon: <BuildingIcon size={14} /> },
                   { id: 'hero', label: 'Hero & Announcements', icon: <ActivityIcon size={14} /> },
@@ -2906,13 +2924,13 @@ export default function CmsPanelPage() {
                     onClick={() => setEditorSection(sec.id as EditorSection)}
                     className="ux-btn"
                     style={{
-                      padding: '8px 14px',
-                      borderRadius: '6px',
-                      fontSize: '12px',
-                      fontWeight: editorSection === sec.id ? '700' : '500',
-                      border: editorSection === sec.id ? '1px solid #0F766E' : '1px solid #CBD5E1',
-                      background: editorSection === sec.id ? '#0F766E' : '#FFFFFF',
-                      color: editorSection === sec.id ? '#FFFFFF' : '#334155',
+                      padding: '8px 16px',
+                      borderRadius: '9999px',
+                      fontSize: '12.5px',
+                      fontWeight: editorSection === sec.id ? 600 : 500,
+                      border: editorSection === sec.id ? '1px solid #183C4A' : '1px solid var(--color-border-subtle)',
+                      background: editorSection === sec.id ? '#183C4A' : 'var(--color-bg-base)',
+                      color: editorSection === sec.id ? '#FFFFFF' : 'var(--color-text-main)',
                       cursor: 'pointer',
                       whiteSpace: 'nowrap',
                       display: 'inline-flex',
@@ -2927,26 +2945,26 @@ export default function CmsPanelPage() {
               </div>
 
               {/* Split Grid: Left Editor Forms & Right Live Preview */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'minmax(380px, 480px) 1fr', gap: '24px', alignItems: 'flex-start' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'minmax(360px, 460px) 1fr', gap: '24px', alignItems: 'flex-start' }}>
                 
                 {/* Left Column: Form Fields */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   
                   {/* Save Banner */}
-                  <div className="ux-card" style={{ background: '#FFFFFF', padding: '16px', borderRadius: '10px', border: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div className="ms-card" style={{ padding: '16px 20px', borderRadius: '18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
                     <div>
-                      <div style={{ fontWeight: '700', fontSize: '13px', color: '#0F766E' }}>
+                      <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--color-brand-primary, #183C4A)' }}>
                         Editing: {editorSection.toUpperCase()}
                       </div>
-                      <div style={{ fontSize: '11px', color: '#64748B', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                      <div style={{ fontSize: '11.5px', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: '5px', marginTop: '3px' }}>
                         {hasUnsavedChanges ? (
                           <>
                             <AlertTriangleIcon size={13} color="#D97706" />
-                            <span style={{ color: '#D97706', fontWeight: '600' }}>Unsaved changes ready to publish</span>
+                            <span style={{ color: '#D97706', fontWeight: 600 }}>Unsaved changes ready to publish</span>
                           </>
                         ) : (
                           <>
-                            <CheckCircleIcon size={13} color="#047857" />
+                            <CheckCircleIcon size={13} color="#10B981" />
                             <span>All synced with live patient page</span>
                           </>
                         )}
@@ -2955,40 +2973,25 @@ export default function CmsPanelPage() {
                     <button
                       onClick={() => handlePublish()}
                       disabled={publishStatus === 'publishing'}
-                      className="ux-btn"
-                      style={{
-                        background: hasUnsavedChanges ? '#D97706' : '#0F766E',
-                        color: '#FFFFFF',
-                        border: 'none',
-                        padding: '8px 16px',
-                        borderRadius: '6px',
-                        fontWeight: '700',
-                        fontSize: '12px',
-                        cursor: 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                      }}
+                      className="ms-pill-dark"
+                      style={hasUnsavedChanges ? { background: '#B45309', borderColor: '#B45309' } : undefined}
                     >
-                      {publishStatus === 'publishing' ? (
-                        <>
-                          <RefreshCwIcon size={13} className="spin" />
-                          <span>Saving...</span>
-                        </>
-                      ) : (
-                        <>
-                          <SendIcon size={13} color="#FFFFFF" />
-                          <span>Publish Changes</span>
-                        </>
-                      )}
+                      <span className="ms-pill-circle">
+                        {publishStatus === 'publishing' ? (
+                          <RefreshCwIcon size={12} color="#183C4A" className="spin" />
+                        ) : (
+                          <SendIcon size={12} color="#183C4A" />
+                        )}
+                      </span>
+                      <span>{publishStatus === 'publishing' ? 'Saving...' : 'Publish Changes'}</span>
                     </button>
                   </div>
 
                   {/* SECTION: CLINIC, SCHEDULE & MAP */}
                   {editorSection === 'clinic' && (
-                    <div className="ux-card" style={{ background: '#FFFFFF', padding: '20px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
-                      <h3 style={{ margin: '0 0 14px 0', fontSize: '16px', color: '#0F766E', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <BuildingIcon size={18} color="#0F766E" />
+                    <div className="ms-card" style={{ padding: '20px', borderRadius: '18px' }}>
+                      <h3 style={{ margin: '0 0 14px 0', fontSize: '16px', color: 'var(--color-brand-primary, #183C4A)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <BuildingIcon size={18} color="var(--color-brand-primary, #183C4A)" />
                         <span>Clinic Address, Schedule &amp; Map Facade</span>
                       </h3>
 
@@ -3007,9 +3010,9 @@ export default function CmsPanelPage() {
                         }}
                       />
 
-                      <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '14px', marginBottom: '16px' }}>
-                        <div style={{ fontSize: '12px', fontWeight: '800', color: '#0F766E', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <ImageIcon size={14} color="#0F766E" />
+                      <div style={{ background: 'var(--color-bg-surface)', border: '1px solid var(--color-border-subtle)', borderRadius: '14px', padding: '14px', marginBottom: '16px' }}>
+                        <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--color-brand-primary, #183C4A)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <ImageIcon size={14} color="var(--color-brand-primary, #183C4A)" />
                           <span>Clinic Facade &amp; Premises Photo</span>
                         </div>
                         <div style={{ display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -3019,8 +3022,8 @@ export default function CmsPanelPage() {
                             style={{
                               width: '120px',
                               height: '80px',
-                              borderRadius: '8px',
-                              border: '2px solid #0F766E',
+                              borderRadius: '10px',
+                              border: '2px solid #183C4A',
                               overflow: 'hidden',
                               background: '#E2E8F0',
                               flexShrink: 0,
@@ -3059,22 +3062,9 @@ export default function CmsPanelPage() {
                               <button
                                 type="button"
                                 onClick={() => clinicPhotoInputRef.current?.click()}
-                                className="ux-btn"
+                                className="ms-pill-dark"
                                 disabled={uploadingMedia}
-                                style={{
-                                  background: '#0F766E',
-                                  color: '#FFF',
-                                  border: 'none',
-                                  padding: '7px 14px',
-                                  borderRadius: '6px',
-                                  fontSize: '12px',
-                                  fontWeight: '700',
-                                  cursor: 'pointer',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '6px',
-                                  boxShadow: '0 2px 4px rgba(15,118,110,0.2)',
-                                }}
+                                style={{ padding: '7px 14px', fontSize: '12px' }}
                               >
                                 <UploadIcon size={14} color="#FFF" />
                                 <span>{uploadingMedia ? 'Uploading...' : 'Upload Clinic Photo'}</span>
@@ -3128,8 +3118,8 @@ export default function CmsPanelPage() {
                           />
                         </div>
                         <div>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '700', marginBottom: '4px' }}>
-                            <MapPinIcon size={14} color="#0F766E" />
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 700, marginBottom: '4px' }}>
+                            <MapPinIcon size={14} color="var(--color-brand-primary, #183C4A)" />
                             <span>Street Address</span>
                           </label>
                           <input
@@ -3183,9 +3173,9 @@ export default function CmsPanelPage() {
 
                   {/* SECTION: HERO & ANNOUNCEMENTS */}
                   {editorSection === 'hero' && (
-                    <div className="ux-card" style={{ background: '#FFFFFF', padding: '20px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
-                      <h3 style={{ margin: '0 0 14px 0', fontSize: '16px', color: '#0F766E', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <ActivityIcon size={18} color="#0F766E" />
+                    <div className="ms-card" style={{ padding: '20px', borderRadius: '18px' }}>
+                      <h3 style={{ margin: '0 0 14px 0', fontSize: '16px', color: 'var(--color-brand-primary, #183C4A)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <ActivityIcon size={18} color="var(--color-brand-primary, #183C4A)" />
                         <span>Hero Section &amp; Announcements</span>
                       </h3>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -3222,9 +3212,9 @@ export default function CmsPanelPage() {
 
                   {/* SECTION: DOCTOR CREDENTIALS */}
                   {editorSection === 'doctor' && (
-                    <div className="ux-card" style={{ background: '#FFFFFF', padding: '20px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
-                      <h3 style={{ margin: '0 0 14px 0', fontSize: '16px', color: '#0F766E', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <UserCheckIcon size={18} color="#0F766E" />
+                    <div className="ms-card" style={{ padding: '20px', borderRadius: '18px' }}>
+                      <h3 style={{ margin: '0 0 14px 0', fontSize: '16px', color: 'var(--color-brand-primary, #183C4A)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <UserCheckIcon size={18} color="var(--color-brand-primary, #183C4A)" />
                         <span>Doctor Credentials, Fee &amp; Bio</span>
                       </h3>
 
@@ -3243,9 +3233,9 @@ export default function CmsPanelPage() {
                         }}
                       />
 
-                      <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '14px', marginBottom: '16px' }}>
-                        <div style={{ fontSize: '12px', fontWeight: '800', color: '#0F766E', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <ImageIcon size={14} color="#0F766E" />
+                      <div style={{ background: 'var(--color-bg-surface)', border: '1px solid var(--color-border-subtle)', borderRadius: '14px', padding: '14px', marginBottom: '16px' }}>
+                        <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--color-brand-primary, #183C4A)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <ImageIcon size={14} color="var(--color-brand-primary, #183C4A)" />
                           <span>Doctor Hero Portrait Photo</span>
                         </div>
                         <div style={{ display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -3255,8 +3245,8 @@ export default function CmsPanelPage() {
                             style={{
                               width: '84px',
                               height: '84px',
-                              borderRadius: '10px',
-                              border: '2px solid #0F766E',
+                              borderRadius: '12px',
+                              border: '2px solid #183C4A',
                               overflow: 'hidden',
                               background: '#E2E8F0',
                               flexShrink: 0,
@@ -3295,22 +3285,9 @@ export default function CmsPanelPage() {
                               <button
                                 type="button"
                                 onClick={() => doctorPhotoInputRef.current?.click()}
-                                className="ux-btn"
+                                className="ms-pill-dark"
                                 disabled={uploadingMedia}
-                                style={{
-                                  background: '#0F766E',
-                                  color: '#FFF',
-                                  border: 'none',
-                                  padding: '7px 14px',
-                                  borderRadius: '6px',
-                                  fontSize: '12px',
-                                  fontWeight: '700',
-                                  cursor: 'pointer',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '6px',
-                                  boxShadow: '0 2px 4px rgba(15,118,110,0.2)',
-                                }}
+                                style={{ padding: '7px 14px', fontSize: '12px' }}
                               >
                                 <UploadIcon size={14} color="#FFF" />
                                 <span>{uploadingMedia ? 'Uploading...' : 'Upload Doctor Photo'}</span>
@@ -3398,16 +3375,16 @@ export default function CmsPanelPage() {
 
                   {/* OTHER SECTIONS: PILLARS, SERVICES, REVIEWS, FAQS (handled directly in editor) */}
                   {editorSection === 'pillars' && (
-                    <div className="ux-card" style={{ background: '#FFFFFF', padding: '20px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
-                      <h3 style={{ margin: '0 0 14px 0', fontSize: '16px', color: '#0F766E', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <AwardIcon size={18} color="#0F766E" />
+                    <div className="ms-card" style={{ padding: '20px', borderRadius: '18px' }}>
+                      <h3 style={{ margin: '0 0 14px 0', fontSize: '16px', color: 'var(--color-brand-primary, #183C4A)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <AwardIcon size={18} color="var(--color-brand-primary, #183C4A)" />
                         <span>Why Choose Us &bull; 4 Trust Pillars</span>
                       </h3>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         {content.whyChooseUs?.map((pillar, idx) => (
-                          <div key={pillar.id} style={{ border: '1px solid #E2E8F0', padding: '14px', borderRadius: '8px', background: '#F8FAFC' }}>
+                          <div key={pillar.id} style={{ border: '1px solid var(--color-border-subtle)', padding: '14px', borderRadius: '14px', background: 'var(--color-bg-surface)' }}>
                             <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', alignItems: 'center' }}>
-                              <div style={{ width: '32px', height: '32px', borderRadius: '6px', background: '#CCFBF1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--color-brand-surface, #E7F2F5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 {renderEditorIconPreview(pillar.icon)}
                               </div>
                               <input
@@ -3430,16 +3407,16 @@ export default function CmsPanelPage() {
                   )}
 
                   {editorSection === 'services' && (
-                    <div className="ux-card" style={{ background: '#FFFFFF', padding: '20px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+                    <div className="ms-card" style={{ padding: '20px', borderRadius: '18px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                        <h3 style={{ margin: 0, fontSize: '16px', color: '#0F766E' }}>
+                        <h3 style={{ margin: 0, fontSize: '16px', color: 'var(--color-brand-primary, #183C4A)' }}>
                           Clinical Services ({content.services.length})
                         </h3>
                         <button
                           type="button"
                           onClick={addService}
-                          className="ux-btn"
-                          style={{ background: '#0F766E', color: '#FFF', border: 'none', padding: '6px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
+                          className="ms-pill-dark"
+                          style={{ padding: '6px 14px', fontSize: '12px' }}
                         >
                           + Add Service
                         </button>
@@ -3475,16 +3452,16 @@ export default function CmsPanelPage() {
                   )}
 
                   {editorSection === 'reviews' && (
-                    <div className="ux-card" style={{ background: '#FFFFFF', padding: '20px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+                    <div className="ms-card" style={{ padding: '20px', borderRadius: '18px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                        <h3 style={{ margin: 0, fontSize: '16px', color: '#0F766E' }}>
+                        <h3 style={{ margin: 0, fontSize: '16px', color: 'var(--color-brand-primary, #183C4A)' }}>
                           Patient Feedback ({content.reviews.length})
                         </h3>
                         <button
                           type="button"
                           onClick={addReview}
-                          className="ux-btn"
-                          style={{ background: '#0F766E', color: '#FFF', border: 'none', padding: '6px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
+                          className="ms-pill-dark"
+                          style={{ padding: '6px 14px', fontSize: '12px' }}
                         >
                           + Add Review
                         </button>
@@ -3528,16 +3505,16 @@ export default function CmsPanelPage() {
                   )}
 
                   {editorSection === 'faqs' && (
-                    <div className="ux-card" style={{ background: '#FFFFFF', padding: '20px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+                    <div className="ms-card" style={{ padding: '20px', borderRadius: '18px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                        <h3 style={{ margin: 0, fontSize: '16px', color: '#0F766E' }}>
+                        <h3 style={{ margin: 0, fontSize: '16px', color: 'var(--color-brand-primary, #183C4A)' }}>
                           FAQs ({content.faqs.length})
                         </h3>
                         <button
                           type="button"
                           onClick={addFaq}
-                          className="ux-btn"
-                          style={{ background: '#0F766E', color: '#FFF', border: 'none', padding: '6px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
+                          className="ms-pill-dark"
+                          style={{ padding: '6px 14px', fontSize: '12px' }}
                         >
                           + Add FAQ
                         </button>
@@ -3605,8 +3582,8 @@ export default function CmsPanelPage() {
                         href="/"
                         target="_blank"
                         rel="noreferrer"
-                        className="ux-btn"
-                        style={{ background: '#0F766E', color: '#FFFFFF', borderRadius: '6px', padding: '5px 12px', fontSize: '12px', textDecoration: 'none', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                        className="ms-pill-dark"
+                        style={{ padding: '4px 12px 4px 10px', fontSize: '12px' }}
                       >
                         <span>Open Live Site</span>
                         <ExternalLinkIcon size={12} color="#FFFFFF" />
@@ -3616,63 +3593,61 @@ export default function CmsPanelPage() {
 
                   {/* Direct In-Context Preview Quick Edit Toolbar */}
                   <div
+                    className="ms-card"
                     style={{
                       width: '100%',
-                      background: '#FFFFFF',
-                      borderRadius: '10px',
-                      border: '1px solid #94A3B8',
-                      padding: '12px 16px',
+                      borderRadius: '16px',
+                      padding: '14px 18px',
                       marginBottom: '12px',
-                      boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
                       boxSizing: 'border-box',
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                      <div style={{ fontSize: '12px', fontWeight: '800', color: '#0F766E', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <SparklesIcon size={14} color="#0F766E" />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
+                      <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--color-brand-primary, #183C4A)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <SparklesIcon size={14} color="var(--color-brand-primary, #183C4A)" />
                         <span>Direct In-Context Quick Edit (Visible Instant Control)</span>
                       </div>
-                      <div style={{ fontSize: '11px', color: '#64748B' }}>
+                      <div style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>
                         Edits apply directly to the live site preview below
                       </div>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 90px 130px auto', gap: '8px', alignItems: 'center' }}>
                       <div>
-                        <div style={{ fontSize: '10px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', marginBottom: '2px' }}>Hero Headline</div>
+                        <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: '3px' }}>Hero Headline</div>
                         <input
                           type="text"
                           value={content.hero.headline}
                           onChange={(e) => handleContentChange('hero', 'headline', e.target.value)}
                           placeholder="Headline"
-                          style={{ width: '100%', padding: '6px 8px', borderRadius: '5px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                          style={{ width: '100%', padding: '7px 10px', borderRadius: '10px', border: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-surface)', color: 'var(--color-text-main)', fontSize: '12px', boxSizing: 'border-box' }}
                         />
                       </div>
 
                       <div>
-                        <div style={{ fontSize: '10px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', marginBottom: '2px' }}>Doctor Specialty</div>
+                        <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: '3px' }}>Doctor Specialty</div>
                         <input
                           type="text"
                           value={content.doctor.specialty}
                           onChange={(e) => handleContentChange('doctor', 'specialty', e.target.value)}
                           placeholder="Specialty"
-                          style={{ width: '100%', padding: '6px 8px', borderRadius: '5px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                          style={{ width: '100%', padding: '7px 10px', borderRadius: '10px', border: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-surface)', color: 'var(--color-text-main)', fontSize: '12px', boxSizing: 'border-box' }}
                         />
                       </div>
 
                       <div>
-                        <div style={{ fontSize: '10px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', marginBottom: '2px' }}>Fee (₹)</div>
+                        <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: '3px' }}>Fee (₹)</div>
                         <input
                           type="number"
                           value={content.doctor.consultationFee}
                           onChange={(e) => handleContentChange('doctor', 'consultationFee', Number(e.target.value))}
                           placeholder="Fee"
-                          style={{ width: '100%', padding: '6px 8px', borderRadius: '5px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                          style={{ width: '100%', padding: '7px 10px', borderRadius: '10px', border: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-surface)', color: 'var(--color-text-main)', fontSize: '12px', boxSizing: 'border-box' }}
                         />
                       </div>
 
                       <div>
-                        <div style={{ fontSize: '10px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', marginBottom: '2px' }}>Next Slot</div>
+                        <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: '3px' }}>Next Slot</div>
                         <input
                           type="text"
                           value={content.availability?.nextAvailableSlot || 'Today, 05:30 PM'}
@@ -3688,28 +3663,15 @@ export default function CmsPanelPage() {
                             setHasUnsavedChanges(true);
                           }}
                           placeholder="Slot"
-                          style={{ width: '100%', padding: '6px 8px', borderRadius: '5px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                          style={{ width: '100%', padding: '7px 10px', borderRadius: '10px', border: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-surface)', color: 'var(--color-text-main)', fontSize: '12px', boxSizing: 'border-box' }}
                         />
                       </div>
 
                       <div style={{ paddingTop: '16px' }}>
                         <button
                           onClick={() => handlePublish()}
-                          className="ux-btn"
-                          style={{
-                            background: '#0F766E',
-                            color: '#FFFFFF',
-                            border: 'none',
-                            padding: '7px 14px',
-                            borderRadius: '6px',
-                            fontSize: '12px',
-                            fontWeight: '700',
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '5px',
-                            whiteSpace: 'nowrap',
-                          }}
+                          className="ms-pill-dark"
+                          style={{ padding: '7px 14px', fontSize: '12px', whiteSpace: 'nowrap' }}
                         >
                           <SendIcon size={12} color="#FFFFFF" />
                           <span>Publish Live</span>
@@ -3718,8 +3680,8 @@ export default function CmsPanelPage() {
                     </div>
 
                     {/* Quick Section Jump Pills */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '10px', paddingTop: '8px', borderTop: '1px solid #F1F5F9', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '11px', fontWeight: '700', color: '#64748B' }}>Quick-Focus Section:</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '10px', paddingTop: '10px', borderTop: '1px solid var(--color-border-subtle)', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--color-text-muted)' }}>Quick-Focus Section:</span>
                       {[
                         { id: 'clinic', label: 'Clinic & Schedule' },
                         { id: 'hero', label: 'Hero Block' },
@@ -3732,14 +3694,14 @@ export default function CmsPanelPage() {
                           onClick={() => setEditorSection(item.id as EditorSection)}
                           className="ux-btn"
                           style={{
-                            background: editorSection === item.id ? '#CCFBF1' : '#F8FAFC',
-                            color: editorSection === item.id ? '#0F766E' : '#475569',
-                            border: editorSection === item.id ? '1px solid #0F766E' : '1px solid #CBD5E1',
-                            padding: '3px 8px',
-                            borderRadius: '4px',
+                            background: editorSection === item.id ? '#183C4A' : 'var(--color-bg-surface)',
+                            color: editorSection === item.id ? '#FFFFFF' : 'var(--color-text-muted)',
+                            border: editorSection === item.id ? '1px solid #183C4A' : '1px solid var(--color-border-subtle)',
+                            padding: '4px 10px',
+                            borderRadius: '9999px',
                             fontSize: '11px',
                             cursor: 'pointer',
-                            fontWeight: editorSection === item.id ? '700' : '500',
+                            fontWeight: editorSection === item.id ? 600 : 500,
                           }}
                         >
                           {item.label}
@@ -3779,48 +3741,50 @@ export default function CmsPanelPage() {
           {/* TAB 4: CLINICAL SERVICES CATALOG                        */}
           {/* ======================================================= */}
           {activeTab === 'services' && (
-            <div className="ux-card" style={{ background: '#FFFFFF', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '24px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <div className="ms-card" style={{ padding: '26px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
-                  <h2 style={{ margin: '0 0 6px 0', fontSize: '20px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <MicroscopeIcon size={22} color="#0F766E" />
-                    <span>Clinical Procedures &amp; Services Catalog</span>
+                  <h2 style={{ margin: '0 0 6px 0', fontSize: '22px', fontWeight: 600, color: 'var(--color-text-main)', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <MicroscopeIcon size={20} color="var(--color-brand-primary, #183C4A)" />
+                    <span>Clinical Procedures</span>
+                    <span className="ms-serif-italic" style={{ fontSize: '26px', fontWeight: 400 }}>&amp; services catalog</span>
                   </h2>
-                  <p style={{ margin: 0, fontSize: '13px', color: '#64748B' }}>
-                    Manage the 9 specialized medical treatments displayed on the patient landing page.
+                  <p style={{ margin: 0, fontSize: '13px', color: 'var(--color-text-muted)' }}>
+                    Manage the specialized medical treatments displayed on the patient landing page.
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={addService}
-                  className="ux-btn"
-                  style={{ background: '#0F766E', color: '#FFF', border: 'none', padding: '8px 16px', borderRadius: '6px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  className="ms-pill-dark"
                 >
-                  <PlusIcon size={15} color="#FFFFFF" />
+                  <span className="ms-pill-circle">
+                    <PlusIcon size={14} color="#183C4A" />
+                  </span>
                   <span>Add Procedure</span>
                 </button>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
                 {content.services.map((srv, idx) => (
-                  <div key={srv.id} className="ux-card" style={{ border: '1px solid #E2E8F0', padding: '16px', borderRadius: '10px', background: '#F8FAFC' }}>
+                  <div key={srv.id} className="ms-bento-tile-light" style={{ padding: '18px', borderRadius: '16px', cursor: 'default' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                       <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flex: 1 }}>
-                        <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#CCFBF1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--color-brand-surface, #E7F2F5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           {renderEditorIconPreview(srv.icon)}
                         </div>
                         <input
                           type="text"
                           value={srv.title}
                           onChange={(e) => updateService(idx, 'title', e.target.value)}
-                          style={{ flex: 1, fontWeight: '700', padding: '6px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px' }}
+                          style={{ flex: 1, fontWeight: 600, padding: '7px 10px', borderRadius: '10px', border: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-base)', color: 'var(--color-text-main)', fontSize: '13px' }}
                         />
                       </div>
                       <button
                         type="button"
                         onClick={() => removeService(idx)}
                         className="ux-btn"
-                        style={{ background: '#FEE2E2', border: 'none', color: '#B91C1C', cursor: 'pointer', marginLeft: '8px', borderRadius: '6px', padding: '6px 8px' }}
+                        style={{ background: '#FEE2E2', border: 'none', color: '#B91C1C', cursor: 'pointer', marginLeft: '8px', borderRadius: '9999px', padding: '7px 9px' }}
                       >
                         <Trash2Icon size={14} color="#B91C1C" />
                       </button>
@@ -3829,7 +3793,7 @@ export default function CmsPanelPage() {
                       rows={3}
                       value={srv.description}
                       onChange={(e) => updateService(idx, 'description', e.target.value)}
-                      style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                      style={{ width: '100%', padding: '9px 10px', borderRadius: '10px', border: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-base)', color: 'var(--color-text-main)', fontSize: '12.5px', boxSizing: 'border-box' }}
                     />
                   </div>
                 ))}
@@ -3841,31 +3805,33 @@ export default function CmsPanelPage() {
           {/* TAB 5: PATIENT REVIEWS & RATINGS                        */}
           {/* ======================================================= */}
           {activeTab === 'reviews' && (
-            <div className="ux-card" style={{ background: '#FFFFFF', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '24px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <div className="ms-card" style={{ padding: '26px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
-                  <h2 style={{ margin: '0 0 6px 0', fontSize: '20px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <MessageCircleIcon size={22} color="#0F766E" />
-                    <span>Patient Feedback &amp; Verified Reviews</span>
+                  <h2 style={{ margin: '0 0 6px 0', fontSize: '22px', fontWeight: 600, color: 'var(--color-text-main)', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <MessageCircleIcon size={20} color="var(--color-brand-primary, #183C4A)" />
+                    <span>Patient Feedback</span>
+                    <span className="ms-serif-italic" style={{ fontSize: '26px', fontWeight: 400 }}>&amp; verified reviews</span>
                   </h2>
-                  <p style={{ margin: 0, fontSize: '13px', color: '#64748B' }}>
+                  <p style={{ margin: 0, fontSize: '13px', color: 'var(--color-text-muted)' }}>
                     Moderate real clinical feedback displayed in the patient landing page reviews carousel.
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={addReview}
-                  className="ux-btn"
-                  style={{ background: '#0F766E', color: '#FFF', border: 'none', padding: '8px 16px', borderRadius: '6px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  className="ms-pill-dark"
                 >
-                  <PlusIcon size={15} color="#FFFFFF" />
+                  <span className="ms-pill-circle">
+                    <PlusIcon size={14} color="#183C4A" />
+                  </span>
                   <span>Add Patient Review</span>
                 </button>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
                 {content.reviews.map((rev, idx) => (
-                  <div key={rev.id} className="ux-card" style={{ border: '1px solid #E2E8F0', padding: '16px', borderRadius: '10px', background: '#F8FAFC' }}>
+                  <div key={rev.id} className="ms-bento-tile-light" style={{ padding: '18px', borderRadius: '16px', cursor: 'default' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                       <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
                         <input
@@ -3873,21 +3839,21 @@ export default function CmsPanelPage() {
                           placeholder="Patient Name"
                           value={rev.patientName}
                           onChange={(e) => updateReview(idx, 'patientName', e.target.value)}
-                          style={{ width: '130px', fontWeight: '700', padding: '6px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                          style={{ width: '130px', fontWeight: 600, padding: '6px 10px', borderRadius: '10px', border: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-base)', color: 'var(--color-text-main)', fontSize: '12px' }}
                         />
                         <input
                           type="text"
                           placeholder="Treatment"
                           value={rev.treatment}
                           onChange={(e) => updateReview(idx, 'treatment', e.target.value)}
-                          style={{ flex: 1, padding: '6px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                          style={{ flex: 1, padding: '6px 10px', borderRadius: '10px', border: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-base)', color: 'var(--color-text-main)', fontSize: '12px' }}
                         />
                       </div>
                       <button
                         type="button"
                         onClick={() => removeReview(idx)}
                         className="ux-btn"
-                        style={{ background: '#FEE2E2', border: 'none', color: '#B91C1C', cursor: 'pointer', marginLeft: '8px', borderRadius: '6px', padding: '6px 8px' }}
+                        style={{ background: '#FEE2E2', border: 'none', color: '#B91C1C', cursor: 'pointer', marginLeft: '8px', borderRadius: '9999px', padding: '6px 8px' }}
                       >
                         <Trash2Icon size={14} color="#B91C1C" />
                       </button>
@@ -3898,12 +3864,12 @@ export default function CmsPanelPage() {
                         placeholder="Location (e.g. Sector 18, Noida)"
                         value={rev.location}
                         onChange={(e) => updateReview(idx, 'location', e.target.value)}
-                        style={{ flex: 1, padding: '5px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                        style={{ flex: 1, padding: '6px 10px', borderRadius: '10px', border: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-base)', color: 'var(--color-text-main)', fontSize: '12px' }}
                       />
                       <select
                         value={rev.rating}
                         onChange={(e) => updateReview(idx, 'rating', Number(e.target.value))}
-                        style={{ padding: '5px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                        style={{ padding: '6px 10px', borderRadius: '10px', border: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-base)', color: 'var(--color-text-main)', fontSize: '12px' }}
                       >
                         <option value={5}>5 Stars (Excellent)</option>
                         <option value={4}>4 Stars (Good)</option>
@@ -3913,7 +3879,7 @@ export default function CmsPanelPage() {
                       rows={3}
                       value={rev.reviewText}
                       onChange={(e) => updateReview(idx, 'reviewText', e.target.value)}
-                      style={{ width: '100%', padding: '6px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                      style={{ width: '100%', padding: '8px 10px', borderRadius: '10px', border: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-base)', color: 'var(--color-text-main)', fontSize: '12px', boxSizing: 'border-box' }}
                     />
                   </div>
                 ))}
@@ -3925,12 +3891,13 @@ export default function CmsPanelPage() {
           {/* TAB 6: CLINIC HOURS & GOOGLE MAP FACADE                 */}
           {/* ======================================================= */}
           {activeTab === 'clinic_hours' && (
-            <div className="ux-card" style={{ background: '#FFFFFF', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '24px' }}>
-              <h2 style={{ margin: '0 0 6px 0', fontSize: '20px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <BuildingIcon size={22} color="#0F766E" />
-                <span>Clinic Schedule, Fee Policy &amp; Google Map</span>
+            <div className="ms-card" style={{ padding: '26px' }}>
+              <h2 style={{ margin: '0 0 6px 0', fontSize: '22px', fontWeight: 600, color: 'var(--color-text-main)', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <BuildingIcon size={20} color="var(--color-brand-primary, #183C4A)" />
+                <span>Clinic Schedule, Fee Policy</span>
+                <span className="ms-serif-italic" style={{ fontSize: '26px', fontWeight: 400 }}>&amp; Google Map</span>
               </h2>
-              <p style={{ margin: '0 0 24px 0', fontSize: '13px', color: '#64748B' }}>
+              <p style={{ margin: '0 0 24px 0', fontSize: '13px', color: 'var(--color-text-muted)' }}>
                 Updates the exact Clinic Schedule &amp; Map Card shown on the patient landing page.
               </p>
 
@@ -4014,17 +3981,18 @@ export default function CmsPanelPage() {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
                 <div>
-                  <h2 style={{ margin: '0 0 6px 0', fontSize: '20px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <PaletteIcon size={22} color="#0F766E" />
-                    <span>DoctorSite Pro &bull; 6 Clinical Theme Presets</span>
+                  <h2 style={{ margin: '0 0 6px 0', fontSize: '22px', fontWeight: 600, color: 'var(--color-text-main)', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <PaletteIcon size={20} color="var(--color-brand-primary, #183C4A)" />
+                    <span>DoctorSite Pro</span>
+                    <span className="ms-serif-italic" style={{ fontSize: '26px', fontWeight: 400 }}>clinical theme presets</span>
                   </h2>
-                  <p style={{ margin: 0, fontSize: '13px', color: '#64748B' }}>
+                  <p style={{ margin: 0, fontSize: '13px', color: 'var(--color-text-muted)' }}>
                     Per Spec 19. All palettes pass WCAG 2.2 Level AA accessibility standards. 1-click apply publishes immediately to <code>localhost:3000</code>.
                   </p>
                 </div>
 
-                <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', padding: '8px 16px', borderRadius: '8px', fontSize: '13px', color: '#166534', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  <CheckCircleIcon size={14} color="#166534" />
+                <div style={{ background: 'var(--color-brand-surface, #E7F2F5)', border: '1px solid var(--color-border-subtle)', padding: '8px 16px', borderRadius: '9999px', fontSize: '13px', color: 'var(--color-brand-primary, #183C4A)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <CheckCircleIcon size={14} color="var(--color-brand-primary, #183C4A)" />
                   <span>Active Theme: <strong>{content.theme}</strong></span>
                 </div>
               </div>
@@ -4035,13 +4003,11 @@ export default function CmsPanelPage() {
                   return (
                     <div
                       key={theme.name}
-                      className="ux-card"
+                      className="ms-card"
                       style={{
-                        background: '#FFFFFF',
-                        borderRadius: '12px',
-                        border: isCurrent ? '2px solid #0F766E' : '1px solid #E2E8F0',
+                        border: isCurrent ? '2px solid #183C4A' : '1px solid var(--color-border-subtle)',
                         padding: '22px',
-                        boxShadow: isCurrent ? '0 6px 16px rgba(15,118,110,0.15)' : '0 1px 3px rgba(0,0,0,0.02)',
+                        boxShadow: isCurrent ? '0 14px 30px -10px rgba(24, 60, 74, 0.18)' : undefined,
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'space-between',
@@ -4052,7 +4018,7 @@ export default function CmsPanelPage() {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                           <strong style={{ fontSize: '17px', color: theme.primary }}>{theme.name}</strong>
                           {isCurrent && (
-                            <span style={{ background: '#0F766E', color: '#FFFFFF', fontWeight: '700', fontSize: '11px', padding: '3px 8px', borderRadius: '999px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <span style={{ background: '#183C4A', color: '#FFFFFF', fontWeight: 700, fontSize: '11px', padding: '4px 10px', borderRadius: '9999px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                               <CheckCircleIcon size={12} color="#FFFFFF" />
                               <span>ACTIVE THEME</span>
                             </span>
@@ -4060,43 +4026,33 @@ export default function CmsPanelPage() {
                         </div>
 
                         <div style={{ display: 'flex', gap: '10px', marginBottom: '14px' }}>
-                          <div style={{ flex: 1, height: '44px', borderRadius: '8px', background: theme.primary, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFF', fontSize: '11px', fontWeight: 'bold' }}>
+                          <div style={{ flex: 1, height: '44px', borderRadius: '10px', background: theme.primary, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFF', fontSize: '11px', fontWeight: 'bold' }}>
                             Primary
                           </div>
-                          <div style={{ flex: 1, height: '44px', borderRadius: '8px', background: theme.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFF', fontSize: '11px', fontWeight: 'bold' }}>
+                          <div style={{ flex: 1, height: '44px', borderRadius: '10px', background: theme.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFF', fontSize: '11px', fontWeight: 'bold' }}>
                             Accent
                           </div>
-                          <div style={{ flex: 1, height: '44px', borderRadius: '8px', background: theme.bg, border: '1px solid #CBD5E1', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#334155', fontSize: '11px', fontWeight: 'bold' }}>
+                          <div style={{ flex: 1, height: '44px', borderRadius: '10px', background: theme.bg, border: '1px solid var(--color-border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#334155', fontSize: '11px', fontWeight: 'bold' }}>
                             Background
                           </div>
                         </div>
 
-                        <div style={{ fontSize: '13px', color: '#334155', marginBottom: '6px', fontWeight: '500' }}>
+                        <div style={{ fontSize: '13px', color: 'var(--color-text-main)', marginBottom: '6px', fontWeight: 500 }}>
                           {theme.description}
                         </div>
-                        <div style={{ fontSize: '12px', color: '#64748B' }}>
+                        <div style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
                           <strong>Recommended for:</strong> {theme.specialty}
                         </div>
                       </div>
 
-                      <div style={{ display: 'flex', gap: '8px', paddingTop: '12px', borderTop: '1px solid #F1F5F9' }}>
+                      <div style={{ display: 'flex', gap: '8px', paddingTop: '12px', borderTop: '1px solid var(--color-border-subtle)' }}>
                         <button
                           onClick={() => selectAndPublishTheme(theme.name)}
-                          className="ux-btn"
+                          className={isCurrent ? 'ms-pill-dark' : 'ms-pill-light'}
                           style={{
                             flex: 1,
-                            background: isCurrent ? '#0F766E' : '#FFFFFF',
-                            color: isCurrent ? '#FFFFFF' : '#0F766E',
-                            border: isCurrent ? 'none' : '1px solid #0F766E',
-                            padding: '10px',
-                            borderRadius: '6px',
-                            fontWeight: '700',
-                            fontSize: '13px',
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
                             justifyContent: 'center',
-                            gap: '6px',
+                            padding: '10px 14px',
                           }}
                         >
                           {isCurrent ? (
@@ -4106,7 +4062,7 @@ export default function CmsPanelPage() {
                             </>
                           ) : (
                             <>
-                              <ZapIcon size={14} color="#0F766E" />
+                              <ZapIcon size={14} color="currentColor" />
                               <span>Apply &amp; Publish Immediately</span>
                             </>
                           )}
@@ -4123,14 +4079,15 @@ export default function CmsPanelPage() {
           {/* TAB 8: MEDIA LIBRARY & ASSET PIPELINE                   */}
           {/* ======================================================= */}
           {activeTab === 'media' && (
-            <div className="ux-card" style={{ background: '#FFFFFF', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '24px' }}>
+            <div className="ms-card" style={{ padding: '26px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
                 <div>
-                  <h2 style={{ margin: '0 0 8px 0', fontSize: '20px', color: '#0F766E', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <ImageIcon size={22} color="#0F766E" />
-                    <span>Media Library &bull; Asset Pipeline &amp; Photo Management</span>
+                  <h2 style={{ margin: '0 0 8px 0', fontSize: '22px', fontWeight: 600, color: 'var(--color-text-main)', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <ImageIcon size={20} color="var(--color-brand-primary, #183C4A)" />
+                    <span>Media Library</span>
+                    <span className="ms-serif-italic" style={{ fontSize: '26px', fontWeight: 400 }}>&amp; clinical photography</span>
                   </h2>
-                  <p style={{ margin: 0, fontSize: '13px', color: '#64748B' }}>
+                  <p style={{ margin: 0, fontSize: '13px', color: 'var(--color-text-muted)' }}>
                     Upload doctor portraits, clinic facades, and branding assets. 1-click set as active on the live patient portal (http://localhost:3000/).
                   </p>
                 </div>
@@ -4138,24 +4095,12 @@ export default function CmsPanelPage() {
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button
                     onClick={() => mediaFileInputRef.current?.click()}
-                    className="ux-btn"
-                    style={{
-                      background: '#0F766E',
-                      color: '#FFFFFF',
-                      border: 'none',
-                      padding: '9px 18px',
-                      borderRadius: '8px',
-                      fontSize: '13px',
-                      fontWeight: '700',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      boxShadow: '0 2px 6px rgba(15,118,110,0.2)',
-                    }}
+                    className="ms-pill-dark"
                   >
-                    <UploadIcon size={16} color="#FFFFFF" />
-                    <span>+ Upload Photo</span>
+                    <span className="ms-pill-circle">
+                      <UploadIcon size={14} color="#183C4A" />
+                    </span>
+                    <span>Upload Photo</span>
                   </button>
                 </div>
               </div>
@@ -4206,59 +4151,48 @@ export default function CmsPanelPage() {
                     handleUploadMediaFile(file);
                   }
                 }}
-                className="ux-card"
+                className="ms-hero-card"
                 style={{
-                  border: isDraggingMedia ? '2px dashed #0F766E' : '2px dashed #0F766E',
-                  borderRadius: '12px',
-                  padding: '36px 20px',
+                  border: '1.5px dashed var(--color-brand-primary, #183C4A)',
+                  borderRadius: '20px',
+                  padding: '32px 20px',
                   textAlign: 'center',
-                  background: isDraggingMedia ? '#CCFBF1' : '#F0FDF4',
+                  background: isDraggingMedia ? 'var(--color-brand-surface, #E7F2F5)' : 'var(--ms-hero-mist)',
                   cursor: 'pointer',
                   marginBottom: '24px',
                   transition: 'all 0.2s ease',
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
-                  <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#CCFBF1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <UploadIcon size={28} color="#0F766E" />
+                  <div style={{ width: '54px', height: '54px', borderRadius: '9999px', background: '#FFFFFF', border: '1px solid var(--color-border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <UploadIcon size={24} color="#183C4A" />
                   </div>
                 </div>
-                <div style={{ fontWeight: '800', fontSize: '16px', color: '#0F766E' }}>
+                <div style={{ fontWeight: 700, fontSize: '16px', color: 'var(--color-brand-primary, #183C4A)' }}>
                   {uploadingMedia ? 'Uploading & Processing Image...' : 'Click to Upload or Drag & Drop Photos Here'}
                 </div>
-                <div style={{ fontSize: '12px', color: '#64748B', marginTop: '6px' }}>
+                <div style={{ fontSize: '12.5px', color: 'var(--color-text-muted)', marginTop: '6px' }}>
                   Supports JPG, PNG, WebP, SVG &bull; Preserved in <code>public/uploads</code> with instant live site sync
                 </div>
                 <button
                   type="button"
-                  className="ux-btn"
-                  style={{
-                    marginTop: '14px',
-                    background: '#0F766E',
-                    color: '#FFFFFF',
-                    border: 'none',
-                    padding: '8px 18px',
-                    borderRadius: '8px',
-                    fontWeight: '700',
-                    fontSize: '12px',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                  }}
+                  className="ms-pill-dark"
+                  style={{ marginTop: '16px' }}
                 >
-                  <UploadIcon size={14} color="#FFFFFF" />
+                  <span className="ms-pill-circle">
+                    <UploadIcon size={13} color="#183C4A" />
+                  </span>
                   <span>Browse File From Computer</span>
                 </button>
               </div>
 
               {/* Filter Pills */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-                <h3 style={{ fontSize: '15px', fontWeight: '800', color: '#334155', margin: 0 }}>
+                <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--color-text-main)', margin: 0 }}>
                   Active Media Assets ({content.media?.length || 0})
                 </h3>
 
-                <div style={{ display: 'flex', gap: '6px' }}>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                   {[
                     { id: 'all', label: `All (${content.media?.length || 0})` },
                     { id: 'doctor', label: 'Doctor Portraits' },
@@ -4270,13 +4204,13 @@ export default function CmsPanelPage() {
                       onClick={() => setMediaCategoryFilter(f.id as any)}
                       className="ux-btn"
                       style={{
-                        padding: '5px 12px',
-                        borderRadius: '6px',
+                        padding: '6px 14px',
+                        borderRadius: '9999px',
                         fontSize: '12px',
-                        fontWeight: mediaCategoryFilter === f.id ? '700' : '500',
-                        border: mediaCategoryFilter === f.id ? '1px solid #0F766E' : '1px solid #CBD5E1',
-                        background: mediaCategoryFilter === f.id ? '#CCFBF1' : '#FFFFFF',
-                        color: mediaCategoryFilter === f.id ? '#0F766E' : '#475569',
+                        fontWeight: mediaCategoryFilter === f.id ? 600 : 500,
+                        border: mediaCategoryFilter === f.id ? '1px solid #183C4A' : '1px solid var(--color-border-subtle)',
+                        background: mediaCategoryFilter === f.id ? '#183C4A' : 'var(--color-bg-base)',
+                        color: mediaCategoryFilter === f.id ? '#FFFFFF' : 'var(--color-text-muted)',
                         cursor: 'pointer',
                       }}
                     >
@@ -4303,13 +4237,11 @@ export default function CmsPanelPage() {
                     return (
                       <div
                         key={item.id}
-                        className="ux-card"
+                        className="ms-card"
                         style={{
-                          border: isDoctorPortrait || isClinicPhoto ? '2px solid #0F766E' : '1px solid #E2E8F0',
-                          borderRadius: '12px',
+                          border: isDoctorPortrait || isClinicPhoto ? '2px solid #183C4A' : '1px solid var(--color-border-subtle)',
+                          borderRadius: '18px',
                           padding: '14px',
-                          background: '#FFFFFF',
-                          boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
                           display: 'flex',
                           flexDirection: 'column',
                           justifyContent: 'space-between',
@@ -4323,8 +4255,8 @@ export default function CmsPanelPage() {
                             style={{
                               height: '160px',
                               width: '100%',
-                              background: '#F1F5F9',
-                              borderRadius: '8px',
+                              background: 'var(--color-bg-surface)',
+                              borderRadius: '12px',
                               overflow: 'hidden',
                               display: 'flex',
                               alignItems: 'center',
@@ -4332,7 +4264,7 @@ export default function CmsPanelPage() {
                               marginBottom: '10px',
                               position: 'relative',
                               cursor: 'pointer',
-                              border: '1px solid #E2E8F0',
+                              border: '1px solid var(--color-border-subtle)',
                             }}
                           >
                             <img
@@ -4346,16 +4278,16 @@ export default function CmsPanelPage() {
                                 position: 'absolute',
                                 bottom: '8px',
                                 right: '8px',
-                                background: 'rgba(15, 23, 42, 0.78)',
+                                background: 'rgba(24, 60, 74, 0.86)',
                                 color: '#FFFFFF',
                                 fontSize: '10px',
-                                fontWeight: '700',
-                                padding: '4px 8px',
-                                borderRadius: '6px',
+                                fontWeight: 700,
+                                padding: '4px 10px',
+                                borderRadius: '9999px',
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: '4px',
-                                backdropFilter: 'blur(2px)',
+                                backdropFilter: 'blur(4px)',
                               }}
                             >
                               <UploadIcon size={11} color="#FFFFFF" />
@@ -4364,57 +4296,45 @@ export default function CmsPanelPage() {
 
                             {/* Active Assignment Badge */}
                             {isDoctorPortrait && (
-                              <span style={{ position: 'absolute', top: '8px', right: '8px', background: '#0F766E', color: '#FFF', fontSize: '10px', fontWeight: '800', padding: '3px 8px', borderRadius: '999px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                              <span style={{ position: 'absolute', top: '8px', right: '8px', background: '#183C4A', color: '#FFF', fontSize: '10px', fontWeight: 700, padding: '3px 9px', borderRadius: '9999px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
                                 <CheckIcon size={11} color="#FFF" />
                                 <span>Active Doctor Portrait</span>
                               </span>
                             )}
                             {isClinicPhoto && (
-                              <span style={{ position: 'absolute', top: '8px', right: '8px', background: '#0284C7', color: '#FFF', fontSize: '10px', fontWeight: '800', padding: '3px 8px', borderRadius: '999px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                              <span style={{ position: 'absolute', top: '8px', right: '8px', background: '#0284C7', color: '#FFF', fontSize: '10px', fontWeight: 700, padding: '3px 9px', borderRadius: '9999px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
                                 <CheckIcon size={11} color="#FFF" />
                                 <span>Active Clinic Photo</span>
                               </span>
                             )}
                             {isNavLogo && (
-                              <span style={{ position: 'absolute', top: '8px', right: '8px', background: '#D97706', color: '#FFF', fontSize: '10px', fontWeight: '800', padding: '3px 8px', borderRadius: '999px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                              <span style={{ position: 'absolute', top: '8px', right: '8px', background: '#D97706', color: '#FFF', fontSize: '10px', fontWeight: 700, padding: '3px 9px', borderRadius: '9999px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
                                 <CheckIcon size={11} color="#FFF" />
                                 <span>Active Nav Logo</span>
                               </span>
                             )}
                           </div>
 
-                          <div style={{ fontWeight: '700', fontSize: '13px', color: '#0F172A', marginBottom: '2px', wordBreak: 'break-all' }}>
+                          <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--color-text-main)', marginBottom: '2px', wordBreak: 'break-all' }}>
                             {item.title || item.fileName}
                           </div>
-                          <div style={{ fontSize: '11px', color: '#64748B', marginBottom: '12px' }}>
+                          <div style={{ fontSize: '11px', color: 'var(--color-text-muted)', marginBottom: '12px' }}>
                             {item.fileSize} &bull; {item.fileType}
                           </div>
                         </div>
 
                         {/* 1-Click Assignment & Management Actions */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', paddingTop: '10px', borderTop: '1px solid #F1F5F9' }}>
-                          {/* Primary Replace/Upload Photo Button for this Card */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', paddingTop: '10px', borderTop: '1px solid var(--color-border-subtle)' }}>
                           <button
                             type="button"
                             onClick={() => handleTriggerReplaceMedia(item.id)}
-                            className="ux-btn"
+                            className="ms-pill-dark"
                             disabled={uploadingMedia && replacingMediaId === item.id}
                             style={{
                               width: '100%',
-                              background: '#0F766E',
-                              color: '#FFFFFF',
-                              border: 'none',
-                              padding: '8px 10px',
-                              borderRadius: '6px',
-                              fontSize: '11px',
-                              fontWeight: '700',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
                               justifyContent: 'center',
-                              gap: '6px',
-                              boxShadow: '0 2px 5px rgba(15,118,110,0.25)',
-                              marginBottom: '2px',
+                              padding: '7px 12px',
+                              fontSize: '11.5px',
                             }}
                           >
                             <UploadIcon size={13} color="#FFFFFF" />
@@ -4428,13 +4348,13 @@ export default function CmsPanelPage() {
                             className="ux-btn"
                             style={{
                               width: '100%',
-                              background: isDoctorPortrait ? '#DCFCE7' : '#F0FDF4',
-                              color: '#166534',
-                              border: '1px solid #BBF7D0',
+                              background: 'var(--color-brand-surface, #E7F2F5)',
+                              color: 'var(--color-brand-primary, #183C4A)',
+                              border: '1px solid var(--color-border-subtle)',
                               padding: '6px 10px',
-                              borderRadius: '6px',
+                              borderRadius: '9999px',
                               fontSize: '11px',
-                              fontWeight: '700',
+                              fontWeight: 600,
                               cursor: 'pointer',
                               display: 'flex',
                               alignItems: 'center',
@@ -4442,7 +4362,7 @@ export default function CmsPanelPage() {
                               gap: '5px',
                             }}
                           >
-                            <UserCheckIcon size={13} color="#166534" />
+                            <UserCheckIcon size={13} color="var(--color-brand-primary, #183C4A)" />
                             <span>{isDoctorPortrait ? 'Current Doctor Portrait' : 'Set as Doctor Portrait'}</span>
                           </button>
 
@@ -4537,42 +4457,42 @@ export default function CmsPanelPage() {
           {/* TAB 9: SETTINGS & COMPLIANCE                            */}
           {/* ======================================================= */}
           {activeTab === 'settings' && (
-            <div className="ux-card" style={{ background: '#FFFFFF', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '24px' }}>
-              <h2 style={{ margin: '0 0 8px 0', fontSize: '20px', color: '#0F766E', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <SettingsIcon size={22} color="#0F766E" />
-                <span>Clinic Governance &bull; 18% GST &amp; DPDP Act 2023</span>
+            <div className="ms-card" style={{ padding: '26px' }}>
+              <h2 style={{ margin: '0 0 8px 0', fontSize: '22px', fontWeight: 600, color: 'var(--color-text-main)', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <SettingsIcon size={20} color="var(--color-brand-primary, #183C4A)" />
+                <span>Clinic Governance</span>
+                <span className="ms-serif-italic" style={{ fontSize: '26px', fontWeight: 400 }}>GST &amp; DPDP Act 2023</span>
               </h2>
-              <p style={{ margin: '0 0 24px 0', fontSize: '13px', color: '#64748B' }}>
+              <p style={{ margin: '0 0 24px 0', fontSize: '13px', color: 'var(--color-text-muted)' }}>
                 Operational compliance configurations for Indian healthcare regulations.
               </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
-                <div style={{ border: '1px solid #E2E8F0', padding: '20px', borderRadius: '10px' }}>
-                  <h3 style={{ fontSize: '15px', color: '#1E293B', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <ClockIcon size={16} color="#0F766E" />
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+                <div className="ms-bento-tile-light" style={{ padding: '22px', borderRadius: '18px', cursor: 'default' }}>
+                  <h3 style={{ fontSize: '15px', color: 'var(--color-text-main)', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <ClockIcon size={16} color="var(--color-brand-primary, #183C4A)" />
                     <span>Clinic Operational Shifts</span>
                   </h3>
-                  <p style={{ fontSize: '13px', color: '#475569', lineHeight: 1.6, margin: '0 0 16px 0' }}>
+                  <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', lineHeight: 1.6, margin: '0 0 16px 0' }}>
                     <strong>{content.clinic.schedule.weekdayHours}</strong><br />
                     <strong>{content.clinic.schedule.saturdayHours}</strong><br />
                     <strong>{content.clinic.schedule.sundayHours}</strong>
                   </p>
                   <button
                     onClick={() => setActiveTab('clinic_hours')}
-                    className="ux-btn"
-                    style={{ background: '#F1F5F9', border: '1px solid #CBD5E1', padding: '7px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    className="ms-pill-light"
                   >
-                    <Edit3Icon size={13} color="#334155" />
+                    <Edit3Icon size={13} color="currentColor" />
                     <span>Edit Hours &amp; Timings</span>
                   </button>
                 </div>
 
-                <div style={{ border: '1px solid #E2E8F0', padding: '20px', borderRadius: '10px' }}>
-                  <h3 style={{ fontSize: '15px', color: '#1E293B', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <BanknoteIcon size={16} color="#0F766E" />
+                <div className="ms-bento-tile-light" style={{ padding: '22px', borderRadius: '18px', cursor: 'default' }}>
+                  <h3 style={{ fontSize: '15px', color: 'var(--color-text-main)', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <BanknoteIcon size={16} color="var(--color-brand-primary, #183C4A)" />
                     <span>18% GST Compliance &amp; Billing</span>
                   </h3>
-                  <div style={{ fontSize: '13px', color: '#475569', lineHeight: 1.6, marginBottom: '16px' }}>
+                  <div style={{ fontSize: '13px', color: 'var(--color-text-muted)', lineHeight: 1.6, marginBottom: '16px' }}>
                     <strong>Plan:</strong> DoctorSite Pro (Annual Retainer)<br />
                     <strong>Base Fee:</strong> ₹24,999 / year<br />
                     <strong>CGST (9%) + SGST (9%):</strong> ₹4,499.82<br />
@@ -4581,20 +4501,21 @@ export default function CmsPanelPage() {
                   </div>
                   <button
                     onClick={() => alert('GST Tax Invoice downloaded: INV-2026-998314.pdf')}
-                    className="ux-btn"
-                    style={{ background: '#0F766E', color: '#FFF', border: 'none', padding: '8px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    className="ms-pill-dark"
                   >
-                    <DownloadIcon size={14} color="#FFFFFF" />
+                    <span className="ms-pill-circle">
+                      <DownloadIcon size={13} color="#183C4A" />
+                    </span>
                     <span>Download Latest Tax Invoice</span>
                   </button>
                 </div>
 
-                <div style={{ border: '1px solid #E2E8F0', padding: '20px', borderRadius: '10px' }}>
-                  <h3 style={{ fontSize: '15px', color: '#1E293B', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <ShieldCheckIcon size={16} color="#0F766E" />
+                <div className="ms-bento-tile-light" style={{ padding: '22px', borderRadius: '18px', cursor: 'default' }}>
+                  <h3 style={{ fontSize: '15px', color: 'var(--color-text-main)', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <ShieldCheckIcon size={16} color="var(--color-brand-primary, #183C4A)" />
                     <span>DPDP Act 2023 Patient Privacy</span>
                   </h3>
-                  <div style={{ fontSize: '13px', color: '#475569', lineHeight: 1.6, marginBottom: '16px' }}>
+                  <div style={{ fontSize: '13px', color: 'var(--color-text-muted)', lineHeight: 1.6, marginBottom: '16px' }}>
                     <strong>Consent Status:</strong> Active on appointment form.<br />
                     <strong>Storage:</strong> AES-256-GCM encrypted.<br />
                     <strong>Audit Trail:</strong> All status transitions logged.<br />
@@ -4602,10 +4523,11 @@ export default function CmsPanelPage() {
                   </div>
                   <button
                     onClick={downloadDPDPExport}
-                    className="ux-btn"
-                    style={{ background: '#1E3A8A', color: '#FFF', border: 'none', padding: '8px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    className="ms-pill-dark"
                   >
-                    <DownloadIcon size={14} color="#FFFFFF" />
+                    <span className="ms-pill-circle">
+                      <DownloadIcon size={13} color="#183C4A" />
+                    </span>
                     <span>Export Patient Consent &amp; Appointment Ledger</span>
                   </button>
                 </div>
@@ -4656,8 +4578,8 @@ export default function CmsPanelPage() {
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div className="ux-card" style={{ background: '#FFFFFF', borderRadius: '14px', padding: '28px', width: '100%', maxWidth: '480px', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ margin: 0, fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <CalendarIcon size={20} color="#0F766E" />
+              <h3 style={{ margin: 0, fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-text-main)' }}>
+                <CalendarIcon size={20} color="var(--color-brand-primary, #183C4A)" />
                 <span>Add Walk-in / Phone Consultation</span>
               </h3>
               <button onClick={() => setShowAddAptModal(false)} className="ux-btn" style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#64748B' }}>
@@ -4732,15 +4654,14 @@ export default function CmsPanelPage() {
                 <button
                   type="button"
                   onClick={() => setShowAddAptModal(false)}
-                  className="ux-btn"
-                  style={{ padding: '8px 14px', borderRadius: '6px', border: '1px solid #CBD5E1', background: '#FFF', fontSize: '13px', cursor: 'pointer' }}
+                  className="ms-pill-light"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="ux-btn"
-                  style={{ padding: '8px 18px', borderRadius: '6px', border: 'none', background: '#0F766E', color: '#FFF', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer' }}
+                  className="ms-pill-dark"
+                  style={{ padding: '9px 18px' }}
                 >
                   Confirm Booking
                 </button>
@@ -4796,25 +4717,25 @@ export default function CmsPanelPage() {
             </button>
 
             {/* Printable Area */}
-            <div style={{ border: '2px solid #0F766E', borderRadius: '12px', padding: '20px', background: '#F8FAFC' }}>
-              <div style={{ textAlign: 'center', borderBottom: '1px solid #CBD5E1', paddingBottom: '12px', marginBottom: '14px' }}>
-                <div style={{ fontSize: '18px', fontWeight: '800', color: '#0F172A' }}>
+            <div style={{ border: '2px solid #183C4A', borderRadius: '16px', padding: '20px', background: '#F8FBFC' }}>
+              <div style={{ textAlign: 'center', borderBottom: '1px solid rgba(24,60,74,0.14)', paddingBottom: '12px', marginBottom: '14px' }}>
+                <div style={{ fontSize: '18px', fontWeight: '800', color: '#162228' }}>
                   {content?.clinic.name}
                 </div>
-                <div style={{ fontSize: '12px', color: '#475569', marginTop: '2px' }}>
+                <div style={{ fontSize: '12px', color: '#54666E', marginTop: '2px' }}>
                   Plot 14, Health Plaza, Sector 18, Noida &bull; Ph: +91 98710 23456
                 </div>
-                <div style={{ fontSize: '11px', color: '#0F766E', fontWeight: '600', marginTop: '2px' }}>
+                <div style={{ fontSize: '11px', color: '#183C4A', fontWeight: '600', marginTop: '2px' }}>
                   {content?.doctor.name} &bull; {content?.doctor.degree} &bull; Reg: {content?.doctor.registrationNumber}
                 </div>
               </div>
 
               {/* Big Token Stamp */}
-              <div style={{ textAlign: 'center', background: '#CCFBF1', border: '1px solid #5EEAD4', borderRadius: '8px', padding: '10px', marginBottom: '16px' }}>
-                <div style={{ fontSize: '11px', fontWeight: '700', color: '#0F766E', textTransform: 'uppercase' }}>
+              <div style={{ textAlign: 'center', background: '#E7F2F5', border: '1px solid rgba(24,60,74,0.18)', borderRadius: '12px', padding: '12px', marginBottom: '16px' }}>
+                <div style={{ fontSize: '11px', fontWeight: '700', color: '#183C4A', textTransform: 'uppercase' }}>
                   OPD Consultation Token
                 </div>
-                <div style={{ fontSize: '34px', fontWeight: '900', color: '#0F766E', letterSpacing: '1px' }}>
+                <div style={{ fontSize: '34px', fontWeight: '900', color: '#183C4A', letterSpacing: '1px' }}>
                   #{String(printSlipPatient.tokenNumber || 1).padStart(2, '0')}
                 </div>
               </div>
@@ -4856,22 +4777,8 @@ export default function CmsPanelPage() {
             <div style={{ display: 'flex', gap: '10px', marginTop: '18px' }}>
               <button
                 onClick={() => window.print()}
-                className="ux-btn"
-                style={{
-                  flex: '1',
-                  background: '#0F766E',
-                  color: '#FFFFFF',
-                  border: 'none',
-                  padding: '10px 16px',
-                  borderRadius: '8px',
-                  fontWeight: '700',
-                  fontSize: '13px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                }}
+                className="ms-pill-dark"
+                style={{ flex: '1', justifyContent: 'center', padding: '10px 16px' }}
               >
                 <PrinterIcon size={16} color="#FFFFFF" />
                 <span>Print Slip (PDF)</span>
@@ -4884,24 +4791,10 @@ export default function CmsPanelPage() {
                   const text = `Namaste ${printSlipPatient.patientName}, here is your HealthConsult Clinic appointment slip.\nToken: ${token}\nDoctor: Dr. Maanvita Kumari\nDate: ${printSlipPatient.preferredDate} (${printSlipPatient.shift || 'Evening'})\nFee: ₹${content?.doctor.consultationFee || 600} (7-day follow-up complimentary)\nDirections: https://maps.google.com/?q=HealthConsult+Clinic+Noida`;
                   window.open(`https://wa.me/91${cleanPhone}?text=${encodeURIComponent(text)}`, '_blank');
                 }}
-                className="ux-btn"
-                style={{
-                  flex: '1',
-                  background: '#F0FDF4',
-                  color: '#166534',
-                  border: '1px solid #BBF7D0',
-                  padding: '10px 16px',
-                  borderRadius: '8px',
-                  fontWeight: '700',
-                  fontSize: '13px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                }}
+                className="ms-pill-light"
+                style={{ flex: '1', justifyContent: 'center', padding: '10px 16px' }}
               >
-                <MessageCircleIcon size={16} color="#166534" />
+                <MessageCircleIcon size={16} color="#183C4A" />
                 <span>Share on WhatsApp</span>
               </button>
             </div>
@@ -4955,14 +4848,14 @@ export default function CmsPanelPage() {
               </button>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#F0FDF4', border: '1px solid #BBF7D0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <MessageCircleIcon size={22} color="#166534" />
+                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--color-brand-surface, #E7F2F5)', border: '1px solid var(--color-border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <MessageCircleIcon size={22} color="var(--color-brand-primary, #183C4A)" />
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#0F172A' }}>
+                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--color-text-main)' }}>
                     Dr. Maanvita Weekly WhatsApp Digest
                   </h3>
-                  <div style={{ fontSize: '12px', color: '#64748B' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
                     Plain-language weekly practice report delivered to doctor&apos;s phone (+91 98710 23456)
                   </div>
                 </div>
@@ -4970,9 +4863,9 @@ export default function CmsPanelPage() {
 
               {/* Stats Highlights Grid */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '16px' }}>
-                <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '20px', fontWeight: '800', color: '#0F766E' }}>{stats.totalBookings}</div>
-                  <div style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>Appointments</div>
+                <div className="ms-bento-tile-light" style={{ padding: '12px', textAlign: 'center', borderRadius: '12px', cursor: 'default' }}>
+                  <div style={{ fontSize: '20px', fontWeight: 700, color: 'var(--color-brand-primary, #183C4A)' }}>{stats.totalBookings}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--color-text-muted)', fontWeight: 600 }}>Appointments</div>
                 </div>
                 <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
                   <div style={{ fontSize: '20px', fontWeight: '800', color: '#16A34A' }}>{stats.completed}</div>

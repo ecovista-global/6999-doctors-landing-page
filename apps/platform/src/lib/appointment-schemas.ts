@@ -25,6 +25,9 @@ export const appointmentSubmissionSchema = z.object({
     .string({ required_error: 'Service name is required' })
     .min(2, 'Service name must be at least 2 characters')
     .max(100),
+  doctorId: z.string().uuid('doctorId must be a valid UUID').optional(),
+  doctorName: z.string().min(2).max(120).optional(),
+  strictSlotCheck: z.boolean().optional(),
   preferredDate: z
     .string({ required_error: 'Preferred date is required' })
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Preferred date must be in YYYY-MM-DD format'),

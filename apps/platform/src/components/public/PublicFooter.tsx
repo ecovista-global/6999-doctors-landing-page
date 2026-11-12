@@ -2,22 +2,20 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import type { DoctorContent } from '@/lib/contentStore';
 import {
-  StethoscopeIcon,
   PhoneIcon,
   MessageCircleIcon,
-  MapPinIcon,
-  ClockIcon,
-  ShieldCheckIcon,
-  ExternalLinkIcon,
   LockIcon as KeyIcon,
+  StethoscopeIcon,
+  CalendarIcon,
 } from '@/components/Icons';
-import { PUBLIC_NAV_LINKS } from './PublicHeader';
+import { MedSphereBrandTile, PUBLIC_NAV_LINKS } from './PublicHeader';
 
 export interface PublicFooterProps {
   content: DoctorContent;
-  theme: {
+  theme?: {
     primary: string;
     primaryDark: string;
     accent: string;
@@ -26,239 +24,163 @@ export interface PublicFooterProps {
   };
 }
 
-export function PublicFooter({ content, theme }: PublicFooterProps) {
+export function PublicFooter({ content }: PublicFooterProps) {
+  const pathname = usePathname();
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const bookHref = pathname === '/' ? '#lead-form' : '/contact#lead-form';
+
   return (
-    <footer
-      style={{
-        background: '#0F172A',
-        color: '#94A3B8',
-        padding: '54px 24px 36px 24px',
-        fontSize: '13px',
-        borderTop: '1px solid #1E293B',
-      }}
-    >
-      <div
-        style={{
-          maxWidth: '1280px',
-          margin: '0 auto',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-          gap: '36px',
-        }}
-      >
-        {/* Column 1: Clinic & Doctor Identity */}
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-            <div
-              style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '8px',
-                background: theme.primary,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#FFF',
-              }}
-            >
-              <StethoscopeIcon size={20} color="#FFFFFF" />
-            </div>
+    <div className="ms-public-shell" style={{ minHeight: 'auto', background: 'transparent', paddingBottom: 0 }}>
+      <footer className="ms-footer" role="contentinfo">
+        <div className="ms-wrap">
+          <div className="ms-footer-grid">
             <div>
-              <div style={{ fontWeight: '800', fontSize: '16px', color: '#FFFFFF' }}>
-                {content.clinic.name}
-              </div>
-              <div style={{ fontSize: '11px', color: '#64748B' }}>
-                {content.clinic.tagline}
-              </div>
-            </div>
-          </div>
-          <p style={{ lineHeight: '1.6', margin: '0 0 14px 0', fontSize: '12px' }}>
-            {content.doctor.bio}
-          </p>
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '4px 10px',
-              borderRadius: '6px',
-              background: '#1E293B',
-              border: '1px solid #334155',
-              fontSize: '11px',
-              color: '#38BDF8',
-            }}
-          >
-            <ShieldCheckIcon size={13} color="#38BDF8" />
-            <span>Registration: {content.doctor.registrationNumber}</span>
-          </div>
-        </div>
-
-        {/* Column 2: 7-Page Architecture Directory */}
-        <div>
-          <div
-            style={{
-              fontSize: '12px',
-              fontWeight: '700',
-              color: '#F1F5F9',
-              textTransform: 'uppercase',
-              letterSpacing: '0.8px',
-              marginBottom: '14px',
-            }}
-          >
-            7-Page Clinic Directory
-          </div>
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '9px' }}>
-            {PUBLIC_NAV_LINKS.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  style={{
-                    color: '#94A3B8',
-                    textDecoration: 'none',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    transition: 'color 150ms ease',
-                  }}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                <span
+                  className="ms-brand-tile"
+                  style={{ background: 'rgba(255,255,255,0.14)', border: '1px solid rgba(255,255,255,0.22)' }}
+                  aria-hidden="true"
                 >
-                  <span style={{ color: theme.accent }}>&rsaquo;</span>
-                  <span>{link.label}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
+                  <MedSphereBrandTile size={16} />
+                </span>
+                <span style={{ fontSize: '18px', fontWeight: 700, color: '#FFFFFF' }}>
+                  {content.clinic.name}
+                </span>
+              </div>
+              <p style={{ fontSize: '15px', lineHeight: 1.55, color: '#D7E8EE', marginBottom: '12px' }}>
+                {content.doctor.bio}
+              </p>
+              <div style={{ fontSize: '13px', color: '#C7DCE3' }}>
+                Reg: {content.doctor.registrationNumber} &bull; {content.doctor.medicalCouncil}
+              </div>
+            </div>
 
-        {/* Column 3: Clinic Timings & Schedule */}
-        <div>
-          <div
-            style={{
-              fontSize: '12px',
-              fontWeight: '700',
-              color: '#F1F5F9',
-              textTransform: 'uppercase',
-              letterSpacing: '0.8px',
-              marginBottom: '14px',
-            }}
-          >
-            OPD Timings &amp; Location
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-              <ClockIcon size={15} color="#38BDF8" style={{ marginTop: '2px', flexShrink: 0 }} />
-              <div>
-                <strong style={{ color: '#E2E8F0' }}>Monday - Friday:</strong>
-                <div style={{ fontSize: '12px' }}>{content.clinic.schedule.weekdayHours}</div>
+            <div>
+              <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', marginBottom: '12px' }}>
+                Clinic Directory
+              </h3>
+              <ul
+                style={{
+                  listStyle: 'none',
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                  gap: '6px 12px',
+                }}
+              >
+                {PUBLIC_NAV_LINKS.map((link) => (
+                  <li key={link.href}>
+                    <Link href={link.href} className="ms-footer-link">
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', marginBottom: '12px' }}>
+                OPD Hours &amp; Centre
+              </h3>
+              <div style={{ fontSize: '14.5px', lineHeight: 1.55, color: '#D7E8EE', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div>
+                  {content.clinic.street}, {content.clinic.area}, {content.clinic.city},{' '}
+                  {content.clinic.state} {content.clinic.pincode}
+                </div>
+                <div>Mon&ndash;Fri: {content.clinic.schedule.weekdayHours}</div>
+                <div>Saturday: {content.clinic.schedule.saturdayHours}</div>
+                <div>Emergency Notice: Dial 112 for acute trauma or chest pain.</div>
               </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-              <ClockIcon size={15} color="#38BDF8" style={{ marginTop: '2px', flexShrink: 0 }} />
-              <div>
-                <strong style={{ color: '#E2E8F0' }}>Saturday:</strong>
-                <div style={{ fontSize: '12px' }}>{content.clinic.schedule.saturdayHours}</div>
-              </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-              <MapPinIcon size={15} color="#38BDF8" style={{ marginTop: '2px', flexShrink: 0 }} />
-              <div>
-                <strong style={{ color: '#E2E8F0' }}>Location:</strong>
-                <div style={{ fontSize: '12px' }}>
-                  {content.clinic.street}, {content.clinic.area}, {content.clinic.city}, {content.clinic.state} - {content.clinic.pincode}
+
+            <div>
+              <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', marginBottom: '12px' }}>
+                Patient Support &amp; Staff
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <a
+                  href={`tel:${content.doctor.phone.replace(/[^0-9+]/g, '')}`}
+                  className="ms-footer-link"
+                  style={{ gap: '8px', textDecoration: 'none' }}
+                >
+                  <PhoneIcon size={14} color="#FFFFFF" />
+                  <span>{content.doctor.phone}</span>
+                </a>
+                <a
+                  href={`https://wa.me/${content.doctor.whatsappNumber.replace(/[^0-9]/g, '')}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="ms-footer-link"
+                  style={{ gap: '8px', textDecoration: 'none' }}
+                >
+                  <MessageCircleIcon size={14} color="#86EFAC" />
+                  <span>WhatsApp Consultation Desk</span>
+                </a>
+                <div style={{ marginTop: '8px', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,0.16)' }}>
+                  <Link
+                    href="/cms"
+                    className="ms-footer-link"
+                    style={{ gap: '7px', fontSize: '13.5px', fontWeight: 600 }}
+                  >
+                    <KeyIcon size={13} color="#FFFFFF" />
+                    <span>Clinic Staff CMS &rarr;</span>
+                  </Link>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Column 4: Quick Contact & Staff CMS Shortcut */}
-        <div>
           <div
             style={{
-              fontSize: '12px',
-              fontWeight: '700',
-              color: '#F1F5F9',
-              textTransform: 'uppercase',
-              letterSpacing: '0.8px',
-              marginBottom: '14px',
+              borderTop: '1px solid rgba(255, 255, 255, 0.18)',
+              paddingTop: '22px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '16px',
+              flexWrap: 'wrap',
             }}
           >
-            Patient Care &amp; Admin
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <a
-              href={`tel:${content.doctor.phone.replace(/[^0-9+]/g, '')}`}
+            <p style={{ fontSize: '13.5px', color: '#D7E8EE', margin: 0 }}>
+              &copy; {new Date().getFullYear()} {content.clinic.name}. Compliant with DPDP Act 2023 &amp; NMC Telemedicine Guidelines.
+            </p>
+            <button
+              type="button"
+              onClick={scrollToTop}
               style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                color: '#E2E8F0',
-                textDecoration: 'none',
-                fontWeight: '600',
+                background: 'transparent',
+                border: 0,
+                color: '#FFFFFF',
+                fontSize: '14px',
+                fontWeight: 600,
+                textDecoration: 'underline',
+                textUnderlineOffset: '4px',
+                cursor: 'pointer',
+                minHeight: '44px',
               }}
             >
-              <PhoneIcon size={14} color="#38BDF8" />
-              <span>{content.doctor.phone}</span>
-            </a>
-            <a
-              href={`https://wa.me/${content.doctor.whatsappNumber.replace(/[^0-9]/g, '')}`}
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                color: '#E2E8F0',
-                textDecoration: 'none',
-                fontWeight: '600',
-              }}
-            >
-              <MessageCircleIcon size={14} color="#25D366" />
-              <span>WhatsApp Consultation Desk</span>
-            </a>
-            <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #1E293B' }}>
-              <Link
-                href="/cms"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  color: '#38BDF8',
-                  textDecoration: 'none',
-                  fontSize: '12px',
-                  fontWeight: '700',
-                }}
-              >
-                <KeyIcon size={13} color="#38BDF8" />
-                <span>Doctor &amp; Staff CMS Login &rarr;</span>
-              </Link>
-            </div>
+              Return to Top
+            </button>
           </div>
         </div>
-      </div>
+      </footer>
 
-      {/* Bottom Bar: Legal & DPDP Compliance */}
-      <div
-        style={{
-          maxWidth: '1280px',
-          margin: '36px auto 0 auto',
-          paddingTop: '20px',
-          borderTop: '1px solid #1E293B',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '12px',
-          fontSize: '11px',
-          color: '#64748B',
-        }}
-      >
-        <div>
-          &copy; {new Date().getFullYear()} {content.clinic.name}. All medical rights reserved. Reg No: {content.doctor.registrationNumber}.
-        </div>
-        <div>
-          Compliant with Digital Personal Data Protection (DPDP) Act 2023 &bull; Encrypted Telehealth Architecture
-        </div>
-      </div>
-    </footer>
+      {/* Shared Sticky Mobile Action Bar (< 768px) across all public pages */}
+      <nav className="ms-mobile-bar" aria-label="Quick clinic actions">
+        <a href={`tel:${content.doctor.phone.replace(/[^0-9+]/g, '')}`} className="ms-mobile-bar-btn">
+          <PhoneIcon size={17} color="currentColor" />
+          <span>Contact</span>
+        </a>
+        <Link href="/doctors" className="ms-mobile-bar-btn">
+          <StethoscopeIcon size={17} color="currentColor" />
+          <span>Doctors</span>
+        </Link>
+        <Link href={bookHref} className="ms-mobile-bar-btn">
+          <CalendarIcon size={17} color="currentColor" />
+          <span>Book Visit</span>
+        </Link>
+      </nav>
+    </div>
   );
 }

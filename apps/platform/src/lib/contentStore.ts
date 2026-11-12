@@ -126,6 +126,7 @@ export interface AppointmentRecord {
   doctor?: string;
   service: string;
   preferredDate: string;
+  preferredTimeSlot?: string;
   shift: 'Morning' | 'Afternoon' | 'Evening';
   status: 'new' | 'contacted' | 'confirmed' | 'completed' | 'cancelled' | 'waiting' | 'in_consultation';
   opdStage: 'waiting' | 'in_consultation' | 'done';

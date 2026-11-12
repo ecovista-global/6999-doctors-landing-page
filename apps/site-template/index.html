@@ -1,947 +1,924 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="green">
+<html lang="en" data-theme="green" data-type="service" data-radius="soft" data-buttons="solid" data-motion>
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dr. Maanvita Kumari | HealthConsult Family Clinic</title>
-  <meta name="description" content="Consult Dr. Maanvita Kumari (MBBS, MD) at HealthConsult Family Clinic, Sector 18 Noida. Compassionate general medicine, diabetes & infection care." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>MedSphere Noida — Specialist Medical Consultations &amp; Family Clinic</title>
+  <meta name="description" content="Consult 5,000+ NMC-verified specialist doctors across 28 medical departments at MedSphere Sector 18 Noida or via secure video." />
+  <meta name="site-kind" content="other" />
+  <meta name="page-type" content="service" />
+  <meta name="theme-color" content="#183C4A" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="MedSphere Noida — Specialist Medical Consultations" />
+  <meta property="og:description" content="Verified specialist doctors across 28 departments in Sector 18 Noida and online." />
+  <meta property="og:image" content="/images/hero-doctor.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="./src/styles.css" />
-  
-  <!-- Structured Data: Physician & MedicalClinic per brain/08_UI_SPEC.md § 2 -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": ["Physician", "MedicalClinic"],
-    "name": "Dr. Maanvita Kumari - HealthConsult Family Clinic",
-    "image": "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=640",
-    "telephone": "+919876543210",
-    "email": "contact@healthconsult.in",
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": "Plot 14, Health Plaza, Central Market, Sector 18",
-      "addressLocality": "Noida",
-      "addressRegion": "Uttar Pradesh",
-      "postalCode": "201301",
-      "addressCountry": "IN"
-    },
-    "medicalSpecialty": "General Medicine",
-    "priceRange": "₹600",
-    "openingHoursSpecification": [
-      {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-        "opens": "09:00",
-        "closes": "20:00"
-      },
-      {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": "Saturday",
-        "opens": "09:00",
-        "closes": "16:00"
-      }
-    ]
-  }
-  </script>
+  <script>document.documentElement.classList.add('m-enter');setTimeout(function(){document.documentElement.classList.add('m-enter-done')},700)</script>
+  <script>document.documentElement.classList.add('mo-js');setTimeout(function(){document.documentElement.classList.add('mo-safe')},2500)</script>
+  <link rel="modulepreload" href="/assets/moments/moments.js" />
+  <link rel="modulepreload" href="/assets/moments/lib.js" />
+  <link rel="modulepreload" href="/assets/moments/picture-develops/moment.js" />
+  <link rel="modulepreload" href="/assets/moments/pinned-chapters/moment.js" />
 </head>
 <body>
-  <!-- Section 0: Accessibility Skip Link -->
   <a href="#main-content" class="skip-link">Skip to main content</a>
-
-  <!-- Top Theme Selector Bar (Demonstrating Reference 1 Green & Reference 2 Teal) -->
-  <aside class="theme-bar" aria-label="Theme Customizer">
-    <div class="theme-bar-inner">
-      <span class="theme-label">Visual Direction (Reference Screenshots):</span>
-      <div class="theme-buttons">
-        <button type="button" id="theme-green-btn" class="theme-btn active" onclick="setTheme('green')">
-          <span class="color-dot green"></span> Screenshot 1: Green Landing
-        </button>
-        <button type="button" id="theme-teal-btn" class="theme-btn" onclick="setTheme('teal')">
-          <span class="color-dot teal"></span> Screenshot 2: Teal Poster
-        </button>
-      </div>
-    </div>
-  </aside>
-
-  <!-- Section 2: Header (Brand + Navigation) -->
-  <header class="site-header">
-    <div class="container header-container">
-      <a href="#" class="brand-logo" aria-label="HealthConsult Clinic Home">
-        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-          <path d="M7 12h2l1-3 2 6 1-3h4" />
-        </svg>
-        <span class="brand-name"><strong>Health</strong>Consult</span>
+  <header class="site-header nav" role="banner">
+    <div class="container wrap header-container">
+      <a href="#hero" class="brand-logo" aria-label="MedSphere Specialist Clinic Home">
+        <span class="brand-tile" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="8" />
+            <circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none" />
+            <line x1="12" y1="2" x2="12" y2="6" />
+            <line x1="12" y1="18" x2="12" y2="22" />
+            <line x1="2" y1="12" x2="6" y2="12" />
+            <line x1="18" y1="12" x2="22" y2="12" />
+          </svg>
+        </span>
+        <span class="brand-name">MedSphere</span>
       </a>
 
       <nav class="nav-links" aria-label="Main Navigation">
-        <a href="#hero" class="nav-link active" aria-current="page">Home</a>
-        <a href="#about" class="nav-link">About Doctor</a>
-        <a href="#services" class="nav-link">Clinical Services</a>
-        <a href="#features" class="nav-link">Doctors &amp; Roster</a>
-        <a href="#reviews" class="nav-link">Reviews &amp; FAQ</a>
-        <a href="#blog" class="nav-link">Clinical Blog</a>
-        <a href="#contact" class="nav-link">Contact &amp; Appointment</a>
+        <a href="#about" class="nav-link active">About</a>
+        <a href="#specialties" class="nav-link">Specialties</a>
+        <a href="#doctors" class="nav-link">Doctors</a>
+        <a href="#services" class="nav-link">Services</a>
+        <a href="#resources" class="nav-link">Resources</a>
+        <a href="#contact" class="nav-link">Contact</a>
       </nav>
 
       <div class="header-actions">
-        <a href="https://wa.me/919876543210" class="btn btn-secondary btn-sm" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp Clinic">
-          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-          </svg>
-          WhatsApp Clinic
-        </a>
-        <a href="tel:+919876543210" class="btn btn-primary btn-sm" id="header-call-btn" aria-label="Call Doctor at +91 98765 43210">
-          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-          </svg>
-          Call Doctor
+        <div class="theme-switcher" role="group" aria-label="Clinical Palette">
+          <button type="button" id="theme-green-btn" class="theme-chip active" onclick="setTheme('green')" aria-pressed="true" title="Forest clinical palette">Forest</button>
+          <button type="button" id="theme-teal-btn" class="theme-chip" onclick="setTheme('teal')" aria-pressed="false" title="Teal clinical palette">Teal</button>
+        </div>
+        <a href="#doctors" class="btn-pill btn-pill-dark header-cta">
+          <span>Find a Doctor</span>
+          <svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8" /><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5" /></svg>
         </a>
       </div>
 
-      <button type="button" class="mobile-nav-toggle" id="mobile-nav-toggle" onclick="toggleMobileDrawer()" aria-expanded="false" aria-controls="mobile-nav-drawer" aria-label="Open navigation menu">
-        <svg class="toggle-icon-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true">
-          <line x1="4" x2="20" y1="12" y2="12" />
-          <line x1="4" x2="20" y1="6" y2="6" />
-          <line x1="4" x2="20" y1="18" y2="18" />
+      <button type="button" id="mobile-nav-toggle" class="mobile-nav-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-nav-drawer" onclick="toggleMobileDrawer()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <line x1="4" y1="7" x2="20" y2="7" />
+          <line x1="4" y1="12" x2="20" y2="12" />
+          <line x1="4" y1="17" x2="20" y2="17" />
         </svg>
       </button>
     </div>
   </header>
-  <!-- Responsive Mobile Navigation Drawer (< 768px) -->
+
   <div id="drawer-backdrop" class="drawer-backdrop" onclick="closeMobileDrawer()" aria-hidden="true"></div>
-  <div id="mobile-nav-drawer" class="mobile-drawer" role="dialog" aria-modal="true" aria-label="Mobile Navigation Drawer">
+
+  <aside id="mobile-nav-drawer" class="mobile-drawer" role="dialog" aria-modal="true" aria-label="Mobile Navigation" aria-hidden="true">
     <div class="drawer-header">
       <div class="drawer-brand">
-        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="width:26px;height:26px;color:var(--brand);">
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-          <path d="M7 12h2l1-3 2 6 1-3h4" />
-        </svg>
-        <span class="drawer-title"><strong>Health</strong>Consult</span>
+        <span class="brand-tile" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="8" />
+            <circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none" />
+          </svg>
+        </span>
+        <span>MedSphere</span>
       </div>
-      <button type="button" class="drawer-close-btn" id="drawer-close-btn" onclick="closeMobileDrawer()" aria-label="Close navigation menu">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" width="22" height="22">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
+      <button type="button" id="drawer-close-btn" class="drawer-close-btn" aria-label="Close navigation menu" onclick="closeMobileDrawer()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
         </svg>
       </button>
     </div>
-    <nav class="drawer-nav" aria-label="Mobile Navigation Links">
+
+    <nav class="drawer-nav" aria-label="Mobile sections">
       <ul class="drawer-nav-list">
-        <li class="drawer-nav-item"><a href="#hero" class="drawer-nav-link active" onclick="closeMobileDrawer()">Home</a></li>
-        <li class="drawer-nav-item"><a href="#about" class="drawer-nav-link" onclick="closeMobileDrawer()">About Doctor</a></li>
-        <li class="drawer-nav-item"><a href="#services" class="drawer-nav-link" onclick="closeMobileDrawer()">Clinical Services</a></li>
-        <li class="drawer-nav-item"><a href="#features" class="drawer-nav-link" onclick="closeMobileDrawer()">Doctors &amp; Roster</a></li>
-        <li class="drawer-nav-item"><a href="#reviews" class="drawer-nav-link" onclick="closeMobileDrawer()">Reviews &amp; FAQ</a></li>
-        <li class="drawer-nav-item"><a href="#blog" class="drawer-nav-link" onclick="closeMobileDrawer()">Clinical Blog</a></li>
-        <li class="drawer-nav-item"><a href="#contact" class="drawer-nav-link" onclick="closeMobileDrawer()">Contact &amp; Appointment</a></li>
+        <li><a href="#hero" class="drawer-nav-link" onclick="closeMobileDrawer()">Specialist Care</a></li>
+        <li><a href="#about" class="drawer-nav-link" onclick="closeMobileDrawer()">About</a></li>
+        <li><a href="#specialties" class="drawer-nav-link" onclick="closeMobileDrawer()">Specialties</a></li>
+        <li><a href="#doctors" class="drawer-nav-link" onclick="closeMobileDrawer()">Doctors</a></li>
+        <li><a href="#services" class="drawer-nav-link" onclick="closeMobileDrawer()">Services</a></li>
+        <li><a href="#resources" class="drawer-nav-link" onclick="closeMobileDrawer()">Resources</a></li>
+        <li><a href="#contact" class="drawer-nav-link" onclick="closeMobileDrawer()">Contact</a></li>
       </ul>
     </nav>
+
     <div class="drawer-footer-actions">
-      <a href="tel:+919876543210" class="btn btn-primary btn-block" onclick="closeMobileDrawer()" aria-label="Call Doctor Directly">
-        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-        </svg>
-        Call Doctor Directly
+      <a href="#doctors" class="btn-pill btn-pill-dark btn-block" onclick="closeMobileDrawer()">
+        <span>Find a Doctor</span>
+        <svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8" /><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5" /></svg>
       </a>
-      <a href="https://wa.me/919876543210" class="btn btn-secondary btn-block" target="_blank" rel="noopener noreferrer" onclick="closeMobileDrawer()" aria-label="WhatsApp Clinic Desk">
-        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-        </svg>
-        WhatsApp Clinic Desk
+      <a href="#contact" class="btn-pill btn-pill-light btn-block" onclick="closeMobileDrawer()">
+        <span>Contact Clinic</span>
+        <svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8" /><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5" /></svg>
       </a>
     </div>
-  </div>
-
+  </aside>
 
   <main id="main-content">
-    <!-- Section 3: Hero (Split Layout matching Screenshot 1 & 2) -->
-    <section id="hero" class="hero-section">
-      <div class="container hero-grid">
-        <div class="hero-content">
-          <div class="trust-badge">
-            <span class="badge-dot"></span> DMC Registered • Gold Medalist • 14+ Years Clinical Practice
+    <!-- SECTION 1: HERO -->
+    <section id="hero" class="hero-section" data-enter>
+      <div class="container wrap grid-12 hero-grid">
+        <div class="col-span-5 hero-content hero-text">
+          <div class="live-status-pill" aria-live="polite">
+            <span id="clinic-status-text">Checking Sector 18 OPD schedule...</span>
+            <span id="clinic-status-dot" class="badge-dot" aria-hidden="true"></span>
           </div>
+
           <h1 class="hero-title">
-            Consult your health with our doctor <span class="highlight">anywhere, anytime</span>
+            Your Health Deserves the <span class="hero-serif">right specialist</span>
           </h1>
           <p class="hero-subtitle">
-            We provide expert care with a personal touch. From preventive family wellness to chronic disease management, your health is our sacred commitment.
+            Consult 5,000+ verified Indian specialists across 28 medical departments at MedSphere Sector 18 Noida or via HD video.
           </p>
 
           <div class="hero-cta-group">
-            <a href="tel:+919876543210" class="btn btn-primary btn-lg" id="hero-call-cta">
-              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-              </svg>
-              Call Dr. Maanvita
+            <a href="#doctors" class="btn-pill btn-pill-dark btn-primary">
+              <span>Find a Doctor</span>
+              <svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8" /><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5" /></svg>
             </a>
-            <a href="https://wa.me/919876543210?text=Hello%20Dr.%20Maanvita%2C%20I%20would%20like%20to%20consult%20you" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-lg" id="hero-whatsapp-cta">
-              <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.41a8.17 8.17 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.25-.75-.67-1.26-1.5-1.41-1.75-.14-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44s-.56-1.36-.77-1.86c-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.71 4.3 3.8.6.26 1.07.41 1.43.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.1-.23-.17-.48-.29z"/>
-              </svg>
-              Book on WhatsApp
-            </a>
-            <a href="#about" class="hero-video-pill">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
-                <polygon points="10 8 16 12 10 16 10 8"/>
-              </svg>
-              Watch Clinic Video
+            <a href="#services" class="btn-pill btn-pill-light">
+              <span>See How Care Works</span>
+              <svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8" /><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5" /></svg>
             </a>
           </div>
 
-          <!-- Hero Metrics Bar -->
-          <div class="hero-stats-row">
-            <div class="hero-stat-item">
-              <strong>14+ Years</strong>
-              <span>Clinical Practice</span>
+          <div class="hero-highlights">
+            <div class="hero-highlight-item">
+              <strong>Zero-Fee First Review</strong>
+              <span>30M+ patient visits &amp; no upfront booking fees.</span>
             </div>
-            <div class="hero-stat-item">
-              <strong>25,000+</strong>
-              <span>Patients Consulted</span>
-            </div>
-            <div class="hero-stat-item">
-              <strong>4.9 / 5</strong>
-              <span>Patient Satisfaction</span>
-            </div>
-          </div>
-
-          <!-- Poster-style Contact Highlights from Screenshot 2 -->
-          <div class="hero-contact-strip">
-            <div class="contact-pill">
-              <span class="pill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
-              <div>
-                <span class="pill-label">Call directly:</span>
-                <a href="tel:+919876543210" class="pill-val">+91 98765 43210</a>
-              </div>
-            </div>
-            <div class="contact-pill">
-              <span class="pill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
-              <div>
-                <span class="pill-label">Clinic Location:</span>
-                <span class="pill-val">Sector 18, Noida</span>
-              </div>
-            </div>
-            <div class="contact-pill">
-              <span class="pill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
-              <div>
-                <span class="pill-label">Clinic Timings:</span>
-                <span class="pill-val">Mon-Sat: 9 AM – 8 PM</span>
-              </div>
+            <div class="hero-highlights-divider" aria-hidden="true"></div>
+            <div class="hero-highlight-item">
+              <strong>NMC Registered Panel</strong>
+              <span>Synced digital labs &amp; 24/7 Sector 18 triage desk.</span>
             </div>
           </div>
         </div>
 
-        <!-- Doctor Cutout Card (Matching Screenshot 1 & 2) -->
-        <div class="hero-visual">
-          <div class="doctor-card-wrapper">
-            <div class="doctor-shape-backdrop"></div>
-            <div class="doctor-live-pill">
-              <span class="badge-dot"></span> In-Clinic Today
-            </div>
-            <img 
-              src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=640" 
-              alt="Dr. Maanvita Kumari, MBBS, MD - Consultant Physician" 
-              class="doctor-photo"
-              width="480"
-              height="580"
+        <div class="col-start-7 hero-visual">
+          <div class="hero-photo-card photo-frame">
+            <img
+              src="/images/hero-doctor.jpg"
+              srcset="/images/hero-doctor-sm.jpg 680w, /images/hero-doctor.jpg 1200w"
+              sizes="(max-width: 767px) 92vw, 628px"
+              alt="Smiling board-certified female doctor wearing a crisp white lab coat and stethoscope at MedSphere Clinic"
+              class="hero-doctor-img"
+              width="1200"
+              height="896"
               fetchpriority="high"
+              decoding="sync"
             />
-            <!-- Nameplate Plate from Reference 2 -->
-            <div class="doctor-nameplate">
-              <span class="doctor-title">DR. MAANVITA KUMARI</span>
-              <span class="doctor-degree">MBBS, MD (General Medicine)</span>
-              <span class="doctor-role">Consultant Physician &amp; Family Care Specialist</span>
-            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Section 4: Credentials & Registrations (Full Width Layout with Accreditations) -->
-    <section id="about" class="section credentials-section">
-      <div class="container">
-        <div class="section-header text-center">
-          <span class="section-tag">Doctor Verification</span>
-          <h2 class="section-title">Verified Credentials &amp; Registrations</h2>
-          <p class="section-desc">Medical qualifications and council registrations transparently displayed for patient peace of mind.</p>
-        </div>
+    <!-- SECTION 2: ABOUT (with dealt moment: picture-develops) -->
+    <section id="about" class="section about-bento-section" data-enter>
+      <div class="container wrap grid-12 about-bento-layout">
+        <div class="col-span-5 about-statement-col">
+          <span class="section-eyebrow">About Us</span>
+          <h2 id="about-heading" class="section-title">About Our Specialist Care Team</h2>
+          <p class="section-desc">
+            From preventive cardiovascular screening to longitudinal thyroid and diabetes plans, our Noida physicians coordinate diagnostics, OPD visits, and follow-ups under one clear record.
+          </p>
 
-        <div class="credentials-grid">
-          <div class="credential-card">
-            <div class="cred-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><circle cx="12" cy="8" r="6"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg></div>
-            <h3 class="cred-title">Medical Degrees</h3>
-            <p class="cred-val">MBBS, MD (General Medicine)</p>
-            <span class="cred-sub">Maulana Azad Medical College, New Delhi</span>
+          <div class="bento-kpi-stack">
+            <div class="bento-stat bento-stat-light">
+              <div class="bento-stat-num">5k+</div>
+              <p class="bento-stat-label">Verified specialist physicians available for Sector 18 OPD and video slots.</p>
+            </div>
+            <div class="bento-stat bento-stat-dark">
+              <div class="bento-stat-num">28+</div>
+              <p class="bento-stat-label">Integrated medical specialties sharing unified lab panels and visit histories.</p>
+            </div>
           </div>
-          <div class="credential-card">
-            <div class="cred-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg></div>
-            <h3 class="cred-title">Council Registration</h3>
-            <p class="cred-val">Reg. No: DMC/R/28491</p>
-            <span class="cred-sub">Delhi Medical Council (Active &amp; Verified)</span>
-          </div>
-          <div class="credential-card">
-            <div class="cred-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><path d="M4.5 3v5a3.5 3.5 0 0 0 7 0V3"/><path d="M8 11.5v3.5a4 4 0 0 0 8 0V11"/><circle cx="18" cy="10" r="2"/><path d="M2 3h5"/><path d="M9 3h5"/></svg></div>
-            <h3 class="cred-title">Clinical Experience</h3>
-            <p class="cred-val">14+ Years Active Practice</p>
-            <span class="cred-sub">Over 25,000+ Family &amp; Adult Consultations</span>
-          </div>
-          <div class="credential-card">
-            <div class="cred-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
-            <h3 class="cred-title">Languages Spoken</h3>
-            <p class="cred-val">English &amp; Hindi</p>
-            <span class="cred-sub">Fluent consultation in native language</span>
+
+          <div class="section-cta-row">
+            <a href="#doctors" class="btn-pill btn-pill-dark">
+              <span>Find a Doctor</span>
+              <svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8" /><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5" /></svg>
+            </a>
           </div>
         </div>
 
-        <!-- Accreditations & Standards Banner (Filling the width) -->
-        <div class="accreditations-banner">
-          <div class="accreditation-item">
-            <span class="accreditation-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
-            <div class="accreditation-text">
-              <strong>NABH Safety Standards</strong>
-              <span>Sterilized clinic environment &amp; protocols</span>
-            </div>
+        <figure class="col-start-7 about-photo-frame photo-frame" data-moment="picture-develops">
+          <img
+            src="/images/about-consultation.jpg"
+            srcset="/images/about-consultation-sm.jpg 680w, /images/about-consultation.jpg 1100w"
+            sizes="(max-width: 767px) 92vw, 628px"
+            alt="Physician reviewing digital diagnostic imaging with a patient inside a calm MedSphere Noida consultation room"
+            class="bento-photo-img"
+            width="1100"
+            height="613"
+            loading="lazy"
+            decoding="async"
+          />
+        </figure>
+      </div>
+    </section>
+
+    <!-- SECTION 3: SPECIALTIES -->
+    <section id="specialties" class="section specialties-section" data-enter>
+      <div class="container wrap">
+        <div class="grid-12 split-head">
+          <div class="col-span-5">
+            <span class="section-eyebrow">Specialties</span>
+            <h2 id="specialties-heading" class="section-title">Medical Specialties Around Your Symptoms</h2>
+            <p class="section-desc">Select any clinical department below to pre-select that specialist in our Sector 18 callback form.</p>
           </div>
-          <div class="accreditation-item">
-            <span class="accreditation-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg></span>
-            <div class="accreditation-text">
-              <strong>Transparent Consultation</strong>
-              <span>Complimentary 7-day follow-up included</span>
-            </div>
+
+          <div class="col-start-7 clinical-diagram-card">
+            <svg viewBox="0 0 560 184" width="100%" height="184" role="img" aria-label="MedSphere symptom triage flow: Symptoms to Specialist Care" fill="none">
+              <rect x="2" y="2" width="556" height="180" rx="14" fill="#FFFFFF" stroke="#D7E4E9" stroke-width="1.5" />
+              <text x="24" y="34" fill="#183C4A" font-size="13" font-weight="700" font-family="Plus Jakarta Sans, sans-serif">Department Matching Flow · Sector 18 OPD</text>
+              <rect x="22" y="50" width="150" height="110" rx="10" fill="#EFF7F9" stroke="#C4DAE1" />
+              <circle cx="44" cy="76" r="10" fill="#183C4A" />
+              <path d="M40 76h8M44 72v8" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" />
+              <text x="64" y="80" fill="#111C21" font-size="12.5" font-weight="600" font-family="Plus Jakarta Sans, sans-serif">01 Intake</text>
+              <text x="34" y="106" fill="#2F3E46" font-size="11.5" font-family="Plus Jakarta Sans, sans-serif">Symptom check</text>
+              <text x="34" y="122" fill="#2F3E46" font-size="11.5" font-family="Plus Jakarta Sans, sans-serif">&amp; lab upload</text>
+              <rect x="34" y="136" width="100" height="8" rx="4" fill="#BFE0EA" />
+
+              <path d="M180 105h24" stroke="#183C4A" stroke-width="2" stroke-linecap="round" />
+              <path d="M198 100l6 5-6 5" stroke="#183C4A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+
+              <rect x="208" y="50" width="150" height="110" rx="10" fill="#EFF7F9" stroke="#C4DAE1" />
+              <circle cx="230" cy="76" r="10" fill="#1F6D82" />
+              <path d="M226 76l3 3 5-6" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              <text x="248" y="80" fill="#111C21" font-size="12.5" font-weight="600" font-family="Plus Jakarta Sans, sans-serif">02 Triage</text>
+              <text x="220" y="106" fill="#2F3E46" font-size="11.5" font-family="Plus Jakarta Sans, sans-serif">Department match</text>
+              <text x="220" y="122" fill="#2F3E46" font-size="11.5" font-family="Plus Jakarta Sans, sans-serif">&amp; slot timing</text>
+              <rect x="220" y="136" width="110" height="8" rx="4" fill="#1F6D82" />
+
+              <path d="M366 105h24" stroke="#183C4A" stroke-width="2" stroke-linecap="round" />
+              <path d="M384 100l6 5-6 5" stroke="#183C4A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+
+              <rect x="394" y="50" width="144" height="110" rx="10" fill="#183C4A" />
+              <circle cx="416" cy="76" r="10" fill="#FFFFFF" />
+              <path d="M412 76h8" stroke="#183C4A" stroke-width="2" stroke-linecap="round" />
+              <text x="434" y="80" fill="#FFFFFF" font-size="12.5" font-weight="600" font-family="Plus Jakarta Sans, sans-serif">03 Visit</text>
+              <text x="406" y="106" fill="#E6F2F5" font-size="11.5" font-family="Plus Jakarta Sans, sans-serif">20-min focused</text>
+              <text x="406" y="122" fill="#E6F2F5" font-size="11.5" font-family="Plus Jakarta Sans, sans-serif">NMC consult</text>
+              <rect x="406" y="136" width="116" height="8" rx="4" fill="#6BB8CC" />
+            </svg>
           </div>
-          <div class="accreditation-item">
-            <span class="accreditation-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
-            <div class="accreditation-text">
-              <strong>Digital WhatsApp Reports</strong>
-              <span>Instant prescription &amp; diagnostic delivery</span>
-            </div>
-          </div>
-          <div class="accreditation-item">
-            <span class="accreditation-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
-            <div class="accreditation-text">
-              <strong>DPDP Act 2023 Compliant</strong>
-              <span>100% encrypted &amp; private health records</span>
-            </div>
-          </div>
+        </div>
+
+        <div class="specialties-grid">
+          <article class="specialty-card">
+            <svg class="specialty-card-visual" viewBox="0 0 360 108" width="100%" height="108" aria-hidden="true" fill="none">
+              <rect width="360" height="108" rx="10" fill="#EFF7F9" />
+              <rect x="16" y="16" width="38" height="38" rx="10" fill="#183C4A" />
+              <path d="M24 35h7l3-8 4 16 3-8h7" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M74 68c28 0 34-36 58-36s26 42 50 42 28-28 54-28 32 30 56 30 30-22 52-22" stroke="#1F6D82" stroke-width="2.5" stroke-linecap="round" />
+              <text x="74" y="34" fill="#183C4A" font-size="12" font-weight="700" font-family="Plus Jakarta Sans, sans-serif">ECG &amp; Lipid Panel Review</text>
+              <rect x="16" y="84" width="328" height="6" rx="3" fill="#D4E8EE" />
+              <rect x="16" y="84" width="218" height="6" rx="3" fill="#183C4A" />
+            </svg>
+            <h3>Cardiology &amp; Heart Clinic</h3>
+            <p>Preventive heart screening, lipid optimization, ECG evaluation, and long-term hypertension care.</p>
+            <a href="#lead-form" class="card-link-action" onclick="selectSpecialty('Cardiology & BP Management')">Book Specialist Visit</a>
+          </article>
+
+          <article class="specialty-card">
+            <svg class="specialty-card-visual" viewBox="0 0 360 108" width="100%" height="108" aria-hidden="true" fill="none">
+              <rect width="360" height="108" rx="10" fill="#EFF7F9" />
+              <rect x="16" y="16" width="38" height="38" rx="10" fill="#183C4A" />
+              <path d="M35 26v18M26 35h18" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" />
+              <text x="74" y="34" fill="#183C4A" font-size="12" font-weight="700" font-family="Plus Jakarta Sans, sans-serif">HbA1c &amp; TSH Titration Trend</text>
+              <rect x="74" y="54" width="46" height="22" rx="6" fill="#BFE0EA" />
+              <rect x="130" y="48" width="46" height="28" rx="6" fill="#77B8CA" />
+              <rect x="186" y="42" width="46" height="34" rx="6" fill="#1F6D82" />
+              <rect x="242" y="52" width="46" height="24" rx="6" fill="#183C4A" />
+              <rect x="298" y="46" width="46" height="30" rx="6" fill="#0F2730" />
+            </svg>
+            <h3>Diabetes &amp; Thyroid Clinic</h3>
+            <p>HbA1c trend tracking, thyroid titration, insulin review, and sustainable metabolic nutrition plans.</p>
+            <a href="#lead-form" class="card-link-action" onclick="selectSpecialty('Diabetes & Endocrinology')">Book Specialist Visit</a>
+          </article>
+
+          <article class="specialty-card">
+            <svg class="specialty-card-visual" viewBox="0 0 360 108" width="100%" height="108" aria-hidden="true" fill="none">
+              <rect width="360" height="108" rx="10" fill="#EFF7F9" />
+              <rect x="16" y="16" width="38" height="38" rx="10" fill="#183C4A" />
+              <circle cx="35" cy="35" r="8" stroke="#FFFFFF" stroke-width="2" />
+              <circle cx="35" cy="35" r="2.5" fill="#FFFFFF" />
+              <text x="74" y="34" fill="#183C4A" font-size="12" font-weight="700" font-family="Plus Jakarta Sans, sans-serif">Same-Day Acute Evaluation</text>
+              <polyline points="74,76 130,66 190,72 250,46 310,40 342,36" stroke="#183C4A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+              <circle cx="250" cy="46" r="4.5" fill="#1F6D82" />
+              <circle cx="342" cy="36" r="4.5" fill="#183C4A" />
+            </svg>
+            <h3>Internal Medicine &amp; Fever Care</h3>
+            <p>Same-day acute fever diagnosis, respiratory triage, preventive panels, and multisystem care.</p>
+            <a href="#lead-form" class="card-link-action" onclick="selectSpecialty('General Medicine & Acute Fever')">Book Specialist Visit</a>
+          </article>
+
+          <article class="specialty-card">
+            <svg class="specialty-card-visual" viewBox="0 0 360 108" width="100%" height="108" aria-hidden="true" fill="none">
+              <rect width="360" height="108" rx="10" fill="#EFF7F9" />
+              <rect x="16" y="16" width="38" height="38" rx="10" fill="#183C4A" />
+              <circle cx="35" cy="30" r="4.5" stroke="#FFFFFF" stroke-width="1.9" />
+              <path d="M27 44c0-4 3.6-7 8-7s8 3 8 7" stroke="#FFFFFF" stroke-width="1.9" stroke-linecap="round" />
+              <text x="74" y="34" fill="#183C4A" font-size="12" font-weight="700" font-family="Plus Jakarta Sans, sans-serif">Growth &amp; Vaccine Schedule</text>
+              <path d="M74 78c48-2 104-12 162-28 38-10 72-14 106-14" stroke="#1F6D82" stroke-width="2.6" stroke-linecap="round" />
+              <rect x="74" y="84" width="268" height="6" rx="3" fill="#D4E8EE" />
+              <rect x="74" y="84" width="184" height="6" rx="3" fill="#183C4A" />
+            </svg>
+            <h3>Paediatrics &amp; Child Care</h3>
+            <p>Newborn growth tracking, school immunisations, adolescent care, and fever response guidance.</p>
+            <a href="#lead-form" class="card-link-action" onclick="selectSpecialty('Paediatrics & Immunisation')">Book Specialist Visit</a>
+          </article>
+
+          <article class="specialty-card">
+            <svg class="specialty-card-visual" viewBox="0 0 360 108" width="100%" height="108" aria-hidden="true" fill="none">
+              <rect width="360" height="108" rx="10" fill="#EFF7F9" />
+              <rect x="16" y="16" width="38" height="38" rx="10" fill="#183C4A" />
+              <path d="M28 28v14M42 28v14M28 35h14" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" />
+              <text x="74" y="34" fill="#183C4A" font-size="12" font-weight="700" font-family="Plus Jakarta Sans, sans-serif">Joint Mobility &amp; Spine Plan</text>
+              <rect x="74" y="54" width="126" height="22" rx="6" fill="#FFFFFF" stroke="#B9D2DA" />
+              <text x="86" y="69" fill="#183C4A" font-size="11" font-weight="600" font-family="Plus Jakarta Sans, sans-serif">Load Rehab</text>
+              <rect x="210" y="54" width="134" height="22" rx="6" fill="#183C4A" />
+              <text x="224" y="69" fill="#FFFFFF" font-size="11" font-weight="600" font-family="Plus Jakarta Sans, sans-serif">Pain Recovery</text>
+            </svg>
+            <h3>Orthopaedics &amp; Joint Clinic</h3>
+            <p>Evidence-backed osteoarthritis rehab, sports sprains, posture correction, and spine guidance.</p>
+            <a href="#lead-form" class="card-link-action" onclick="selectSpecialty('Orthopaedics & Joint Care')">Book Specialist Visit</a>
+          </article>
+
+          <article class="specialty-card">
+            <svg class="specialty-card-visual" viewBox="0 0 360 108" width="100%" height="108" aria-hidden="true" fill="none">
+              <rect width="360" height="108" rx="10" fill="#EFF7F9" />
+              <rect x="16" y="16" width="38" height="38" rx="10" fill="#183C4A" />
+              <circle cx="35" cy="35" r="8" stroke="#FFFFFF" stroke-width="1.9" />
+              <path d="M35 27v16" stroke="#FFFFFF" stroke-width="1.9" stroke-linecap="round" />
+              <text x="74" y="34" fill="#183C4A" font-size="12" font-weight="700" font-family="Plus Jakarta Sans, sans-serif">Antenatal &amp; Preventive Pathway</text>
+              <circle cx="94" cy="68" r="9" fill="#1F6D82" />
+              <line x1="103" y1="68" x2="180" y2="68" stroke="#183C4A" stroke-width="2" />
+              <circle cx="189" cy="68" r="9" fill="#183C4A" />
+              <line x1="198" y1="68" x2="275" y2="68" stroke="#183C4A" stroke-width="2" />
+              <circle cx="284" cy="68" r="9" fill="#1F6D82" />
+            </svg>
+            <h3>Obstetrics &amp; Women&rsquo;s Clinic</h3>
+            <p>Respectful antenatal care, PCOS balance, menopausal wellness, and preventive screenings.</p>
+            <a href="#lead-form" class="card-link-action" onclick="selectSpecialty(&quot;Obstetrics & Women's Health&quot;)">Book Specialist Visit</a>
+          </article>
         </div>
       </div>
     </section>
 
-    <!-- Section 4B: Why Choose Us (Pillars from Screenshot 1 Features) -->
-    <section id="features" class="section features-section">
-      <div class="container">
-        <div class="section-header text-center">
-          <span class="section-tag">Clinic Standards</span>
-          <h2 class="section-title">Why Patients Trust HealthConsult</h2>
-          <p class="section-desc">We prioritize medical ethics, transparent guidance, and zero unnecessary interventions.</p>
+    <!-- SECTION 4: DOCTORS -->
+    <section id="doctors" class="section doctors-section" data-enter>
+      <div class="container wrap">
+        <div class="grid-12 split-head">
+          <div class="col-span-5">
+            <span class="section-eyebrow">Lead Doctors</span>
+            <h2 id="doctors-heading" class="section-title">Specialist Doctors at MedSphere Noida</h2>
+            <p class="section-desc">Each consultant holds active National Medical Commission credentials and unhurried 20-minute OPD or video windows.</p>
+          </div>
+
+          <div class="col-start-7 clinical-diagram-card">
+            <svg viewBox="0 0 560 184" width="100%" height="184" role="img" aria-label="NMC registration verification and daily OPD availability summary" fill="none">
+              <rect x="2" y="2" width="556" height="180" rx="14" fill="#F8FAFB" stroke="#D7E4E9" stroke-width="1.5" />
+              <circle cx="50" cy="54" r="24" fill="#183C4A" />
+              <path d="M40 54l6 6 12-13" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+              <text x="92" y="48" fill="#111C21" font-size="14.5" font-weight="700" font-family="Plus Jakarta Sans, sans-serif">NMC Council Verified Roster</text>
+              <text x="92" y="70" fill="#2F3E46" font-size="12.5" font-family="Plus Jakarta Sans, sans-serif">20-min minimum slot · Zero hidden fees</text>
+              <rect x="24" y="100" width="160" height="28" rx="14" fill="#E6F2F5" />
+              <text x="52" y="118" fill="#183C4A" font-size="12" font-weight="600" font-family="Plus Jakarta Sans, sans-serif">Mon-Sat OPD</text>
+              <rect x="198" y="100" width="164" height="28" rx="14" fill="#E6F2F5" />
+              <text x="220" y="118" fill="#183C4A" font-size="12" font-weight="600" font-family="Plus Jakarta Sans, sans-serif">9 AM - 8 PM IST</text>
+              <rect x="376" y="100" width="160" height="28" rx="14" fill="#183C4A" />
+              <text x="398" y="118" fill="#FFFFFF" font-size="12" font-weight="600" font-family="Plus Jakarta Sans, sans-serif">Same-Day Video</text>
+              <rect x="24" y="146" width="512" height="10" rx="5" fill="#D7E4E9" />
+              <rect x="24" y="146" width="440" height="10" rx="5" fill="#1F6D82" />
+            </svg>
+          </div>
         </div>
 
-        <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon-wrapper"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-            <h3 class="feature-title">Minimal Waiting Time</h3>
-            <p class="feature-desc">WhatsApp slot coordination ensures you spend minimal time in the waiting area, receiving prompt doctor attention.</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon-wrapper"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><path d="M4.5 3v5a3.5 3.5 0 0 0 7 0V3"/><path d="M8 11.5v3.5a4 4 0 0 0 8 0V11"/><circle cx="18" cy="10" r="2"/><path d="M2 3h5"/><path d="M9 3h5"/></svg></div>
-            <h3 class="feature-title">Evidence-Based Medicine</h3>
-            <p class="feature-desc">Rational clinical diagnoses with zero unnecessary lab investigations or heavy over-prescription of antibiotics.</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon-wrapper"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
-            <h3 class="feature-title">Digital Health Records</h3>
-            <p class="feature-desc">Clear digital prescriptions delivered instantly to your WhatsApp, accessible whenever you need them.</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon-wrapper"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg></div>
-            <h3 class="feature-title">Dedicated Consultation</h3>
-            <p class="feature-desc">Thorough 15+ minute consultation sessions allowing ample time to address your symptoms, queries, and lifestyle concerns.</p>
-          </div>
+        <div class="doctors-grid">
+          <article class="doctor-profile-card">
+            <div class="doctor-profile-head">
+              <img src="/images/avatar-1.jpg" alt="Portrait of Dr. Maanvita Kumari, Senior Physician in Noida" class="doctor-portrait" width="96" height="120" loading="lazy" decoding="async" />
+              <div>
+                <h3>Dr. Maanvita Kumari</h3>
+                <span class="doctor-cred">MD Internal Medicine · 14 Yrs</span>
+              </div>
+            </div>
+            <svg class="doctor-schedule-svg" viewBox="0 0 360 156" width="100%" height="156" aria-hidden="true" fill="none">
+              <rect width="360" height="156" rx="10" fill="#FFFFFF" stroke="#D7E4E9" />
+              <text x="16" y="30" fill="#183C4A" font-size="12" font-weight="700" font-family="Plus Jakarta Sans, sans-serif">Sector 18 OPD Windows</text>
+              <text x="16" y="54" fill="#2F3E46" font-size="11.5" font-family="Plus Jakarta Sans, sans-serif">Morning · 9:30 AM - 1:30 PM</text>
+              <rect x="16" y="64" width="328" height="10" rx="5" fill="#EFF7F9" />
+              <rect x="16" y="64" width="248" height="10" rx="5" fill="#183C4A" />
+              <text x="16" y="102" fill="#2F3E46" font-size="11.5" font-family="Plus Jakarta Sans, sans-serif">Video &amp; Lab Review · 4:00 PM - 7:30 PM</text>
+              <rect x="16" y="112" width="328" height="10" rx="5" fill="#EFF7F9" />
+              <rect x="16" y="112" width="290" height="10" rx="5" fill="#1F6D82" />
+            </svg>
+            <div class="doctor-profile-body">
+              <p>Specialises in cardiometabolic syndromes, preventive screening, and hypertension across multi-specialty family panels.</p>
+              <div class="doctor-card-footer">
+                <div class="doctor-reg-pill">Reg: NMC/DL/38492</div>
+                <a href="#lead-form" class="card-link-action" onclick="selectSpecialty('Cardiology & BP Management')">Book Specialist Visit</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="doctor-profile-card">
+            <div class="doctor-profile-head">
+              <img src="/images/avatar-2.jpg" alt="Portrait of Dr. Vivek Vardhan, Endocrinologist in Noida" class="doctor-portrait" width="96" height="144" loading="lazy" decoding="async" />
+              <div>
+                <h3>Dr. Vivek Vardhan</h3>
+                <span class="doctor-cred">MD Endocrinology · 12 Yrs</span>
+              </div>
+            </div>
+            <svg class="doctor-schedule-svg" viewBox="0 0 360 156" width="100%" height="156" aria-hidden="true" fill="none">
+              <rect width="360" height="156" rx="10" fill="#FFFFFF" stroke="#D7E4E9" />
+              <text x="16" y="30" fill="#183C4A" font-size="12" font-weight="700" font-family="Plus Jakarta Sans, sans-serif">Sector 18 OPD Windows</text>
+              <text x="16" y="54" fill="#2F3E46" font-size="11.5" font-family="Plus Jakarta Sans, sans-serif">Morning · 10:00 AM - 2:00 PM</text>
+              <rect x="16" y="64" width="328" height="10" rx="5" fill="#EFF7F9" />
+              <rect x="16" y="64" width="265" height="10" rx="5" fill="#183C4A" />
+              <text x="16" y="102" fill="#2F3E46" font-size="11.5" font-family="Plus Jakarta Sans, sans-serif">Evening Telehealth · 5:00 PM - 8:00 PM</text>
+              <rect x="16" y="112" width="328" height="10" rx="5" fill="#EFF7F9" />
+              <rect x="16" y="112" width="230" height="10" rx="5" fill="#1F6D82" />
+            </svg>
+            <div class="doctor-profile-body">
+              <p>Focused on Type 2 diabetes reversal, complex thyroid balance, and metabolic care with zero polypharmacy.</p>
+              <div class="doctor-card-footer">
+                <div class="doctor-reg-pill">Reg: NMC/UP/41092</div>
+                <a href="#lead-form" class="card-link-action" onclick="selectSpecialty('Diabetes & Endocrinology')">Book Specialist Visit</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="doctor-profile-card">
+            <div class="doctor-profile-head">
+              <img src="/images/avatar-3.jpg" alt="Portrait of Dr. Ananya Kulkarni, Senior Paediatrician in Noida" class="doctor-portrait" width="96" height="144" loading="lazy" decoding="async" />
+              <div>
+                <h3>Dr. Ananya Kulkarni</h3>
+                <span class="doctor-cred">DCH Paediatrics · 11 Yrs</span>
+              </div>
+            </div>
+            <svg class="doctor-schedule-svg" viewBox="0 0 360 156" width="100%" height="156" aria-hidden="true" fill="none">
+              <rect width="360" height="156" rx="10" fill="#FFFFFF" stroke="#D7E4E9" />
+              <text x="16" y="30" fill="#183C4A" font-size="12" font-weight="700" font-family="Plus Jakarta Sans, sans-serif">Sector 18 OPD Windows</text>
+              <text x="16" y="54" fill="#2F3E46" font-size="11.5" font-family="Plus Jakarta Sans, sans-serif">Child Clinic · 9:00 AM - 1:00 PM</text>
+              <rect x="16" y="64" width="328" height="10" rx="5" fill="#EFF7F9" />
+              <rect x="16" y="64" width="275" height="10" rx="5" fill="#183C4A" />
+              <text x="16" y="102" fill="#2F3E46" font-size="11.5" font-family="Plus Jakarta Sans, sans-serif">Family Evening · 4:30 PM - 7:30 PM</text>
+              <rect x="16" y="112" width="328" height="10" rx="5" fill="#EFF7F9" />
+              <rect x="16" y="112" width="260" height="10" rx="5" fill="#1F6D82" />
+            </svg>
+            <div class="doctor-profile-body">
+              <p>Provides calm immunisation schedules, infant developmental checks, and responsive acute fever care for families.</p>
+              <div class="doctor-card-footer">
+                <div class="doctor-reg-pill">Reg: NMC/DL/50918</div>
+                <a href="#lead-form" class="card-link-action" onclick="selectSpecialty('Paediatrics & Immunisation')">Book Specialist Visit</a>
+              </div>
+            </div>
+          </article>
         </div>
       </div>
     </section>
 
-    <!-- Section 5: Services Grid (Full 9 Services) -->
-    <section id="services" class="section services-section">
-      <div class="container">
-        <div class="section-header text-center">
-          <span class="section-tag">Clinical Services</span>
-          <h2 class="section-title">Comprehensive Care For Your Whole Family</h2>
-          <p class="section-desc">Personalized diagnosis, modern medical protocols, and ongoing family wellness care.</p>
+    <!-- SECTION 5: SERVICES (Dealt moment: pinned-chapters, 2 screens) -->
+    <section id="services" class="section services-section" style="--h: 2;" data-moment="pinned-chapters">
+      <div class="container wrap mo-pc__grid">
+        <div class="mo-pc__text">
+          <span class="section-eyebrow">Care Services</span>
+          <h2 id="services-heading" class="section-title">Clinical Services &amp; Care Continuity</h2>
+          <p class="section-desc">Structured specialist continuity from pre-visit symptom intake through Sector 18 OPD or HD video follow-up.</p>
+
+          <ol class="mo-pc__steps">
+            <li class="mo-pc__step step-card" data-step="0">
+              <h3>Step 01 · Symptom Intake &amp; Lab Sync</h3>
+              <p>Share your symptoms or prior test panels ahead of time so your consultant starts prepared.</p>
+              <figure class="mo-pc__visual photo-frame">
+                <img src="/images/pathway-triage.jpg" alt="Medical coordinator syncing lab history and patient symptoms at intake" width="720" height="540" loading="lazy" decoding="async" />
+              </figure>
+            </li>
+
+            <li class="mo-pc__step step-card" data-step="1">
+              <h3>Step 02 · Noida OPD or Video Visit</h3>
+              <p>Choose calm in-person examination at Sector 18 Noida or encrypted HD teleconsultation from home.</p>
+              <figure class="mo-pc__visual photo-frame">
+                <img src="/images/pathway-consult.jpg" alt="Specialist physician performing an unhurried clinical consultation" width="720" height="540" loading="lazy" decoding="async" />
+              </figure>
+            </li>
+
+            <li class="mo-pc__step step-card" data-step="2">
+              <h3>Step 03 · 7-Day Care Follow-Up</h3>
+              <p>Receive a plain-language digital prescription summary and scheduled follow-up review.</p>
+              <figure class="mo-pc__visual photo-frame">
+                <img src="/images/pathway-followup.jpg" alt="Patient reviewing digital prescription follow-up guidance with specialist" width="720" height="540" loading="lazy" decoding="async" />
+              </figure>
+            </li>
+          </ol>
+
+          <div class="section-cta-row">
+            <a href="#doctors" class="btn-pill btn-pill-dark">
+              <span>Find a Doctor</span>
+              <svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8" /><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5" /></svg>
+            </a>
+          </div>
         </div>
 
-        <div class="services-grid">
-          <article class="service-card">
-            <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"/><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/></svg></div>
-            <h3 class="service-title">General Health Checkup</h3>
-            <p class="service-desc">Complete physical examination, baseline vital assessments, blood pressure screening, and personalized preventive health roadmaps.</p>
-            <a href="#contact" class="service-link">Consult Doctor &rarr;</a>
+        <div class="mo-pc__visuals photo-frame"></div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: RESOURCES -->
+    <section id="resources" class="section resources-section" data-enter>
+      <div class="container wrap">
+        <div class="grid-12 split-head">
+          <div class="col-span-5">
+            <span class="section-eyebrow">Patient Resources</span>
+            <h2 id="resources-heading" class="section-title">Patient Resources &amp; Clinical Briefs</h2>
+            <p class="section-desc">Evidence-based preparation briefs written by MedSphere Noida consultants to make your OPD visit productive.</p>
+          </div>
+
+          <div class="col-start-7 clinical-diagram-card">
+            <svg viewBox="0 0 560 176" width="100%" height="176" role="img" aria-label="MedSphere diagnostic library metrics across 3 clinical guides" fill="none">
+              <rect x="2" y="2" width="556" height="172" rx="14" fill="#F8FAFB" stroke="#D7E4E9" stroke-width="1.5" />
+              <text x="26" y="46" fill="#111C21" font-size="14.5" font-weight="700" font-family="Plus Jakarta Sans, sans-serif">Pre-Consultation Checklist Guides</text>
+              <text x="26" y="70" fill="#2F3E46" font-size="12.5" font-family="Plus Jakarta Sans, sans-serif">Peer-reviewed by Cardiology, Endocrinology &amp; Internal Medicine</text>
+              <rect x="26" y="96" width="150" height="28" rx="14" fill="#FFFFFF" stroke="#D7E4E9" />
+              <text x="44" y="114" fill="#183C4A" font-size="12" font-weight="600" font-family="Plus Jakarta Sans, sans-serif">Home BP Protocol</text>
+              <rect x="188" y="96" width="150" height="28" rx="14" fill="#FFFFFF" stroke="#D7E4E9" />
+              <text x="206" y="114" fill="#183C4A" font-size="12" font-weight="600" font-family="Plus Jakarta Sans, sans-serif">HbA1c Fast Guide</text>
+              <rect x="350" y="96" width="184" height="28" rx="14" fill="#183C4A" />
+              <text x="368" y="114" fill="#FFFFFF" font-size="12" font-weight="600" font-family="Plus Jakarta Sans, sans-serif">Noida OPD Intake Prep</text>
+              <rect x="26" y="142" width="508" height="10" rx="5" fill="#E6F2F5" />
+              <rect x="26" y="142" width="380" height="10" rx="5" fill="#1F6D82" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="blog-grid">
+          <article class="blog-card">
+            <div class="blog-card-figure" aria-hidden="true">
+              <svg viewBox="0 0 320 148" width="100%" height="148" fill="none">
+                <rect width="320" height="148" rx="10" fill="#EFF7F9" />
+                <text x="20" y="30" fill="#183C4A" font-size="12" font-weight="700" font-family="Plus Jakarta Sans, sans-serif">7-Day Ambulatory BP Trend</text>
+                <polyline points="20,108 70,88 125,96 175,62 235,70 295,46" stroke="#183C4A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+                <circle cx="175" cy="62" r="5" fill="#1F6D82" />
+                <circle cx="295" cy="46" r="5" fill="#183C4A" />
+              </svg>
+            </div>
+            <div class="blog-card-meta">
+              <span class="blog-card-tag">Heart Care</span>
+              <span class="blog-card-time">4 min brief</span>
+            </div>
+            <h3>Home BP &amp; Lipid Panel Guide</h3>
+            <p>How specialists evaluate 7-day ambulatory blood pressure averages alongside LDL-C and ApoB markers.</p>
+            <a href="#lead-form" class="card-link-action" onclick="selectSpecialty('Cardiology & BP Management')">Book Specialist Visit</a>
           </article>
-          <article class="service-card">
-            <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/></svg></div>
-            <h3 class="service-title">Diabetes &amp; Hypertension</h3>
-            <p class="service-desc">Careful blood sugar monitoring, HbA1c review, blood pressure stabilization, diet counseling, and long-term kidney &amp; heart protection.</p>
-            <a href="#contact" class="service-link">Consult Doctor &rarr;</a>
+
+          <article class="blog-card">
+            <div class="blog-card-figure" aria-hidden="true">
+              <svg viewBox="0 0 320 148" width="100%" height="148" fill="none">
+                <rect width="320" height="148" rx="10" fill="#EFF7F9" />
+                <text x="20" y="30" fill="#183C4A" font-size="12" font-weight="700" font-family="Plus Jakarta Sans, sans-serif">Fasting Lab Stability Window</text>
+                <rect x="32" y="76" width="44" height="48" rx="6" fill="#BFE0EA" />
+                <rect x="96" y="62" width="44" height="62" rx="6" fill="#77B8CA" />
+                <rect x="160" y="46" width="44" height="78" rx="6" fill="#1F6D82" />
+                <rect x="224" y="66" width="44" height="58" rx="6" fill="#183C4A" />
+              </svg>
+            </div>
+            <div class="blog-card-meta">
+              <span class="blog-card-tag">Metabolic Care</span>
+              <span class="blog-card-time">5 min brief</span>
+            </div>
+            <h3>Preparing Fasting Lab Panels</h3>
+            <p>Which hydration steps keep fasting glucose and thyroid markers accurate before your Noida clinic slot.</p>
+            <a href="#lead-form" class="card-link-action" onclick="selectSpecialty('Diabetes & Endocrinology')">Book Specialist Visit</a>
           </article>
-          <article class="service-card">
-            <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></svg></div>
-            <h3 class="service-title">Fevers &amp; Seasonal Illnesses</h3>
-            <p class="service-desc">Rapid diagnostic assessment for dengue, malaria, typhoid, viral flu, bronchitis, seasonal allergies, and acute throat infections.</p>
-            <a href="#contact" class="service-link">Consult Doctor &rarr;</a>
-          </article>
-          <article class="service-card">
-            <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg></div>
-            <h3 class="service-title">Thyroid &amp; Endocrine Care</h3>
-            <p class="service-desc">Expert clinical evaluation of hypothyroidism, hyperthyroidism, metabolic shifts, chronic fatigue, and hormone stabilization.</p>
-            <a href="#contact" class="service-link">Consult Doctor &rarr;</a>
-          </article>
-          <article class="service-card">
-            <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-            <h3 class="service-title">Geriatric &amp; Elderly Care</h3>
-            <p class="service-desc">Compassionate healthcare for senior citizens, routine medication interaction reviews, arthritis pain support, and mobility advice.</p>
-            <a href="#contact" class="service-link">Consult Doctor &rarr;</a>
-          </article>
-          <article class="service-card">
-            <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><path d="m18 2 4 4"/><path d="m17 7 3-3"/><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/><path d="m9 11 4 4"/><path d="m5 19-3 3"/><path d="m14 4 6 6"/></svg></div>
-            <h3 class="service-title">Adult Vaccinations</h3>
-            <p class="service-desc">Annual influenza shots, pneumococcal protection, hepatitis B boosters, tetanus prophylaxis, and adult immunization schedules.</p>
-            <a href="#contact" class="service-link">Consult Doctor &rarr;</a>
-          </article>
-          <article class="service-card">
-            <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-            <h3 class="service-title">Respiratory &amp; Asthma Care</h3>
-            <p class="service-desc">Management of chronic wheezing, asthma flare-ups, seasonal allergic rhinitis, smoker's cough, and post-viral lung recovery.</p>
-            <a href="#contact" class="service-link">Consult Doctor &rarr;</a>
-          </article>
-          <article class="service-card">
-            <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div>
-            <h3 class="service-title">Gastrointestinal &amp; Acidity</h3>
-            <p class="service-desc">Treatment of GERD, acid reflux, peptic ulcers, IBS, chronic constipation, liver sluggishness, and dietary intolerance.</p>
-            <a href="#contact" class="service-link">Consult Doctor &rarr;</a>
-          </article>
-          <article class="service-card">
-            <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-            <h3 class="service-title">Preventive Lifestyle Medicine</h3>
-            <p class="service-desc">Evidence-based guidance on weight management, uric acid reduction, cholesterol balance, and cardiac risk factor reduction.</p>
-            <a href="#contact" class="service-link">Consult Doctor &rarr;</a>
+
+          <article class="blog-card">
+            <div class="blog-card-figure" aria-hidden="true">
+              <svg viewBox="0 0 320 148" width="100%" height="148" fill="none">
+                <rect width="320" height="148" rx="10" fill="#EFF7F9" />
+                <text x="24" y="30" fill="#183C4A" font-size="12" font-weight="700" font-family="Plus Jakarta Sans, sans-serif">OPD Check-In Readiness</text>
+                <rect x="24" y="46" width="272" height="22" rx="6" fill="#FFFFFF" stroke="#C7DCE3" />
+                <rect x="24" y="78" width="222" height="22" rx="6" fill="#FFFFFF" stroke="#C7DCE3" />
+                <rect x="24" y="110" width="248" height="16" rx="5" fill="#183C4A" />
+              </svg>
+            </div>
+            <div class="blog-card-meta">
+              <span class="blog-card-tag">Visit Prep</span>
+              <span class="blog-card-time">3 min brief</span>
+            </div>
+            <h3>First Clinic Visit Checklist</h3>
+            <p>Four concise items to bring—current medications, allergies, and prior discharge notes—for faster evaluation.</p>
+            <a href="#lead-form" class="card-link-action" onclick="selectSpecialty('General Medicine & Acute Fever')">Book Specialist Visit</a>
           </article>
         </div>
       </div>
     </section>
 
-    <!-- Section 6: Clinic Info & Map Facade (Full 2-Column Balanced Layout) -->
-    <section id="clinic" class="section clinic-section">
-      <div class="container">
-        <div class="section-header text-center">
-          <span class="section-tag">Clinic Visit</span>
-          <h2 class="section-title">Visit HealthConsult Family Clinic</h2>
-          <p class="section-desc">Conveniently located in Central Market, Sector 18 Noida with dedicated parking and metro accessibility.</p>
-        </div>
-
-        <div class="clinic-grid">
-          <div class="clinic-details-card">
-            <p class="clinic-tagline">"We Nurture Your Health, Every Day"</p>
-
-            <div class="clinic-info-list">
-              <div class="clinic-info-item">
-                <span class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
-                <div>
-                  <strong>Clinic Address:</strong>
-                  <p>Plot 14, Health Plaza, Central Market, Sector 18, Noida, Uttar Pradesh – 201301</p>
-                </div>
-              </div>
-              <div class="clinic-info-item">
-                <span class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
-                <div>
-                  <strong>Consultation Schedule:</strong>
-                  <table class="hours-table">
-                    <tr><td>Monday – Friday:</td><td><strong>09:00 AM – 08:00 PM</strong></td></tr>
-                    <tr><td>Saturday:</td><td><strong>09:00 AM – 04:00 PM</strong></td></tr>
-                    <tr><td>Sunday:</td><td><span class="text-closed">Closed (Emergency On-Call)</span></td></tr>
-                  </table>
-                </div>
-              </div>
-              <div class="clinic-info-item">
-                <span class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg></span>
-                <div>
-                  <strong>Consultation Fee &amp; Policy:</strong>
-                  <p>₹600 regular consultation. Includes a <strong>7-day complimentary follow-up</strong> visit for the same medical issue.</p>
-                </div>
-              </div>
-              <div class="clinic-info-item">
-                <span class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M12 6h.01M8 10h.01M16 10h.01M12 10h.01M8 14h.01M16 14h.01M12 14h.01"/></svg></span>
-                <div>
-                  <strong>Clinic Amenities:</strong>
-                  <div class="amenities-grid">
-                    <span class="amenity-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13" aria-hidden="true" style="margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>In-house Pharmacy Partner</span>
-                    <span class="amenity-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13" aria-hidden="true" style="margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>Home Sample Collection</span>
-                    <span class="amenity-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13" aria-hidden="true" style="margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>Wheelchair Accessible</span>
-                    <span class="amenity-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13" aria-hidden="true" style="margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>AC Waiting Lounge</span>
-                    <span class="amenity-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13" aria-hidden="true" style="margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>Digital Payments Accepted</span>
-                    <span class="amenity-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13" aria-hidden="true" style="margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>Dedicated Car Parking</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+    <!-- SECTION 7: REVIEWS & FAQ -->
+    <section id="reviews" class="section reviews-faq-section" data-enter>
+      <div class="container wrap">
+        <div class="grid-12 split-head">
+          <div class="col-span-5">
+            <span class="section-eyebrow">Reviews &amp; FAQ</span>
+            <h2 id="reviews-heading" class="section-title">Patient Reviews &amp; Clinic Questions</h2>
+            <p class="section-desc">Verified family stories alongside transparent answers on Sector 18 OPD fees and medical records.</p>
           </div>
 
-          <!-- Click-to-load Map Facade per SD-045 -->
-          <div class="map-column">
-            <div class="map-facade-container" id="map-container">
-              <div class="map-facade" onclick="loadMap()">
-                <div class="map-facade-content">
-                  <span class="map-pin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
-                  <h3>HealthConsult Clinic Location</h3>
-                  <p>Sector 18 Central Market, Noida</p>
-                  <button type="button" class="btn btn-secondary btn-sm">Click to Load Interactive Google Map</button>
-                </div>
-              </div>
-            </div>
-            <div class="directions-card">
-              <strong>Transit &amp; Parking Guidance:</strong> Located directly in Central Market Sector 18, just 200 meters from Noida Sector 18 Metro Station (Blue Line, Gate 2). Ample multi-level car parking available next to Health Plaza.
-            </div>
+          <div class="col-start-7 clinical-diagram-card">
+            <svg viewBox="0 0 560 116" width="100%" height="116" role="img" aria-label="4.9 out of 5 verified patient rating across MedSphere Noida clinic visits" fill="none">
+              <rect x="2" y="2" width="556" height="112" rx="14" fill="#FFFFFF" stroke="#D7E4E9" stroke-width="1.5" />
+              <text x="26" y="44" fill="#183C4A" font-size="24" font-weight="700" font-family="Plus Jakarta Sans, sans-serif">4.9 / 5</text>
+              <text x="128" y="38" fill="#111C21" font-size="13.5" font-weight="600" font-family="Plus Jakarta Sans, sans-serif">Verified Patient Satisfaction</text>
+              <text x="128" y="58" fill="#2F3E46" font-size="12" font-family="Plus Jakarta Sans, sans-serif">Zero hidden charges · DPDP compliant privacy</text>
+              <rect x="26" y="76" width="508" height="10" rx="5" fill="#E6F2F5" />
+              <rect x="26" y="76" width="486" height="10" rx="5" fill="#183C4A" />
+            </svg>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 7: Patient Reviews (Full 6 Reviews in 3x2 Grid) -->
-    <section id="reviews" class="section reviews-section">
-      <div class="container">
-        <div class="section-header text-center">
-          <span class="section-tag">Patient Feedback</span>
-          <h2 class="section-title">What Patients Say About Dr. Maanvita</h2>
-          <p class="section-desc">Real, verified clinical experiences from families treated at our clinic.</p>
         </div>
 
         <div class="reviews-grid">
-          <div class="review-card">
-            <span class="review-treatment-tag">Senior Citizen Diabetes Care</span>
-            <div class="review-stars" role="img" aria-label="5 out of 5 stars"><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-            <p class="review-text">"Dr. Maanvita is exceptionally patient and thorough. She explained my mother's blood tests in simple Hindi and adjusted her medications smoothly without piling on unnecessary drugs."</p>
-            <div class="review-author">
-              <span class="author-avatar">R</span>
-              <div>
-                <strong>R. Sharma</strong>
-                <span class="author-badge">Verified Patient • Sector 19</span>
-              </div>
+          <article class="review-card">
+            <div class="review-card-top">
+              <span class="review-badge" aria-hidden="true">AG</span>
+              <svg width="92" height="18" viewBox="0 0 92 18" fill="#183C4A" aria-hidden="true">
+                <polygon points="9,1 11.4,6 17,6.7 13,10.5 14,16 9,13.3 4,16 5,10.5 1,6.7 6.6,6" />
+                <polygon points="27,1 29.4,6 35,6.7 31,10.5 32,16 27,13.3 22,16 23,10.5 19,6.7 24.6,6" />
+                <polygon points="45,1 47.4,6 53,6.7 49,10.5 50,16 45,13.3 40,16 41,10.5 37,6.7 42.6,6" />
+                <polygon points="63,1 65.4,6 71,6.7 67,10.5 68,16 63,13.3 58,16 59,10.5 55,6.7 60.6,6" />
+                <polygon points="81,1 83.4,6 89,6.7 85,10.5 86,16 81,13.3 76,16 77,10.5 73,6.7 78.6,6" />
+              </svg>
             </div>
-          </div>
+            <p class="review-quote">"Dr. Kumari spent 25 minutes reviewing three years of family cardiac labs and dropped two redundant medications."</p>
+            <div class="review-author">Aarav Gupta · Noida Sector 18 OPD</div>
+          </article>
 
-          <div class="review-card">
-            <span class="review-treatment-tag">Dengue Fever Recovery</span>
-            <div class="review-stars" role="img" aria-label="5 out of 5 stars"><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-            <p class="review-text">"Very clean clinic and minimal waiting time. When I had high viral fever, doctor monitored my platelet counts daily on WhatsApp. Highly empathetic and knowledgeable!"</p>
-            <div class="review-author">
-              <span class="author-avatar">A</span>
-              <div>
-                <strong>A. Verma</strong>
-                <span class="author-badge">Verified Patient • Sector 27</span>
-              </div>
+          <article class="review-card">
+            <div class="review-card-top">
+              <span class="review-badge" aria-hidden="true">NR</span>
+              <svg width="92" height="18" viewBox="0 0 92 18" fill="#183C4A" aria-hidden="true">
+                <polygon points="9,1 11.4,6 17,6.7 13,10.5 14,16 9,13.3 4,16 5,10.5 1,6.7 6.6,6" />
+                <polygon points="27,1 29.4,6 35,6.7 31,10.5 32,16 27,13.3 22,16 23,10.5 19,6.7 24.6,6" />
+                <polygon points="45,1 47.4,6 53,6.7 49,10.5 50,16 45,13.3 40,16 41,10.5 37,6.7 42.6,6" />
+                <polygon points="63,1 65.4,6 71,6.7 67,10.5 68,16 63,13.3 58,16 59,10.5 55,6.7 60.6,6" />
+                <polygon points="81,1 83.4,6 89,6.7 85,10.5 86,16 81,13.3 76,16 77,10.5 73,6.7 78.6,6" />
+              </svg>
             </div>
-          </div>
+            <p class="review-quote">"Video triage matched me with Dr. Vardhan within two hours, and the digital thyroid summary arrived promptly."</p>
+            <div class="review-author">Nandini Rao · Gurgaon Video Consult</div>
+          </article>
 
-          <div class="review-card">
-            <span class="review-treatment-tag">Hypertension Management</span>
-            <div class="review-stars" role="img" aria-label="5 out of 5 stars"><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-            <p class="review-text">"Quick WhatsApp reply for consultation hours and excellent bedside manner. My blood pressure is now well controlled within 3 weeks with simple lifestyle tweaks."</p>
-            <div class="review-author">
-              <span class="author-avatar">P</span>
-              <div>
-                <strong>P. Gupta</strong>
-                <span class="author-badge">Verified Patient • Sector 18</span>
-              </div>
+          <article class="review-card">
+            <div class="review-card-top">
+              <span class="review-badge" aria-hidden="true">RM</span>
+              <svg width="92" height="18" viewBox="0 0 92 18" fill="#183C4A" aria-hidden="true">
+                <polygon points="9,1 11.4,6 17,6.7 13,10.5 14,16 9,13.3 4,16 5,10.5 1,6.7 6.6,6" />
+                <polygon points="27,1 29.4,6 35,6.7 31,10.5 32,16 27,13.3 22,16 23,10.5 19,6.7 24.6,6" />
+                <polygon points="45,1 47.4,6 53,6.7 49,10.5 50,16 45,13.3 40,16 41,10.5 37,6.7 42.6,6" />
+                <polygon points="63,1 65.4,6 71,6.7 67,10.5 68,16 63,13.3 58,16 59,10.5 55,6.7 60.6,6" />
+                <polygon points="81,1 83.4,6 89,6.7 85,10.5 86,16 81,13.3 76,16 77,10.5 73,6.7 78.6,6" />
+              </svg>
             </div>
-          </div>
-
-          <div class="review-card">
-            <span class="review-treatment-tag">Thyroid Balance Treatment</span>
-            <div class="review-stars" role="img" aria-label="5 out of 5 stars"><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-            <p class="review-text">"Diagnosed my chronic thyroid fatigue after multiple other clinics dismissed it as stress. Her dosage guidance was spot-on and my energy levels have bounced back."</p>
-            <div class="review-author">
-              <span class="author-avatar">S</span>
-              <div>
-                <strong>S. Nair</strong>
-                <span class="author-badge">Verified Patient • Sector 15</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="review-card">
-            <span class="review-treatment-tag">Family Health &amp; Allergy</span>
-            <div class="review-stars" role="img" aria-label="5 out of 5 stars"><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-            <p class="review-text">"Our entire family consults Dr. Maanvita for any fever or seasonal illness. She listens carefully for 15+ minutes and never rushes the patient out of the room."</p>
-            <div class="review-author">
-              <span class="author-avatar">M</span>
-              <div>
-                <strong>M. Chawla</strong>
-                <span class="author-badge">Verified Patient • Sector 30</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="review-card">
-            <span class="review-treatment-tag">Preventive Executive Checkup</span>
-            <div class="review-stars" role="img" aria-label="5 out of 5 stars"><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-            <p class="review-text">"Very sensible medical approach. She reviewed my annual lipid profile and gave practical diet guidance instead of prescribing statins straight away. Truly trustworthy."</p>
-            <div class="review-author">
-              <span class="author-avatar">V</span>
-              <div>
-                <strong>V. Singhal</strong>
-                <span class="author-badge">Verified Patient • Sector 29</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 8: FAQ Accordion (Full 8 Items in 2-Column Grid) -->
-    <section class="section faq-section">
-      <div class="container">
-        <div class="section-header text-center">
-          <span class="section-tag">Frequently Asked Questions</span>
-          <h2 class="section-title">Common Patient Enquiries</h2>
-          <p class="section-desc">Quick answers about consultation hours, fees, diagnostic tests, and appointments.</p>
+            <p class="review-quote">"Dr. Kulkarni eased our parenting worries during a late fever and clearly explained every vaccine milestone."</p>
+            <div class="review-author">Rohan &amp; Meera · Indirapuram Family</div>
+          </article>
         </div>
 
         <div class="faq-grid">
-          <details class="faq-item" open>
-            <summary class="faq-question">Do I need a prior appointment before visiting?</summary>
-            <div class="faq-answer">
-              <p>Walk-ins are welcomed during all clinic hours. However, messaging on WhatsApp or calling ahead helps assign an estimated consultation window, minimizing your waiting room time.</p>
+          <div class="faq-item">
+            <div class="faq-head">
+              <span class="faq-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 3.5"/><circle cx="12" cy="16.5" r=".7" fill="currentColor"/></svg>
+              </span>
+              <h3 class="faq-q">How does the free clinic evaluation work?</h3>
             </div>
-          </details>
-
-          <details class="faq-item">
-            <summary class="faq-question">What is the consultation fee and follow-up policy?</summary>
-            <div class="faq-answer">
-              <p>The standard consultation fee is ₹600. All patients are eligible for one complimentary follow-up visit within 7 days of the initial consultation for review of lab reports or treatment progress.</p>
+            <p class="faq-a">Your initial symptom review carries no consultation fee; subsequent diagnostics or follow-ups are quoted clearly before consent.</p>
+          </div>
+          <div class="faq-item">
+            <div class="faq-head">
+              <span class="faq-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 14l2 2 4-4"/></svg>
+              </span>
+              <h3 class="faq-q">Are Noida video prescriptions pharmacy-valid?</h3>
             </div>
-          </details>
-
-          <details class="faq-item">
-            <summary class="faq-question">Is home blood sample collection available?</summary>
-            <div class="faq-answer">
-              <p>Yes, our clinic partners with certified NABL diagnostic laboratory partners. You can schedule a phlebotomist visit for home sample collection by informing clinic reception.</p>
+            <p class="faq-a">Yes. Every consultation includes a signed digital prescription under India Telemedicine Guidelines with NMC registration details.</p>
+          </div>
+          <div class="faq-item">
+            <div class="faq-head">
+              <span class="faq-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+              </span>
+              <h3 class="faq-q">How is patient record privacy protected?</h3>
             </div>
-          </details>
-
-          <details class="faq-item">
-            <summary class="faq-question">What payment modes are accepted at the clinic?</summary>
-            <div class="faq-answer">
-              <p>We accept all digital payment options including UPI (Google Pay, PhonePe, Paytm, BHIM), debit/credit cards, and cash.</p>
+            <p class="faq-a">Contact and clinical records are encrypted and processed strictly under India DPDP Act 2023 consent controls.</p>
+          </div>
+          <div class="faq-item">
+            <div class="faq-head">
+              <span class="faq-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18.1A2 2 0 0 0 3.5 21h17a2 2 0 0 0 1.7-2.9L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r=".7" fill="currentColor"/></svg>
+              </span>
+              <h3 class="faq-q">Should acute chest pain use this booking desk?</h3>
             </div>
-          </details>
-
-          <details class="faq-item">
-            <summary class="faq-question">How do I receive my prescription and reports?</summary>
-            <div class="faq-answer">
-              <p>You receive both a printed hard copy and an official verified digital prescription delivered directly to your WhatsApp number immediately following the consultation.</p>
-            </div>
-          </details>
-
-          <details class="faq-item">
-            <summary class="faq-question">Can I consult Dr. Maanvita over WhatsApp for follow-ups?</summary>
-            <div class="faq-answer">
-              <p>Yes! Existing patients can send their lab test reports and quick dosage follow-up queries to the clinic WhatsApp number during clinic working hours.</p>
-            </div>
-          </details>
-
-          <details class="faq-item">
-            <summary class="faq-question">Are medical fitness and sick leave certificates provided?</summary>
-            <div class="faq-answer">
-              <p>Yes, official verified medical fitness certificates and sick leave verification are issued following physical clinical assessment, stamped with DMC registration credentials.</p>
-            </div>
-          </details>
-
-          <details class="faq-item">
-            <summary class="faq-question">What emergency facilities are available?</summary>
-            <div class="faq-answer">
-              <p>The clinic provides primary acute emergency stabilization (oxygen, nebulization, primary wound dressing, glucose revival). Severe trauma or cardiac emergencies are stabilized and referred to partner tertiary hospitals.</p>
-            </div>
-          </details>
+            <p class="faq-a">No. For sudden chest pain, breathing distress, or stroke warning signs, call 112 or visit the nearest hospital ER immediately.</p>
+          </div>
         </div>
       </div>
     </section>
 
-        <!-- Section 6: Clinical Blog & Healthcare Insights -->
-    <section id="blog" class="section blog-section">
-      <div class="container">
-        <div class="section-header text-center">
-          <span class="section-tag">Clinical Blog</span>
-          <h2 class="section-title">Health Insights &amp; Prevention Guides</h2>
-          <p class="section-desc">Evidence-based advice on metabolic health, seasonal illness prevention, and family wellness.</p>
-        </div>
+    <!-- SECTION 8: CLOSING / CONTACT -->
+    <section id="contact" class="section contact-section" data-enter>
+      <div class="container wrap grid-12 contact-split-grid">
+        <div class="col-span-5 contact-info-panel">
+          <span class="section-eyebrow">Contact &amp; Visit</span>
+          <h2 id="contact-heading" class="section-title">Contact &amp; Clinic Visits in Noida</h2>
+          <p class="section-desc">
+            MedSphere Medical Centre · Ground Floor, Block D, Sector 18, Noida, UP 201301 · Open Mon-Sat, 9:00 AM to 8:00 PM IST.
+          </p>
 
-        <div class="blog-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:28px;">
-          <article class="blog-card" style="background:#FFFFFF; border:1px solid var(--border); border-radius:16px; overflow:hidden; display:flex; flex-direction:column;">
-            <div style="padding:24px; flex:1; display:flex; flex-direction:column;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <span style="font-size:12px; font-weight:700; color:var(--brand); text-transform:uppercase;">Diabetes Care</span>
-                <span style="font-size:12px; color:var(--muted);">4 min read</span>
-              </div>
-              <h3 style="font-size:18px; font-weight:700; color:var(--ink); margin-bottom:10px;">Managing Fasting Blood Sugar in Early Stages</h3>
-              <p style="font-size:14px; color:var(--muted); line-height:1.6; flex:1; margin-bottom:16px;">Practical dietary timing, carbohydrate spacing, and physical routine guidelines for pre-diabetic and newly diagnosed patients.</p>
-              <div style="border-top:1px solid var(--border); padding-top:12px; display:flex; align-items:center; gap:10px;">
-                <span style="width:32px; height:32px; border-radius:50%; background:var(--mint); color:var(--brand); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;">MK</span>
-                <div>
-                  <strong style="display:block; font-size:13px; color:var(--ink);">Dr. Maanvita Kumari</strong>
-                  <span style="font-size:11px; color:var(--muted);">MD (General Medicine)</span>
-                </div>
-              </div>
-            </div>
-          </article>
-
-          <article class="blog-card" style="background:#FFFFFF; border:1px solid var(--border); border-radius:16px; overflow:hidden; display:flex; flex-direction:column;">
-            <div style="padding:24px; flex:1; display:flex; flex-direction:column;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <span style="font-size:12px; font-weight:700; color:var(--brand); text-transform:uppercase;">Seasonal Illness</span>
-                <span style="font-size:12px; color:var(--muted);">5 min read</span>
-              </div>
-              <h3 style="font-size:18px; font-weight:700; color:var(--ink); margin-bottom:10px;">Dengue Fever: Warning Signs You Must Not Ignore</h3>
-              <p style="font-size:14px; color:var(--muted); line-height:1.6; flex:1; margin-bottom:16px;">Recognizing the critical phase between day 3 and 7, critical hydration guidelines, and when urgent hospital admission is needed.</p>
-              <div style="border-top:1px solid var(--border); padding-top:12px; display:flex; align-items:center; gap:10px;">
-                <span style="width:32px; height:32px; border-radius:50%; background:var(--mint); color:var(--brand); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;">MK</span>
-                <div>
-                  <strong style="display:block; font-size:13px; color:var(--ink);">Dr. Maanvita Kumari</strong>
-                  <span style="font-size:11px; color:var(--muted);">MD (General Medicine)</span>
-                </div>
-              </div>
-            </div>
-          </article>
-
-          <article class="blog-card" style="background:#FFFFFF; border:1px solid var(--border); border-radius:16px; overflow:hidden; display:flex; flex-direction:column;">
-            <div style="padding:24px; flex:1; display:flex; flex-direction:column;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <span style="font-size:12px; font-weight:700; color:var(--brand); text-transform:uppercase;">Hypertension</span>
-                <span style="font-size:12px; color:var(--muted);">3 min read</span>
-              </div>
-              <h3 style="font-size:18px; font-weight:700; color:var(--ink); margin-bottom:10px;">Sodium Reduction &amp; Blood Pressure Control</h3>
-              <p style="font-size:14px; color:var(--muted); line-height:1.6; flex:1; margin-bottom:16px;">Simple culinary swaps in Indian household diets that reliably reduce systolic pressure without sacrificing flavor or nutrition.</p>
-              <div style="border-top:1px solid var(--border); padding-top:12px; display:flex; align-items:center; gap:10px;">
-                <span style="width:32px; height:32px; border-radius:50%; background:var(--mint); color:var(--brand); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;">MK</span>
-                <div>
-                  <strong style="display:block; font-size:13px; color:var(--ink);">Dr. Maanvita Kumari</strong>
-                  <span style="font-size:11px; color:var(--muted);">MD (General Medicine)</span>
-                </div>
-              </div>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 9: Contact & Enquiry Section (Balanced 2-Column Split) -->
-    <section id="contact" class="section contact-section">
-      <div class="container">
-        <div class="contact-split-grid">
-          <!-- Left Column: Direct Clinic Assistance -->
-          <div class="contact-info-panel">
-            <div class="section-header" style="margin-bottom: 24px;">
-              <span class="section-tag">Direct Assistance</span>
-              <h2 class="section-title">Get In Touch Directly</h2>
-              <p class="section-desc" style="margin: 0;">Have an urgent symptom or want to confirm doctor availability? Reach out through our direct hotline or WhatsApp desk.</p>
-            </div>
-
-            <div class="contact-card-box">
-              <h3>Direct Clinic Hotline</h3>
-              <p>Speak directly with our clinic desk to check walk-in wait times or book consultation slots.</p>
-              <div class="direct-actions-list">
-                <a href="tel:+919876543210" class="direct-action-btn">
-                  <div class="action-icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
-                  <div>
-                    <span style="display:block; font-size:12px; color:var(--muted)">Direct Call:</span>
-                    <span style="font-size:16px; color:var(--brand)">+91 98765 43210</span>
-                  </div>
+          <div class="contact-card-box">
+            <div id="map-container" class="map-facade">
+              <svg viewBox="0 0 460 148" width="100%" height="148" role="img" aria-label="MedSphere Sector 18 Noida location map schematic" fill="none">
+                <rect width="460" height="148" rx="10" fill="#EDF6F8" />
+                <path d="M0 54h460M130 0v148M320 0v148" stroke="#CFE1E7" stroke-width="8" />
+                <path d="M0 54h460M130 0v148" stroke="#FFFFFF" stroke-width="2" />
+                <rect x="64" y="18" width="96" height="24" rx="6" fill="#FFFFFF" stroke="#B9D2DA" />
+                <text x="74" y="34" fill="#183C4A" font-size="11" font-weight="600" font-family="Plus Jakarta Sans, sans-serif">Metro Sec 18</text>
+                <circle cx="265" cy="90" r="14" fill="#183C4A" />
+                <circle cx="265" cy="90" r="5" fill="#FFFFFF" />
+                <rect x="190" y="110" width="150" height="24" rx="6" fill="#183C4A" />
+                <text x="202" y="126" fill="#FFFFFF" font-size="11" font-weight="600" font-family="Plus Jakarta Sans, sans-serif">MedSphere Block D</text>
+              </svg>
+              <div class="map-action-row">
+                <a href="#doctors" class="btn-pill btn-pill-dark">
+                  <span>Find a Doctor</span>
+                  <svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8" /><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5" /></svg>
                 </a>
-                <a href="https://wa.me/919876543210?text=Hello%20Dr.%20Maanvita%2C%20I%20would%20like%20to%20consult%20you" class="direct-action-btn" target="_blank" rel="noopener noreferrer">
-                  <div class="action-icon-circle" style="background:#E1F9EB; color:#25D366;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
-                  <div>
-                    <span style="display:block; font-size:12px; color:var(--muted)">WhatsApp Desk:</span>
-                    <span style="font-size:16px; color:#047857">Chat on WhatsApp (Instant Reply)</span>
-                  </div>
-                </a>
+                <button type="button" id="load-map-btn" class="btn-pill btn-pill-light" onclick="loadMap()">
+                  <span>Show Clinic Map</span>
+                  <svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8" /><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5" /></svg>
+                </button>
               </div>
-            </div>
-
-            <div class="contact-card-box">
-              <h3>Clinic Location &amp; Timings</h3>
-              <p><strong>HealthConsult Family Clinic</strong><br />
-              Plot 14, Health Plaza, Central Market, Sector 18, Noida – 201301<br />
-              <strong>Monday – Saturday:</strong> 09:00 AM – 08:00 PM (Sunday Closed)</p>
             </div>
           </div>
 
-          <!-- Right Column: Patient Enquiry Form -->
-          <div class="contact-form-panel">
-            <h3 class="form-title">Send An Online Health Query</h3>
-            <p class="form-subtitle">Submit your details below and our clinic team will call you back within 30 minutes.</p>
+          <div class="emergency-notice-box">
+            <p><strong>Emergency Warning:</strong> For chest pain, severe bleeding, or acute breathing difficulty, dial emergency helpline 112 immediately instead of waiting for a callback.</p>
+          </div>
+        </div>
 
-            <form id="lead-form" class="lead-form" onsubmit="handleFormSubmit(event)">
-              <!-- Honeypot anti-spam field per SD-044 -->
-              <div class="honeypot" style="display:none" aria-hidden="true">
-                <label for="form-website">Leave blank</label>
-                <input type="text" id="form-website" name="website" tabindex="-1" autocomplete="off" />
-              </div>
+        <div class="col-start-7 contact-form-panel">
+          <form id="lead-form" class="contact-form" action="/api/appointment" method="post" novalidate onsubmit="handleFormSubmit(event)">
+            <h3 class="form-title">Book Specialist Visit</h3>
+            <p class="form-sub">Enter your preferred specialist department and phone number. Our Sector 18 coordinator responds within 15 minutes during OPD hours.</p>
 
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="form-name">Patient Full Name *</label>
-                  <input type="text" id="form-name" name="name" required placeholder="e.g. Rajesh Kumar" class="form-input" />
-                </div>
-                <div class="form-group">
-                  <label for="form-phone">Mobile Number *</label>
-                  <input type="tel" id="form-phone" name="phone" required placeholder="e.g. +91 98765 43210" pattern="^(\+91[\-\s]?)?[6789]\d{9}$" class="form-input" />
-                  <small class="form-hint">10-digit Indian mobile number</small>
-                </div>
-              </div>
+            <input type="hidden" id="form-website" name="website" value="" />
 
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="form-service">Consultation Service</label>
-                  <select id="form-service" name="service" class="form-select">
-                    <option value="General Health Checkup">General Health Checkup</option>
-                    <option value="Diabetes & Hypertension">Diabetes &amp; Hypertension</option>
-                    <option value="Fevers & Infections">Fevers &amp; Seasonal Illness</option>
-                    <option value="Thyroid & Endocrine">Thyroid &amp; Hormonal Health</option>
-                    <option value="Elderly Care">Geriatric / Elderly Care</option>
-                    <option value="Adult Vaccination">Vaccinations</option>
-                    <option value="Other Query">Other Health Query</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="form-time">Preferred Visit Time</label>
-                  <select id="form-time" name="time" class="form-select">
-                    <option value="Morning (9 AM - 12 PM)">Morning (09:00 AM – 12:00 PM)</option>
-                    <option value="Afternoon (12 PM - 4 PM)">Afternoon (12:00 PM – 04:00 PM)</option>
-                    <option value="Evening (4 PM - 8 PM)">Evening (04:00 PM – 08:00 PM)</option>
-                  </select>
-                </div>
-              </div>
-
+            <div class="form-row">
               <div class="form-group">
-                <label for="form-message">Brief Symptoms or Query</label>
-                <textarea id="form-message" name="message" rows="3" placeholder="Describe symptoms or current medications..." class="form-textarea"></textarea>
+                <label for="form-name">Patient Full Name <span aria-hidden="true">*</span></label>
+                <input type="text" id="form-name" name="name" required autocomplete="name" placeholder="e.g. Rajesh Sharma" class="form-input" aria-describedby="error-name" />
+                <span id="error-name" class="field-error" role="alert"></span>
               </div>
-
-              <!-- DPDP Act 2023 Consent Checkbox per brain/10_SECURITY.md § 8 -->
-              <div class="form-checkbox-group">
-                <input type="checkbox" id="form-consent" name="consent" required />
-                <label for="form-consent">
-                  I give consent to HealthConsult Family Clinic to contact me via Call or WhatsApp regarding this healthcare enquiry.
-                </label>
+              <div class="form-group">
+                <label for="form-phone">Mobile Phone <span aria-hidden="true">*</span></label>
+                <input type="tel" id="form-phone" name="phone" required autocomplete="tel" placeholder="10-digit mobile number" class="form-input" aria-describedby="error-phone" />
+                <span id="error-phone" class="field-error" role="alert"></span>
               </div>
+            </div>
 
-              <button type="submit" class="btn btn-primary btn-block btn-lg" id="form-submit-btn">
-                Submit Health Enquiry
-              </button>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="form-service">Clinical Specialty</label>
+                <select id="form-service" name="service" class="form-select">
+                  <option value="">General Evaluation / Free Triage</option>
+                  <option value="Cardiology & BP Management">Cardiology &amp; BP Management</option>
+                  <option value="Diabetes & Endocrinology">Diabetes &amp; Endocrinology</option>
+                  <option value="General Medicine & Acute Fever">General Medicine &amp; Acute Fever</option>
+                  <option value="Paediatrics & Immunisation">Paediatrics &amp; Immunisation</option>
+                  <option value="Orthopaedics & Joint Care">Orthopaedics &amp; Joint Care</option>
+                  <option value="Obstetrics & Women's Health">Obstetrics &amp; Women&rsquo;s Health</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="form-type">Consultation Mode</label>
+                <select id="form-type" name="mode" class="form-select">
+                  <option value="In-Clinic Sector 18">Sector 18 Noida In-Clinic OPD</option>
+                  <option value="Video Teleconsultation">Verified Video Consultation</option>
+                </select>
+              </div>
+            </div>
 
-              <div id="form-status" class="form-status" aria-live="polite"></div>
-            </form>
-          </div>
+            <div class="form-group">
+              <label for="form-message">Brief Symptom Summary (Optional)</label>
+              <textarea id="form-message" name="message" rows="2" class="form-textarea" placeholder="Share primary symptoms or preferred date (avoid government IDs here)."></textarea>
+            </div>
+
+            <div class="form-checkbox-group">
+              <input type="checkbox" id="form-consent" name="consent" required aria-describedby="error-consent" />
+              <label for="form-consent">
+                I consent to appointment scheduling contact under the <strong>DPDP Act 2023</strong> and confirm this is not an emergency.
+              </label>
+            </div>
+            <span id="error-consent" class="field-error" role="alert"></span>
+
+            <button type="submit" id="form-submit-btn" class="btn-pill btn-pill-dark btn-primary btn-block">
+              <span>Request Callback</span>
+              <svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8" /><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5" /></svg>
+            </button>
+
+            <div id="form-status" class="form-status" role="status" aria-live="polite"></div>
+          </form>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- Section 10: Footer (Full 4-Column Layout) -->
-  <footer class="site-footer">
-    <div class="container">
+  <footer class="site-footer closing" role="contentinfo">
+    <div class="container wrap">
       <div class="footer-grid">
-        <div class="footer-col">
-          <span class="footer-brand">HealthConsult Family Clinic</span>
-          <p class="footer-bio">
-            Led by Dr. Maanvita Kumari (MBBS, MD - General Medicine), providing trusted, compassionate healthcare for families across Noida.
-          </p>
-          <p style="color:#D1D5DB; font-size:13px;">
-            Registration: DMC/R/28491 • Delhi Medical Council
-          </p>
+        <div>
+          <div class="footer-brand-row">
+            <span class="brand-tile" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="8" />
+                <circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none" />
+              </svg>
+            </span>
+            <span class="footer-brand">MedSphere</span>
+          </div>
+          <p class="footer-bio">Patient-first specialist care network connecting Noida families with NMC-registered physicians.</p>
+          <div class="footer-reg">Compliant with NMC Telemedicine Practice Guidelines</div>
         </div>
 
-        <div class="footer-col">
-          <h3 class="footer-heading">Clinic Navigation</h3>
+        <div>
+          <h3 class="footer-heading">Clinic Sections</h3>
           <ul class="footer-links">
-            <li><a href="#hero">Home</a></li>
-            <li><a href="#about">About Doctor</a></li>
-            <li><a href="#services">Clinical Services</a></li>
-            <li><a href="#features">Doctors &amp; Roster</a></li>
-            <li><a href="#reviews">Reviews &amp; FAQ</a></li>
-            <li><a href="#blog">Clinical Blog</a></li>
-            <li><a href="#contact">Contact &amp; Appointment</a></li>
+            <li><a href="#about">About Us</a></li>
+            <li><a href="#specialties">Specialties</a></li>
+            <li><a href="#doctors">Find Doctors</a></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#resources">Resources</a></li>
           </ul>
         </div>
 
-        <div class="footer-col">
-          <h3 class="footer-heading">Clinical Specialties</h3>
+        <div>
+          <h3 class="footer-heading">Clinical Departments</h3>
           <ul class="footer-links">
-            <li><a href="#services">Diabetes &amp; Blood Pressure Care</a></li>
-            <li><a href="#services">Fever &amp; Dengue Management</a></li>
-            <li><a href="#services">Thyroid &amp; Metabolic Health</a></li>
-            <li><a href="#services">Geriatric &amp; Senior Medicine</a></li>
-            <li><a href="#services">Preventive Family Health Checkup</a></li>
-            <li><a href="#services">Adult Vaccination Schedules</a></li>
+            <li><a href="#lead-form" onclick="selectSpecialty('Cardiology & BP Management')">Cardiology Care</a></li>
+            <li><a href="#lead-form" onclick="selectSpecialty('Diabetes & Endocrinology')">Endocrinology</a></li>
+            <li><a href="#lead-form" onclick="selectSpecialty('General Medicine & Acute Fever')">Internal Medicine</a></li>
+            <li><a href="#lead-form" onclick="selectSpecialty('Paediatrics & Immunisation')">Paediatrics</a></li>
           </ul>
         </div>
 
-        <div class="footer-col">
-          <h3 class="footer-heading">Clinic Contact &amp; Hours</h3>
-          <div class="footer-contact-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="18" height="18" class="footer-icon" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            <span>Plot 14, Health Plaza, Central Market, Sector 18, Noida – 201301</span>
-          </div>
-          <div class="footer-contact-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="18" height="18" class="footer-icon" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            <span>Phone: <a href="tel:+919876543210" style="color:inherit;text-decoration:none;">+91 98765 43210</a></span>
-          </div>
-          <div class="footer-contact-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="18" height="18" class="footer-icon" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <span>Mon – Sat: 09:00 AM – 08:00 PM</span>
-          </div>
-          <div class="footer-contact-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="18" height="18" class="footer-icon" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-            <span>Email: <a href="mailto:contact@healthconsult.in" style="color:inherit;text-decoration:none;">contact@healthconsult.in</a></span>
-          </div>
+        <div>
+          <h3 class="footer-heading">Noida Centre</h3>
+          <div class="footer-contact-item">Ground Floor, Block D, Sector 18, Noida, UP 201301</div>
+          <div class="footer-contact-item"><a href="#contact">Request Callback Desk</a></div>
+          <div class="footer-contact-item">Mon-Sat · 9:00 AM - 8:00 PM IST</div>
+          <div class="footer-contact-item">care@healthconsult-noida.in</div>
         </div>
       </div>
 
       <div class="footer-bottom-bar">
-        <div>
-          Patient data processed in accordance with the Digital Personal Data Protection (DPDP) Act, 2023.
-        </div>
-        <div class="footer-credit">
-          Designed &amp; Hosted by <strong>EcoDigiTech</strong> • Fast, Verified Doctor Presence
-        </div>
+        <p class="footer-copyright">&copy; 2026 MedSphere Specialist Family Clinic, Sector 18 Noida. Educational care portal.</p>
+        <button type="button" id="back-to-top" class="footer-top-btn" aria-label="Return to top of page" onclick="scrollToTop()">Return to Top</button>
       </div>
     </div>
   </footer>
 
-  <!-- Section 1: Sticky Bottom Mobile CTA Bar (< 768px, 48px Touch Targets) -->
-  <aside class="sticky-mobile-bar" aria-label="Quick Actions">
-    <a href="tel:+919876543210" class="mobile-cta-btn cta-call" aria-label="Call Dr. Maanvita Kumari">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mobile-cta-icon" aria-hidden="true">
-        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-      </svg>
-      <span>Call</span>
-    </a>
-    <a href="https://wa.me/919876543210?text=Hello%20Dr.%20Maanvita%2C%20I%20would%20like%20to%20consult%20you" class="mobile-cta-btn cta-wa" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp Dr. Maanvita Kumari">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mobile-cta-icon" aria-hidden="true">
-        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-      </svg>
-      <span>WhatsApp</span>
-    </a>
-    <a href="#contact" class="mobile-cta-btn cta-form" aria-label="Book Visit with Clinic">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mobile-cta-icon" aria-hidden="true">
-        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-        <line x1="16" y1="2" x2="16" y2="6" />
-        <line x1="8" y1="2" x2="8" y2="6" />
-        <line x1="3" y1="10" x2="21" y2="10" />
-      </svg>
-      <span>Book Visit</span>
-    </a>
-  </aside>
+  <nav class="sticky-mobile-bar actionbar" aria-label="Quick clinic actions">
+    <div class="wrap actionbar-inner">
+      <a href="#contact" class="mobile-cta-btn cta-call">
+        <svg class="mobile-cta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+        </svg>
+        <span>Contact Clinic</span>
+      </a>
+      <a href="#doctors" class="mobile-cta-btn cta-wa">
+        <svg class="mobile-cta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <span>Find a Doctor</span>
+      </a>
+      <a href="#lead-form" class="mobile-cta-btn cta-form">
+        <svg class="mobile-cta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+          <line x1="16" y1="2" x2="16" y2="6" />
+          <line x1="8" y1="2" x2="8" y2="6" />
+          <line x1="3" y1="10" x2="21" y2="10" />
+        </svg>
+        <span>Book Visit</span>
+      </a>
+    </div>
+  </nav>
 
+  <link rel="stylesheet" href="/assets/motion/motion.css" />
   <script type="module" src="./src/main.js"></script>
+  <script type="module" src="/assets/motion/motion.js"></script>
+  <script type="module" src="/assets/moments/moments.js"></script>
 </body>
 </html>

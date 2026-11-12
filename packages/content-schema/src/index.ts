@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ProfessionalPageSlotsSchema } from './schema.js';
+import { ProfessionalPageSlotsSchema, PremiumPageSlotsSchema } from './schema.js';
 
 // Security check: ban script tags and dangerous HTML/JS in any text input
 export const safeText = (maxChars: number = 500) =>
@@ -97,7 +97,7 @@ export type ThemeType = z.infer<typeof ThemeEnum>;
 export const LangEnum = z.enum(['en', 'hi']);
 export type LangType = z.infer<typeof LangEnum>;
 
-export const PlanEnum = z.enum(['basic', 'growth', 'professional']);
+export const PlanEnum = z.enum(['basic', 'growth', 'professional', 'premium']);
 export type PlanType = z.infer<typeof PlanEnum>;
 
 export * from './schema.js';
@@ -124,7 +124,7 @@ export const ContentSheetSchema = z.object({
   lang: LangEnum.default('en'),
   seo: SeoSchema,
   pages: PagesConfigSchema,
-  enabledPages: ProfessionalPageSlotsSchema.optional(),
+  enabledPages: z.union([ProfessionalPageSlotsSchema, PremiumPageSlotsSchema]).optional(),
 });
 
 export type ContentSheet = z.infer<typeof ContentSheetSchema>;

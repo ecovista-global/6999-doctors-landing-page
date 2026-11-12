@@ -23,6 +23,49 @@ Rule: every merged PR appends an entry below; releases are cut from the pipeline
 
 ## [Unreleased]
 
+### Fixed (CMS Control Panel Live Sync & End-to-End Persistence)
+
+- **Tenant Resolution & Booking <-> Submissions Sync (`defaultTenant.ts`, `appointmentSync.ts`, `public/*`, `api/appointments/*`, `api/v1/cms/submissions/appointments/*`):**
+  - Unified default demo tenant fallback across `/api/v1/public/doctors`, `/api/v1/public/availability`, `/api/v1/public/appointments`, and `/api/v1/public/enquiries` via `resolvePublicTenantId` prioritizing `healthconsult-demo` (`00000000-0000-0000-0000-000000000001`).
+  - Synced `POST /api/appointments` and `PATCH /api/appointments/[id]` into AES-256-GCM encrypted Postgres `appointments` and backfilled store-only bookings on `GET /api/v1/cms/submissions/appointments`, with bidirectional status sync in `PATCH /api/v1/cms/submissions/appointments/[id]`.
+- **Live Site Block Editor, Publish Pipeline, Patient Enquiries Tab & CMS Search (`cms/editor`, `lib/publish.ts`, `cms/submissions`, `api/v1/cms/enquiries`, `cms/blog`, `cms/reviews-faqs`, `cms/doctors`):**
+  - Connected `/cms/editor` to live `/api/content` (`GET`/`POST`) and `/api/v1/sites/[id]/publish`, and fixed `lib/publish.ts` to validate against `site.plan` (`premium` 10-page cap vs `professional` 7-page cap).
+  - Added `/api/v1/cms/enquiries` (`GET`/`PATCH`), wired `?tab=enquiries` and top header `useCmsShell().searchQuery` across `/cms/submissions`, `/cms/doctors`, `/cms/blog`, and `/cms/reviews-faqs`, and guarded non-UUID fallback IDs (`post-*`, `faq-*`, `rev-*`) so saving/deleting persists cleanly to PostgreSQL.
+
+### Added (Premium Clinic ₹24,999 / ₹14,999 Multi-Doctor Platform)
+
+- **MedSphere Editorial Frontend Unification (`apps/platform`, `medsphere-public.css`, `PublicHeader`, `PublicFooter`, `page.tsx`, all inner public routes):**
+  - Ported the crisp MedSphere editorial clinical layout, split hero (`Plus Jakarta Sans` + `Instrument Serif`), Forest/Teal palette switcher, Bento metrics, SVG clinical triage/roster diagrams, interactive 3-step care pathway showcase, slide-out mobile drawer, and sticky mobile action bar directly onto live Next.js `@ecodigitech/platform` (`:3000`) wired to PostgreSQL doctors, availability, CMS sync, and slot booking.
+  - Unified all 10 inner public routes (`/about`, `/specialties`, `/doctors`, `/services`, `/facilities`, `/health-packages`, `/testimonials-faq`, `/blog`, `/blog/[slug]`, `/contact`) onto `.ms-public-shell` tokens, rounded-full `.ms-pill` buttons, pill filters, editorial cards, interactive time-slot pill selection, and shared mobile bottom bar (`PublicFooter.tsx`).
+
+- **10-Page Architecture & Content Schema (`packages/content-schema`, `/specialties`, `/facilities`, `/health-packages`):**
+  - Extended `@ecodigitech/content-schema` with `'premium'` plan tier, `PREMIUM_ALLOWED_PAGE_SLOTS` (10 pages including `specialties`, `facilities`, `health-packages`), and plan-aware `validatePageSlots(slots, plan)` preserving Professional Clinic 7-page cap.
+  - Added `/specialties`, `/facilities`, and `/health-packages` responsive pages and updated `PublicHeader`, `PublicFooter`, `Sidebar`, `Header`, and `/cms/pages` for up to 10 active pages.
+- **Multi-Doctor Directory & Per-Doctor Slot Conflict Checks (`0005_premium_clinic.sql`, `/cms/doctors`, `/doctors`, `/contact`, `/`):**
+  - Added RLS-isolated `doctors` table plus `appointments.doctor_id` / `appointments.doctor_name`, CMS CRUD endpoints (`/api/v1/cms/doctors/**`), `/cms/doctors` management UI, public `/api/v1/public/doctors` directory API, and department/specialty filtering on `/doctors`.
+  - Upgraded `/api/v1/public/availability`, `/api/v1/public/appointments`, `/api/appointments`, `/contact`, and home booking form for doctor selection, per-doctor slot filtering, and `409 Conflict` (`E-1608`) collision checks.
+- **Booking History Timeline, Status Notifications, Advanced On-Page SEO & Monthly Ops SLA:**
+  - Added chronological `appointment_events` timeline and repeat patient visit history in `GET /api/v1/cms/submissions/appointments/[id]` and `SubmissionDrawer.tsx`; wired status-change outbox events and Resend email notifications in `PATCH /api/v1/cms/submissions/appointments/[id]`.
+  - Added `robots.ts`, `sitemap.ts`, `ClinicJsonLd.tsx` (`MedicalClinic`, `Physician`, `FAQPage`), and expanded root metadata.
+  - Enabled `'premium'` (`₹24,999` initial / `₹14,999` renewal) GST billing in `billing.ts` and `BillingInvoicesPanel.tsx`, plus `/api/v1/cms/operations` and `OperationsGovernancePanel.tsx` in `/cms/settings` for 5 content updates + 60 minor-change mins/month, live DB health check, backup schedule, and 30-day bug-fix SLA.
+
+### Changed (CMS Control Panel MedSphere Reference Redesign)
+
+- **CMS Control Panel (`apps/platform/src/app/cms/**`, `apps/platform/src/components/cms/**`, `globals.css`) Visual Overhaul:**
+  - Applied the MedSphere clinical aesthetic across the CMS Control Panel: ice-teal mist hero gradients (`#F8FBFC -> #E7F2F5 -> #DCECEF`), deep petrol `#183C4A` pill CTAs with white circular arrow badges (`.ms-pill-dark` / `.ms-pill-circle`), hairline light pills (`.ms-pill-light`), asymmetric clinical bento cards (`.ms-bento-tile-light`, `.ms-bento-tile-dark`, `.ms-card`), and self-hosted `Plus Jakarta Sans` + italic `Instrument Serif` editorial headings (zero external Google Fonts requests).
+  - Updated `Sidebar.tsx`, `Header.tsx`, main `cms/page.tsx` views (`dashboard`, `opd_board`, `appointments`, `editor`, `services`, `reviews`, `clinic_hours`, `themes`, `media`, `settings`), all standalone CMS routes (`pages`, `editor`, `blog`, `reviews-faqs`, `media`, `settings`, `versions`), and shared CMS components (`SubmissionsTable`, `SubmissionDrawer`, `StatusTransitionBar`, `OperatingHoursEditor`, `BillingInvoicesPanel`) while preserving dark-mode CSS variable compatibility, all MT-104 shell test selectors, zero-emoji rules, and all commercial INR pricing tiers verbatim.
+
+### Added (Client Site Template Redesign & Taste Skill Compliance)
+
+- **Client Site Template (`apps/site-template`) UI/UX & A11y Remediation:**
+  - Modernized `apps/site-template/index.html` structure: moved `.skip-link` to body start, unnested `#mobile-nav-drawer` and `#drawer-backdrop` from `<header>` to ensure exact header bounding box.
+  - Aligned typography and color tokens in `packages/ui/src/tokens.css` to Plus Jakarta Sans and high-contrast deep slate/teal tones (`#2F3E46` & `#2B4042`), with 3px focus-visible rings.
+  - Implemented medical figures, specialist cards, and doctor schedules with SVG graphics; removed orphaned credentials from card headings.
+  - Enforced strict Rule R7 (zero emojis in markup, CSS, and TSX files across the template).
+  - Maintained JavaScript bundle under 30 KB budget (actual: 6.90 KB uncompressed, 2.55 KB gzipped).
+  - Added vendored motion assets and responsive imagery in `public/assets/` and `public/images/`.
+  - Verified 12/12 unit and acceptance tests passing in `@ecodigitech/site-template` (anti-FOUC, CSS pipeline, Axe accessibility clean with 0 critical/serious violations, 360/768/1280px screenshots).
+
 ### Added (MT-123 Media Library & Quota, MT-124 Publish/Rollback Controller, MT-139 Razorpay Billing & 18% GST Invoices)
 
 - **Media Library & R2 Quota Enforcement (MT-123):**

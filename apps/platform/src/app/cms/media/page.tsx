@@ -219,7 +219,7 @@ export default function MediaLibraryPage() {
   });
 
   const quotaBarColor =
-    quota.percentUsed >= 95 ? '#DC2626' : quota.percentUsed >= 80 ? '#D97706' : '#0D5C46';
+    quota.percentUsed >= 95 ? '#DC2626' : quota.percentUsed >= 80 ? '#D97706' : '#183C4A';
   const usedDisplay =
     quota.usedBytes < 1_048_576 && quota.usedBytes > 0
       ? `${(quota.usedBytes / 1024).toFixed(1)} KB`
@@ -241,31 +241,31 @@ export default function MediaLibraryPage() {
         }}
       >
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#0F172A', margin: '0 0 6px 0' }}>
-            Media &amp; Asset Library
+          <h1 style={{ fontSize: '26px', fontWeight: 600, letterSpacing: '-0.025em', color: 'var(--color-text-main, #162228)', margin: '0 0 6px 0' }}>
+            Media &amp; <span className="ms-serif-italic" style={{ fontSize: '30px', fontWeight: 400 }}>asset library</span>
           </h1>
-          <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
+          <p style={{ fontSize: '13.5px', color: 'var(--color-text-muted, #54666E)', margin: 0 }}>
             Manage clinic photos, doctor cutouts, facade imagery, and brand SVG assets backed by R2 quota tracking.
           </p>
         </div>
 
         {/* Live Storage Quota Meter */}
         <div
+          className="ms-bento-tile-light"
           style={{
-            background: '#F8FAFC',
-            border: '1px solid #E2E8F0',
-            borderRadius: '10px',
-            padding: '10px 16px',
+            borderRadius: '16px',
+            padding: '12px 18px',
             minWidth: '260px',
+            cursor: 'default',
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 700, color: 'var(--color-text-muted)', marginBottom: '6px' }}>
             <span>Storage Quota</span>
             <span style={{ color: quotaBarColor }}>
               {usedDisplay} / 1 GB ({quota.percentUsed}%)
             </span>
           </div>
-          <div style={{ width: '100%', height: '6px', background: '#E2E8F0', borderRadius: '999px', overflow: 'hidden' }}>
+          <div style={{ width: '100%', height: '6px', background: 'var(--color-border-subtle)', borderRadius: '9999px', overflow: 'hidden' }}>
             <div style={{ width: `${Math.min(100, Math.max(quota.usedBytes > 0 ? 1 : 0, quota.percentUsed))}%`, height: '100%', background: quotaBarColor }} />
           </div>
         </div>
@@ -281,7 +281,7 @@ export default function MediaLibraryPage() {
             border: '1px solid #FECACA',
             color: '#B91C1C',
             padding: '10px 14px',
-            borderRadius: '8px',
+            borderRadius: '12px',
             fontSize: '13px',
             fontWeight: 600,
             marginBottom: '16px',
@@ -294,25 +294,23 @@ export default function MediaLibraryPage() {
 
       {/* Upload Dropzone + URL Registration Card */}
       <div
+        className="ms-card"
         style={{
-          background: '#FFFFFF',
-          borderRadius: '12px',
-          border: `1px solid ${replacingAsset ? '#0D5C46' : '#E2E8F0'}`,
-          padding: '20px 24px',
+          border: `1px solid ${replacingAsset ? '#183C4A' : 'var(--color-border-subtle)'}`,
+          padding: '22px 24px',
           marginBottom: '24px',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)',
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-          <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#0F172A', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <UploadIcon size={16} color="#0D5C46" />
+          <h3 style={{ fontSize: '14.5px', fontWeight: 700, color: 'var(--color-text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <UploadIcon size={16} color="var(--color-brand-primary, #183C4A)" />
             <span>{replacingAsset ? `Replace Photo: ${replacingAsset.title}` : 'Upload Image File or Register CDN URL'}</span>
           </h3>
           {replacingAsset && (
             <button
               type="button"
               onClick={() => setReplacingAsset(null)}
-              style={{ fontSize: '12px', fontWeight: 600, color: '#64748B', background: 'none', border: 'none', cursor: 'pointer' }}
+              style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}
             >
               Cancel Replace
             </button>
@@ -334,10 +332,10 @@ export default function MediaLibraryPage() {
           }}
           onClick={() => !isUploading && fileInputRef.current?.click()}
           style={{
-            border: `1.5px dashed ${isDragging ? '#0D5C46' : '#CBD5E1'}`,
-            background: isDragging ? '#E6F4F1' : '#F8FAFC',
-            borderRadius: '10px',
-            padding: '16px',
+            border: `1.5px dashed ${isDragging ? '#183C4A' : 'var(--color-border-strong)'}`,
+            background: isDragging ? 'var(--color-brand-surface, #E7F2F5)' : 'var(--ms-hero-mist)',
+            borderRadius: '16px',
+            padding: '20px',
             textAlign: 'center',
             cursor: isUploading ? 'not-allowed' : 'pointer',
             marginBottom: '16px',
@@ -406,16 +404,12 @@ export default function MediaLibraryPage() {
           <button
             type="submit"
             disabled={isUploading}
+            className="ms-pill-dark"
             style={{
-              padding: '10px 16px',
-              borderRadius: '6px',
-              border: 'none',
-              background: '#0D5C46',
-              color: '#FFFFFF',
-              fontWeight: 700,
-              fontSize: '13px',
-              cursor: isUploading ? 'not-allowed' : 'pointer',
+              padding: '9px 18px',
               height: '38px',
+              justifyContent: 'center',
+              cursor: isUploading ? 'not-allowed' : 'pointer',
             }}
           >
             {isUploading ? 'Saving...' : replacingAsset ? 'Replace URL' : 'Add URL'}
@@ -426,13 +420,13 @@ export default function MediaLibraryPage() {
       {/* Filter and Search Bar */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap', marginBottom: '20px' }}>
         <div style={{ position: 'relative', width: '320px' }}>
-          <SearchIcon size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+          <SearchIcon size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
           <input
             type="text"
             placeholder="Search media assets..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{ width: '100%', padding: '9px 12px 9px 36px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '13px', background: '#FFFFFF', boxSizing: 'border-box' }}
+            style={{ width: '100%', padding: '9px 14px 9px 38px', borderRadius: '9999px', border: '1px solid var(--color-border-subtle)', fontSize: '13px', background: 'var(--color-bg-base)', color: 'var(--color-text-main)', boxSizing: 'border-box' }}
           />
         </div>
 
@@ -449,13 +443,13 @@ export default function MediaLibraryPage() {
               type="button"
               onClick={() => setFilterCategory(cat.id)}
               style={{
-                padding: '6px 12px',
-                borderRadius: '999px',
-                border: `1px solid ${filterCategory === cat.id ? '#0D5C46' : '#E2E8F0'}`,
-                background: filterCategory === cat.id ? '#E6F4F1' : '#FFFFFF',
-                color: filterCategory === cat.id ? '#0D5C46' : '#64748B',
+                padding: '7px 14px',
+                borderRadius: '9999px',
+                border: `1px solid ${filterCategory === cat.id ? '#183C4A' : 'var(--color-border-subtle)'}`,
+                background: filterCategory === cat.id ? '#183C4A' : 'var(--color-bg-base)',
+                color: filterCategory === cat.id ? '#FFFFFF' : 'var(--color-text-muted)',
                 fontSize: '12px',
-                fontWeight: filterCategory === cat.id ? 700 : 500,
+                fontWeight: filterCategory === cat.id ? 600 : 500,
                 cursor: 'pointer',
               }}
             >
@@ -467,24 +461,22 @@ export default function MediaLibraryPage() {
 
       {/* Assets Grid */}
       {loading ? (
-        <p style={{ fontSize: '13px', color: '#64748B' }}>Loading media assets...</p>
+        <p style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>Loading media assets...</p>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
           {filteredAssets.map((asset) => (
             <div
               key={asset.id}
+              className="ms-card"
               style={{
-                background: '#FFFFFF',
-                borderRadius: '12px',
-                border: '1px solid #E2E8F0',
+                padding: 0,
                 overflow: 'hidden',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
                 display: 'flex',
                 flexDirection: 'column',
               }}
             >
               {/* Image Preview Container */}
-              <div style={{ height: '180px', background: '#F1F5F9', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ height: '180px', background: 'var(--color-bg-surface)', position: 'relative', overflow: 'hidden' }}>
                 <img
                   src={asset.url}
                   alt={asset.title}
@@ -499,16 +491,16 @@ export default function MediaLibraryPage() {
                       position: 'absolute',
                       top: '10px',
                       left: '10px',
-                      background: '#0D5C46',
+                      background: '#183C4A',
                       color: '#FFFFFF',
                       fontSize: '11px',
                       fontWeight: 700,
-                      padding: '3px 8px',
-                      borderRadius: '4px',
+                      padding: '4px 10px',
+                      borderRadius: '9999px',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '4px',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
+                      boxShadow: '0 4px 10px rgba(24,60,74,0.25)',
                     }}
                   >
                     <ShieldCheckIcon size={12} />
@@ -520,10 +512,10 @@ export default function MediaLibraryPage() {
               {/* Content info */}
               <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <div>
-                  <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#0F172A', margin: '0 0 6px 0', lineHeight: 1.4 }}>
+                  <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-text-main)', margin: '0 0 6px 0', lineHeight: 1.4 }}>
                     {asset.title}
                   </h4>
-                  <div style={{ display: 'flex', gap: '10px', fontSize: '11px', color: '#94A3B8', marginBottom: '14px' }}>
+                  <div style={{ display: 'flex', gap: '10px', fontSize: '11px', color: 'var(--color-text-muted)', marginBottom: '14px' }}>
                     <span>{asset.dimensions || 'Auto'}</span>
                     <span>&bull;</span>
                     <span>{formatAssetSize(asset)}</span>
@@ -541,11 +533,11 @@ export default function MediaLibraryPage() {
                         type="button"
                         onClick={() => handleAssignAsset(asset.id, role)}
                         style={{
-                          padding: '4px 8px',
-                          borderRadius: '4px',
-                          border: '1px solid #CBD5E1',
-                          background: asset.assignedTo === role ? '#D1FAE5' : '#FFFFFF',
-                          color: asset.assignedTo === role ? '#065F46' : '#475569',
+                          padding: '4px 10px',
+                          borderRadius: '9999px',
+                          border: '1px solid var(--color-border-subtle)',
+                          background: asset.assignedTo === role ? 'var(--color-brand-surface, #E7F2F5)' : 'var(--color-bg-base)',
+                          color: asset.assignedTo === role ? 'var(--color-brand-primary, #183C4A)' : 'var(--color-text-muted)',
                           fontSize: '11px',
                           fontWeight: 600,
                           cursor: 'pointer',
@@ -556,17 +548,17 @@ export default function MediaLibraryPage() {
                     ))}
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', borderTop: '1px solid #F1F5F9', paddingTop: '10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', borderTop: '1px solid var(--color-border-subtle)', paddingTop: '10px' }}>
                     <div style={{ display: 'flex', gap: '6px' }}>
                       <button
                         type="button"
                         onClick={() => handleCopyUrl(asset.url)}
                         style={{
-                          padding: '6px 10px',
-                          borderRadius: '6px',
-                          border: '1px solid #E2E8F0',
-                          background: '#FFFFFF',
-                          color: '#475569',
+                          padding: '6px 12px',
+                          borderRadius: '9999px',
+                          border: '1px solid var(--color-border-subtle)',
+                          background: 'var(--color-bg-base)',
+                          color: 'var(--color-text-muted)',
                           fontSize: '11px',
                           fontWeight: 600,
                           cursor: 'pointer',
@@ -585,11 +577,11 @@ export default function MediaLibraryPage() {
                           window.scrollTo({ top: 0, behavior: 'smooth' });
                         }}
                         style={{
-                          padding: '6px 10px',
-                          borderRadius: '6px',
-                          border: '1px solid #E2E8F0',
-                          background: '#FFFFFF',
-                          color: '#0D5C46',
+                          padding: '6px 12px',
+                          borderRadius: '9999px',
+                          border: '1px solid var(--color-border-subtle)',
+                          background: 'var(--color-brand-surface, #E7F2F5)',
+                          color: 'var(--color-brand-primary, #183C4A)',
                           fontSize: '11px',
                           fontWeight: 600,
                           cursor: 'pointer',
@@ -607,8 +599,8 @@ export default function MediaLibraryPage() {
                       onClick={() => handleDelete(asset.id)}
                       title="Delete Asset"
                       style={{
-                        padding: '6px',
-                        borderRadius: '6px',
+                        padding: '6px 8px',
+                        borderRadius: '9999px',
                         border: '1px solid #FEE2E2',
                         background: '#FEF2F2',
                         color: '#DC2626',
@@ -634,13 +626,13 @@ export default function MediaLibraryPage() {
             position: 'fixed',
             bottom: '24px',
             right: '24px',
-            background: '#0D5C46',
+            background: '#183C4A',
             color: '#FFFFFF',
             padding: '12px 20px',
-            borderRadius: '8px',
+            borderRadius: '9999px',
             fontSize: '13px',
             fontWeight: 600,
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+            boxShadow: '0 10px 24px rgba(24, 60, 74, 0.28)',
             zIndex: 200,
             display: 'flex',
             alignItems: 'center',

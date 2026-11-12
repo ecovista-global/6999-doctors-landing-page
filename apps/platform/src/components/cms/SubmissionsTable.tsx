@@ -19,8 +19,9 @@ import {
 
 export interface SubmissionsTableProps {
   items: CmsAppointmentItem[];
-  activeTab: 'today' | 'all';
-  onTabChange: (tab: 'today' | 'all') => void;
+  activeTab: 'today' | 'all' | 'enquiries';
+  onTabChange: (tab: 'today' | 'all' | 'enquiries') => void;
+  enquiriesSlot?: React.ReactNode;
   statusFilter: string;
   onStatusFilterChange: (status: string) => void;
   serviceFilter: string;
@@ -72,13 +73,13 @@ export function StatusBadge({ status }: { status: CmsAppointmentItem['status'] }
             display: 'inline-flex',
             alignItems: 'center',
             gap: '4px',
-            padding: '3px 8px',
-            borderRadius: '999px',
+            padding: '4px 10px',
+            borderRadius: '9999px',
             fontSize: '12px',
             fontWeight: 700,
-            background: '#CCFBF1',
-            color: '#0D9488',
-            border: '1px solid #99F6E4',
+            background: 'var(--color-brand-surface, #E7F2F5)',
+            color: 'var(--color-brand-primary, #183C4A)',
+            border: '1px solid var(--color-border-subtle, #DFE8EB)',
           }}
         >
           <CheckCircleIcon size={12} />
@@ -93,13 +94,13 @@ export function StatusBadge({ status }: { status: CmsAppointmentItem['status'] }
             display: 'inline-flex',
             alignItems: 'center',
             gap: '4px',
-            padding: '3px 8px',
-            borderRadius: '999px',
+            padding: '4px 10px',
+            borderRadius: '9999px',
             fontSize: '12px',
             fontWeight: 700,
-            background: '#D1FAE5',
-            color: '#059669',
-            border: '1px solid #A7F3D0',
+            background: 'var(--color-brand-primary, #183C4A)',
+            color: '#FFFFFF',
+            border: '1px solid var(--color-brand-primary, #183C4A)',
           }}
         >
           <CheckCircleIcon size={12} />
@@ -153,6 +154,7 @@ export function SubmissionsTable({
   onExportCsv,
   onSelectSubmission,
   onQuickStatusChange,
+  enquiriesSlot,
   servicesList = [
     'General Consultation',
     'Cardiology Screening',
@@ -230,17 +232,17 @@ export function SubmissionsTable({
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '6px 14px',
-              borderRadius: '6px',
+              padding: '6px 16px',
+              borderRadius: '9999px',
               fontSize: '13px',
               fontWeight: activeTab === 'today' ? 700 : 500,
               border: 'none',
               cursor: 'pointer',
               background:
                 activeTab === 'today'
-                  ? 'var(--color-brand-primary, #0D5C46)'
+                  ? 'var(--color-brand-primary, #183C4A)'
                   : 'transparent',
-              color: activeTab === 'today' ? '#FFFFFF' : 'var(--color-text-main, #334155)',
+              color: activeTab === 'today' ? '#FFFFFF' : 'var(--color-text-main, #121B1F)',
               transition: 'all 150ms ease',
             }}
           >
@@ -257,26 +259,57 @@ export function SubmissionsTable({
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '6px 14px',
-              borderRadius: '6px',
+              padding: '6px 16px',
+              borderRadius: '9999px',
               fontSize: '13px',
               fontWeight: activeTab === 'all' ? 700 : 500,
               border: 'none',
               cursor: 'pointer',
               background:
                 activeTab === 'all'
-                  ? 'var(--color-brand-primary, #0D5C46)'
+                  ? 'var(--color-brand-primary, #183C4A)'
                   : 'transparent',
-              color: activeTab === 'all' ? '#FFFFFF' : 'var(--color-text-main, #334155)',
+              color: activeTab === 'all' ? '#FFFFFF' : 'var(--color-text-main, #121B1F)',
               transition: 'all 150ms ease',
             }}
           >
             <CalendarIcon size={14} />
             All Submissions
           </button>
+
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'enquiries'}
+            data-testid="tab-enquiries"
+            onClick={() => onTabChange('enquiries')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 16px',
+              borderRadius: '9999px',
+              fontSize: '13px',
+              fontWeight: activeTab === 'enquiries' ? 700 : 500,
+              border: 'none',
+              cursor: 'pointer',
+              background:
+                activeTab === 'enquiries'
+                  ? 'var(--color-brand-primary, #183C4A)'
+                  : 'transparent',
+              color: activeTab === 'enquiries' ? '#FFFFFF' : 'var(--color-text-main, #121B1F)',
+              transition: 'all 150ms ease',
+            }}
+          >
+            Patient Enquiries
+          </button>
         </div>
       </div>
 
+      {activeTab === 'enquiries' && enquiriesSlot ? (
+        enquiriesSlot
+      ) : (
+        <>
       {/* Filter Toolbar: Search, Status, Service, Date range */}
       <div
         style={{
@@ -510,11 +543,11 @@ export function SubmissionsTable({
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '4px',
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  border: '1px solid var(--color-border-subtle, #CBD5E1)',
-                  background: 'var(--color-bg-base, #FFFFFF)',
-                  color: 'var(--color-brand-primary, #0D5C46)',
+                  padding: '8px 14px',
+                  borderRadius: '9999px',
+                  border: '1px solid var(--color-border-subtle, #DFE8EB)',
+                  background: 'var(--color-bg-surface, #FFFFFF)',
+                  color: 'var(--color-brand-primary, #183C4A)',
                   fontWeight: 600,
                   fontSize: '12px',
                   cursor: 'pointer',
@@ -530,12 +563,10 @@ export function SubmissionsTable({
 
       {/* Main Table */}
       <div
+        className="ms-card"
         style={{
-          background: 'var(--color-bg-base, #FFFFFF)',
-          borderRadius: '10px',
-          border: '1px solid var(--color-border-subtle, #E2E8F0)',
+          padding: 0,
           overflow: 'hidden',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
         }}
       >
         <div style={{ overflowX: 'auto' }}>
@@ -626,15 +657,20 @@ export function SubmissionsTable({
                       )}
                     </td>
 
-                    {/* Service */}
+                    {/* Service & Assigned Doctor */}
                     <td style={{ padding: '12px 16px', color: '#1E293B', fontWeight: 500 }}>
-                      {row.serviceName}
+                      <div>{row.serviceName}</div>
+                      {row.doctorName && (
+                        <div style={{ fontSize: '11.5px', color: 'var(--color-brand-primary, #183C4A)', fontWeight: 600, marginTop: '2px' }}>
+                          {row.doctorName}
+                        </div>
+                      )}
                     </td>
 
                     {/* Preferred Slot */}
                     <td style={{ padding: '12px 16px', color: '#334155' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <CalendarIcon size={12} color="#0D5C46" />
+                        <CalendarIcon size={12} color="var(--color-brand-primary, #183C4A)" />
                         <span style={{ fontWeight: 600 }}>{row.preferredDate}</span>
                       </div>
                       <div
@@ -677,11 +713,11 @@ export function SubmissionsTable({
                             data-testid={`quick-confirm-${row.id}`}
                             onClick={() => onQuickStatusChange(row.id, 'confirmed')}
                             style={{
-                              padding: '4px 8px',
-                              borderRadius: '4px',
-                              border: '1px solid #99F6E4',
-                              background: '#CCFBF1',
-                              color: '#0D9488',
+                              padding: '5px 12px',
+                              borderRadius: '9999px',
+                              border: '1px solid var(--color-border-subtle, #DFE8EB)',
+                              background: 'var(--color-brand-surface, #E7F2F5)',
+                              color: 'var(--color-brand-primary, #183C4A)',
                               fontSize: '11px',
                               fontWeight: 700,
                               cursor: 'pointer',
@@ -698,11 +734,11 @@ export function SubmissionsTable({
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '4px',
-                            padding: '4px 10px',
-                            borderRadius: '4px',
-                            border: '1px solid var(--color-border-subtle, #CBD5E1)',
-                            background: '#FFFFFF',
-                            color: 'var(--color-brand-primary, #0D5C46)',
+                            padding: '5px 12px',
+                            borderRadius: '9999px',
+                            border: '1px solid var(--color-border-subtle, #DFE8EB)',
+                            background: 'var(--color-bg-surface, #FFFFFF)',
+                            color: 'var(--color-brand-primary, #183C4A)',
                             fontSize: '12px',
                             fontWeight: 600,
                             cursor: 'pointer',
@@ -727,14 +763,14 @@ export function SubmissionsTable({
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '12px 16px',
-            borderTop: '1px solid var(--color-border-subtle, #E2E8F0)',
-            background: 'var(--color-bg-subtle, #F8FAFC)',
+            borderTop: '1px solid var(--color-border-subtle, #DFE8EB)',
+            background: 'var(--color-bg-base, #F5F8F9)',
             fontSize: '12px',
-            color: 'var(--color-text-muted, #64748B)',
+            color: 'var(--color-text-muted, #5A6B72)',
           }}
         >
           <div>
-            Showing <strong style={{ color: '#0F172A' }}>{items.length}</strong> records
+            Showing <strong style={{ color: 'var(--color-text-main, #121B1F)' }}>{items.length}</strong> records
           </div>
 
           <div>
@@ -744,15 +780,12 @@ export function SubmissionsTable({
                 data-testid="cms-load-more"
                 disabled={loading}
                 onClick={onLoadMore}
+                className="ms-pill-dark"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  padding: '6px 14px',
-                  borderRadius: '6px',
-                  border: '1px solid var(--color-brand-primary, #0D5C46)',
-                  background: 'var(--color-brand-primary, #0D5C46)',
-                  color: '#FFFFFF',
+                  padding: '6px 16px',
                   fontWeight: 600,
                   fontSize: '12px',
                   cursor: loading ? 'not-allowed' : 'pointer',
@@ -767,6 +800,8 @@ export function SubmissionsTable({
           </div>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }

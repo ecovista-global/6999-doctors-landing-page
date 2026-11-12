@@ -11,6 +11,7 @@ import {
 } from '@/lib/idempotency';
 import { validateSpamProtection } from '@/lib/spam-protection';
 import { enquirySubmissionSchema } from '@/lib/enquiry-schemas';
+import { resolvePublicTenantId } from '@/lib/defaultTenant';
 
 // ==============================================================================
 // 1. CORS Preflight & Security Headers
@@ -125,27 +126,7 @@ export const POST = withGateway({ auth: 'none' }, async (req: NextRequest, ctx) 
     await client.query('BEGIN');
 
     // 4.1 Resolve Tenant ID
-    let resolvedTenantId = data.tenantId;
-
-    if (!resolvedTenantId && data.clinicSlug) {
-      const tenantLookup = await client.query(
-        'SELECT id FROM tenants WHERE slug = $1 LIMIT 1',
-        [data.clinicSlug]
-      );
-      if (tenantLookup.rowCount && tenantLookup.rowCount > 0) {
-        resolvedTenantId = tenantLookup.rows[0].id;
-      }
-    }
-
-    if (!resolvedTenantId) {
-      const defaultTenantLookup = await client.query(
-        'SELECT id FROM tenants WHERE status = $1 ORDER BY created_at ASC LIMIT 1',
-        ['active']
-      );
-      if (defaultTenantLookup.rowCount && defaultTenantLookup.rowCount > 0) {
-        resolvedTenantId = defaultTenantLookup.rows[0].id;
-      }
-    }
+    const resolvedTenantId = await resolvePublicTenantId(client, data.tenantId, data.clinicSlug);
 
     if (!resolvedTenantId) {
       throw new AppError('E-1101', 'Unable to resolve clinic tenant for enquiry');

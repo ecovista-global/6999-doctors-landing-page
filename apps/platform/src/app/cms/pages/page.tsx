@@ -15,9 +15,9 @@ import {
   ShieldCheckIcon,
 } from '@/components/Icons';
 import {
-  ALLOWED_PAGE_SLOTS,
+  PREMIUM_ALLOWED_PAGE_SLOTS,
   PAGE_SLOTS_METADATA,
-  AllowedPageSlot,
+  PREMIUM_PAGE_SLOTS_METADATA,
   PageSlotDetail,
 } from '@ecodigitech/content-schema';
 
@@ -31,7 +31,7 @@ interface SlotExtraInfo {
   metaDescription: string;
 }
 
-const SLOT_EXTRAS: Record<AllowedPageSlot, SlotExtraInfo> = {
+const SLOT_EXTRAS: Record<string, SlotExtraInfo> = {
   home: {
     features: ['Clinical Split Hero', 'Doctor Photo Cutout', 'Medical Badges', 'Clinic Hours Banner', 'Quick-Book CTA'],
     manageUrl: '/cms/editor',
@@ -60,13 +60,40 @@ const SLOT_EXTRAS: Record<AllowedPageSlot, SlotExtraInfo> = {
     metaDescription: 'Expert care for Type-2 Diabetes, Hypertension, Seasonal Fevers, Thyroid, and Preventive Health Checks at Sector 18 Noida.',
   },
   doctors: {
-    features: ['Specialist Clinical Roster', 'Consulting Days & Hours', 'Qualifications Display', 'Direct Booking Trigger', 'Mobile Responsive Cards'],
-    manageUrl: '/cms/editor',
-    manageLabel: 'Manage Specialists',
+    features: ['Multi-Doctor Directory', 'Consulting Days & Hours', 'Department Filtering', 'Direct Doctor Booking', 'Mobile Responsive Cards'],
+    manageUrl: '/cms/doctors',
+    manageLabel: 'Manage Doctors',
     previewHash: '#features',
     routePath: '/doctors',
     metaTitle: 'Specialist Doctors & Clinical Schedule | HealthConsult Clinic',
     metaDescription: 'Meet our consulting physicians and specialists. Check OPD timings and book priority consultations.',
+  },
+  specialties: {
+    features: ['3 Clinical Departments', 'Linked Specialist Cards', 'Chronic Care Pathways', 'Direct Specialty Booking'],
+    manageUrl: '/cms/doctors',
+    manageLabel: 'Link Specialists',
+    previewHash: '#specialties',
+    routePath: '/specialties',
+    metaTitle: 'Medical Specialties & Departments | HealthConsult Clinic',
+    metaDescription: 'Explore Internal Medicine, Family Pediatrics, and Clinical Nutrition departments with specialist routing.',
+  },
+  facilities: {
+    features: ['In-House Sample Collection', 'Digital ECG & Diagnostics', '2-8C Cold-Chain Vaccines', 'Barrier-Free Access'],
+    manageUrl: '/cms/editor',
+    manageLabel: 'Edit Facilities Info',
+    previewHash: '#facilities',
+    routePath: '/facilities',
+    metaTitle: 'Clinic Facilities & Diagnostic Lab | HealthConsult Clinic',
+    metaDescription: 'Point-of-care diagnostics, ECG, cold-chain vaccination suite, and outpatient observation facilities in Sector 18 Noida.',
+  },
+  'health-packages': {
+    features: ['4 Preventive Check Panels', 'Transparent Package Pricing', 'Home Sample Option', '1-Click Package Booking'],
+    manageUrl: '/cms/editor',
+    manageLabel: 'Edit Checkup Panels',
+    previewHash: '#health-packages',
+    routePath: '/health-packages',
+    metaTitle: 'Preventive Health Packages | HealthConsult Clinic',
+    metaDescription: 'Comprehensive Diabetes, Cardiac, Senior Citizen, and Annual Preventive Health Screening packages with physician review.',
   },
   'testimonials-faq': {
     features: ['Verified Patient Reviews', 'DPDP Act 2023 Consent Check', '5-Star Rating Selector', 'Searchable FAQ Accordion', 'Emergency Protocols'],
@@ -98,7 +125,9 @@ const SLOT_EXTRAS: Record<AllowedPageSlot, SlotExtraInfo> = {
 };
 
 export default function PageSlotsManager() {
-  const [enabledPages, setEnabledPages] = useState<AllowedPageSlot[]>([...ALLOWED_PAGE_SLOTS]);
+  const [enabledPages, setEnabledPages] = useState<string[]>([...PREMIUM_ALLOWED_PAGE_SLOTS]);
+  const [sitePlan, setSitePlan] = useState<'professional' | 'premium'>('premium');
+  const [maxAllowedPages, setMaxAllowedPages] = useState<number>(10);
   const [loading, setLoading] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -117,6 +146,12 @@ export default function PageSlotsManager() {
         const res = await fetch(`/api/v1/cms/pages?tenantId=${tenantId}`);
         if (res.ok) {
           const data = await res.json();
+          if (data.plan === 'professional' || data.plan === 'premium') {
+            setSitePlan(data.plan);
+          }
+          if (typeof data.maxAllowedPages === 'number') {
+            setMaxAllowedPages(data.maxAllowedPages);
+          }
           if (data.enabledPages) {
             setEnabledPages(data.enabledPages);
           }
@@ -130,7 +165,7 @@ export default function PageSlotsManager() {
     loadPages();
   }, []);
 
-  const handleTogglePage = (slotId: AllowedPageSlot, isCore: boolean) => {
+  const handleTogglePage = (slotId: string, isCore: boolean) => {
     if (isCore) {
       // Core pages cannot be disabled
       return;
@@ -140,10 +175,10 @@ export default function PageSlotsManager() {
     if (enabledPages.includes(slotId)) {
       setEnabledPages(enabledPages.filter((id) => id !== slotId));
     } else {
-      if (enabledPages.length >= 7) {
+      if (enabledPages.length >= maxAllowedPages) {
         setFeedback({
           type: 'error',
-          message: 'Page limit reached: maximum 7 page slots permitted on the Professional Clinic plan (E-1601).',
+          message: `Page limit reached: maximum ${maxAllowedPages} page slots permitted on your current plan (E-1601).`,
         });
         return;
       }
@@ -206,11 +241,11 @@ export default function PageSlotsManager() {
         }}
       >
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#0F172A', margin: '0 0 6px 0' }}>
-            Page Slots Manager (7-Page Architecture)
+          <h1 style={{ fontSize: '26px', fontWeight: 600, letterSpacing: '-0.025em', color: 'var(--color-text-main, #162228)', margin: '0 0 6px 0' }}>
+            Page Slots Manager <span className="ms-serif-italic" style={{ fontSize: '30px', fontWeight: 400 }}>({maxAllowedPages}-page architecture)</span>
           </h1>
-          <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
-            Configure active website pages for the Professional Clinic plan. Exactly up to 7 distinct pages are supported.
+          <p style={{ fontSize: '13.5px', color: 'var(--color-text-muted, #54666E)', margin: 0 }}>
+            Configure active website pages for the {sitePlan === 'premium' ? 'Premium Clinic' : 'Professional Clinic'} plan. Up to {maxAllowedPages} responsive pages are supported.
           </p>
         </div>
 
@@ -221,36 +256,37 @@ export default function PageSlotsManager() {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
-            padding: '6px 14px',
-            borderRadius: '999px',
-            background: enabledPages.length === 7 ? '#CCFBF1' : '#F1F5F9',
-            border: `1px solid ${enabledPages.length === 7 ? '#99F6E4' : '#CBD5E1'}`,
+            padding: '7px 16px',
+            borderRadius: '9999px',
+            background: enabledPages.length >= maxAllowedPages ? 'var(--color-brand-surface, #E7F2F5)' : 'var(--color-bg-surface)',
+            border: '1px solid var(--color-border-subtle)',
             fontSize: '13px',
             fontWeight: 700,
-            color: enabledPages.length === 7 ? '#0D9488' : '#334155',
+            color: enabledPages.length >= maxAllowedPages ? 'var(--color-brand-primary, #183C4A)' : 'var(--color-text-muted)',
           }}
         >
           <FileTextIcon size={15} />
-          <span>{enabledPages.length} / 7 Pages Active</span>
+          <span>{enabledPages.length} / {maxAllowedPages} Pages Active</span>
         </div>
       </div>
 
       {/* Page Slots List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
-        {PAGE_SLOTS_METADATA.map((slot: PageSlotDetail) => {
+        {(maxAllowedPages >= 10 ? PREMIUM_PAGE_SLOTS_METADATA : PAGE_SLOTS_METADATA).map((slot: PageSlotDetail) => {
           const isEnabled = enabledPages.includes(slot.id);
-          const extra = SLOT_EXTRAS[slot.id];
+          const extra = (SLOT_EXTRAS[slot.id] ?? SLOT_EXTRAS.home)!;
           const isExpanded = !!expandedSlots[slot.id];
 
           return (
             <div
               key={slot.id}
               data-testid={`page-slot-card-${slot.id}`}
+              className="ms-card"
               style={{
-                borderRadius: '12px',
-                background: isEnabled ? '#FFFFFF' : '#F8FAFC',
-                border: `1px solid ${isEnabled ? '#CBD5E1' : '#E2E8F0'}`,
-                boxShadow: isEnabled ? '0 1px 3px rgba(0, 0, 0, 0.04)' : 'none',
+                borderRadius: '20px',
+                padding: 0,
+                background: isEnabled ? 'var(--color-bg-base)' : 'var(--color-bg-surface)',
+                border: `1px solid ${isEnabled ? 'var(--color-border-strong)' : 'var(--color-border-subtle)'}`,
                 opacity: isEnabled ? 1 : 0.65,
                 transition: 'all 150ms ease',
                 overflow: 'hidden',
@@ -262,22 +298,22 @@ export default function PageSlotsManager() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: '18px 22px',
+                  padding: '20px 24px',
                   gap: '16px',
                   flexWrap: 'wrap',
                 }}
               >
                 <div style={{ flex: 1, minWidth: '280px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                    <strong style={{ fontSize: '15px', color: '#0F172A' }}>{slot.label}</strong>
+                    <strong style={{ fontSize: '15.5px', color: 'var(--color-text-main)' }}>{slot.label}</strong>
                     <span
                       style={{
                         fontSize: '12px',
                         fontFamily: 'monospace',
-                        background: '#F1F5F9',
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        color: '#0D5C46',
+                        background: 'var(--color-brand-surface, #E7F2F5)',
+                        padding: '2px 9px',
+                        borderRadius: '9999px',
+                        color: 'var(--color-brand-primary, #183C4A)',
                         fontWeight: 600,
                       }}
                     >
@@ -292,8 +328,8 @@ export default function PageSlotsManager() {
                           fontSize: '10px',
                           fontWeight: 700,
                           textTransform: 'uppercase',
-                          padding: '2px 7px',
-                          borderRadius: '4px',
+                          padding: '2px 8px',
+                          borderRadius: '9999px',
                           background: '#EFF6FF',
                           color: '#1D4ED8',
                           border: '1px solid #BFDBFE',
@@ -304,7 +340,7 @@ export default function PageSlotsManager() {
                       </span>
                     )}
                   </div>
-                  <p style={{ fontSize: '13px', color: '#64748B', margin: '0 0 10px 0', lineHeight: 1.4 }}>
+                  <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', margin: '0 0 10px 0', lineHeight: 1.45 }}>
                     {slot.description}
                   </p>
 
@@ -315,10 +351,11 @@ export default function PageSlotsManager() {
                         key={fIdx}
                         style={{
                           fontSize: '11px',
-                          padding: '2px 8px',
-                          borderRadius: '4px',
-                          background: '#F1F5F9',
-                          color: '#475569',
+                          padding: '3px 10px',
+                          borderRadius: '9999px',
+                          background: 'var(--color-bg-surface)',
+                          color: 'var(--color-text-muted)',
+                          border: '1px solid var(--color-border-subtle)',
                           fontWeight: 500,
                         }}
                       >
@@ -334,18 +371,11 @@ export default function PageSlotsManager() {
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <Link
                         href={extra.manageUrl}
+                        className="ms-pill-light"
                         style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '5px',
-                          padding: '7px 12px',
-                          borderRadius: '6px',
-                          border: '1px solid #CBD5E1',
-                          background: '#FFFFFF',
-                          color: '#0D5C46',
+                          padding: '7px 14px',
+                          color: 'var(--color-brand-primary, #183C4A)',
                           fontSize: '12px',
-                          fontWeight: 700,
-                          textDecoration: 'none',
                         }}
                       >
                         <Edit3Icon size={13} />
@@ -357,18 +387,11 @@ export default function PageSlotsManager() {
                         target="_blank"
                         rel="noreferrer"
                         title={`Preview live page (${extra.routePath})`}
+                        className="ms-pill-light"
                         style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          padding: '7px 10px',
-                          borderRadius: '6px',
-                          border: '1px solid #CBD5E1',
-                          background: '#FFFFFF',
-                          color: '#0D5C46',
+                          padding: '7px 14px',
+                          color: 'var(--color-brand-primary, #183C4A)',
                           fontSize: '12px',
-                          fontWeight: 700,
-                          textDecoration: 'none',
                         }}
                       >
                         <ExternalLinkIcon size={13} />
@@ -393,9 +416,9 @@ export default function PageSlotsManager() {
                       disabled={slot.isCore}
                       checked={isEnabled}
                       onChange={() => handleTogglePage(slot.id, slot.isCore)}
-                      style={{ width: '18px', height: '18px', cursor: slot.isCore ? 'not-allowed' : 'pointer' }}
+                      style={{ width: '18px', height: '18px', accentColor: '#183C4A', cursor: slot.isCore ? 'not-allowed' : 'pointer' }}
                     />
-                    <span style={{ fontSize: '13px', fontWeight: 700, color: isEnabled ? '#0D5C46' : '#94A3B8' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 700, color: isEnabled ? 'var(--color-brand-primary, #183C4A)' : 'var(--color-text-muted)' }}>
                       {isEnabled ? 'Enabled' : 'Disabled'}
                     </span>
                   </label>
@@ -405,9 +428,9 @@ export default function PageSlotsManager() {
               {/* Bottom Accordion Bar for SEO Metadata */}
               <div
                 style={{
-                  background: '#F8FAFC',
-                  borderTop: '1px solid #E2E8F0',
-                  padding: '8px 22px',
+                  background: 'var(--color-bg-surface)',
+                  borderTop: '1px solid var(--color-border-subtle)',
+                  padding: '10px 24px',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
@@ -485,20 +508,12 @@ export default function PageSlotsManager() {
           data-testid="btn-save-pages"
           disabled={saving}
           onClick={handleSave}
+          className="ms-pill-dark"
           style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
             padding: '10px 24px',
-            borderRadius: '6px',
-            border: 'none',
-            background: 'var(--color-brand-primary, #0D5C46)',
-            color: '#FFFFFF',
-            fontWeight: 700,
             fontSize: '14px',
             cursor: saving ? 'not-allowed' : 'pointer',
             opacity: saving ? 0.7 : 1,
-            boxShadow: '0 2px 4px rgba(0,0,0,0.08)',
           }}
         >
           {saving ? 'Updating Slots...' : 'Save Page Architecture'}

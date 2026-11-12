@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
-import Link from 'next/link';
+import React, { useEffect, useState } from 'react';
 import { useClinicContent } from '@/lib/useClinicContent';
-import { PublicHeader } from '@/components/public/PublicHeader';
+import { CLINICAL_DOCTORS } from '@/lib/doctorsRoster';
+import { PublicHeader, PillArrowIcon } from '@/components/public/PublicHeader';
 import { PublicFooter } from '@/components/public/PublicFooter';
 import {
   MapPinIcon,
@@ -12,46 +12,110 @@ import {
   ClockIcon,
   CalendarIcon,
   CheckCircleIcon,
-  ShieldCheckIcon,
-  ChevronRightIcon,
   PrinterIcon,
-  BuildingIcon,
-  SendIcon,
 } from '@/components/Icons';
 import { AppointmentSlipModal } from '@/components/public/AppointmentSlipModal';
 import { getGoogleCalendarUrl, downloadIcsFile } from '@/lib/calendarExport';
 
 export default function ContactAndBookingPage() {
-  const { content, theme } = useClinicContent();
+  const { content } = useClinicContent();
   const [showSlipModal, setShowSlipModal] = useState(false);
 
-  // Form state
+  const todayStr = new Date().toISOString().split('T')[0] || '';
+  const [doctors, setDoctors] = useState<Array<{ id: string; name: string; department?: string; fee?: number | string }>>(
+    CLINICAL_DOCTORS.map((d) => ({ id: d.id, name: d.name, fee: d.fee }))
+  );
   const [formData, setFormData] = useState({
     patientName: '',
     phone: '',
+    doctor: CLINICAL_DOCTORS[0]?.name || 'Dr. Maanvita Kumari',
+    doctorId: '',
     service: 'General Internal Medicine & OPD Consultation',
-    preferredDate: '',
+    preferredDate: todayStr,
     shift: 'Evening' as 'Morning' | 'Afternoon' | 'Evening',
     notes: '',
   });
 
   const [selectedSlot, setSelectedSlot] = useState<string>('05:30 PM');
+  const [liveSlots, setLiveSlots] = useState<string[]>([]);
+  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+  const [isDayClosed, setIsDayClosed] = useState(false);
+  const [bookingError, setBookingError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submittedAptId, setSubmittedAptId] = useState('');
   const [confirmedToken, setConfirmedToken] = useState<number>(8);
   const [mapLoaded, setMapLoaded] = useState(false);
 
-  // Enquiry state
-  const [enquirySent, setEnquirySent] = useState(false);
-  const [enquiryName, setEnquiryName] = useState('');
-  const [enquiryPhone, setEnquiryPhone] = useState('');
-  const [enquiryMessage, setEnquiryMessage] = useState('');
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const qDoctor = params.get('doctor');
+      const qDoctorId = params.get('doctorId');
+      const qService = params.get('service');
+      if (qDoctor || qDoctorId || qService) {
+        setFormData((prev) => ({
+          ...prev,
+          doctor: qDoctor || prev.doctor,
+          doctorId: qDoctorId || prev.doctorId,
+          service: qService || prev.service,
+        }));
+      }
+    }
+
+    fetch('/api/v1/public/doctors')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && Array.isArray(data.items) && data.items.length > 0) {
+          setDoctors(data.items);
+          setFormData((prev) => {
+            const matched = data.items.find(
+              (d: any) => d.name === prev.doctor || d.id === prev.doctorId
+            );
+            return matched
+              ? { ...prev, doctor: matched.name, doctorId: matched.id }
+              : { ...prev, doctor: data.items[0].name, doctorId: data.items[0].id };
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const targetDate = formData.preferredDate || todayStr;
+    if (!targetDate) return;
+    const qs = new URLSearchParams({ date: targetDate });
+    if (formData.doctorId && /^[0-9a-f-]{36}$/i.test(formData.doctorId)) {
+      qs.set('doctorId', formData.doctorId);
+    } else if (formData.doctor) {
+      qs.set('doctor', formData.doctor);
+    }
+    fetch(`/api/v1/public/availability?${qs.toString()}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && !data.isClosed) {
+          const avail = Array.isArray(data.availableSlots) ? data.availableSlots : [];
+          const booked = Array.isArray(data.bookedSlots) ? data.bookedSlots : [];
+          setIsDayClosed(false);
+          setLiveSlots(avail);
+          setBookedSlots(booked);
+          if (avail.length > 0 && !avail.includes(selectedSlot)) {
+            setSelectedSlot(avail[0]);
+          }
+        } else {
+          setIsDayClosed(Boolean(data?.isClosed));
+          setLiveSlots([]);
+          setBookedSlots([]);
+        }
+      })
+      .catch(() => {});
+  }, [formData.preferredDate, formData.doctor, formData.doctorId, todayStr]);
 
   const handleBook = async (e: React.FormEvent) => {
     e.preventDefault();
+    setBookingError(null);
     if (!formData.patientName || !formData.phone) {
-      alert('Please provide your name and phone number.');
+      setBookingError('Please provide your name and phone number.');
       return;
     }
     setSubmitting(true);
@@ -62,10 +126,12 @@ export default function ContactAndBookingPage() {
         body: JSON.stringify({
           patientName: formData.patientName,
           phone: formData.phone,
+          doctor: formData.doctor,
           service: formData.service,
-          preferredDate: formData.preferredDate || new Date().toISOString().split('T')[0],
+          preferredDate: formData.preferredDate || todayStr,
           shift: formData.shift,
-          notes: `Selected Slot: ${selectedSlot}. ${formData.notes}`.trim(),
+          preferredTimeSlot: selectedSlot,
+          notes: `Doctor: ${formData.doctor}. Selected Slot: ${selectedSlot}. ${formData.notes}`.trim(),
         }),
       });
 
@@ -73,643 +139,541 @@ export default function ContactAndBookingPage() {
         const data = await res.json();
         const apt = data.appointment;
         setSubmittedAptId(apt?.id || '');
-        setConfirmedToken(apt?.tokenNumber || (content?.availability?.currentServingToken ? content.availability.currentServingToken + 4 : 8));
+        setConfirmedToken(
+          apt?.tokenNumber ||
+            (content?.availability?.currentServingToken ? content.availability.currentServingToken + 4 : 8)
+        );
         setSubmitSuccess(true);
+      } else if (res.status === 409) {
+        const errData = await res.json().catch(() => ({}));
+        setBookingError(
+          errData?.error ||
+            `${selectedSlot} with ${formData.doctor} on ${formData.preferredDate || todayStr} is already reserved. Please pick another slot.`
+        );
       } else {
-        alert('Failed to submit appointment. Please call the clinic directly.');
+        const errData = await res.json().catch(() => ({}));
+        setBookingError(errData?.error || 'Failed to submit appointment. Please call the clinic directly.');
       }
     } catch {
-      alert('Error submitting appointment. Please call the clinic directly.');
+      setBookingError('Error submitting appointment. Please call the clinic directly.');
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleEnquiry = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!enquiryName || !enquiryPhone) {
-      alert('Please enter your name and phone number.');
-      return;
-    }
-    setEnquirySent(true);
-  };
-
-  const downloadIcs = () => {
-    const today = (formData.preferredDate || new Date().toISOString().split('T')[0])?.replace(/-/g, '') ?? '';
-    const icsData = [
-      'BEGIN:VCALENDAR',
-      'VERSION:2.0',
-      'PRODID:-//DoctorSite Pro//Clinic Appointment//EN',
-      'BEGIN:VEVENT',
-      `SUMMARY:OPD Appointment - Dr. Maanvita Kumari (Token #${confirmedToken})`,
-      `DESCRIPTION:Consultation: ${formData.service}. Token Number #${confirmedToken}. HealthConsult Clinic, Sector 18 Noida.`,
-      `LOCATION:${content.clinic.street}, ${content.clinic.area}, ${content.clinic.city}`,
-      `DTSTART:${today}T120000Z`,
-      `DTEND:${today}T123000Z`,
-      'STATUS:CONFIRMED',
-      'END:VEVENT',
-      'END:VCALENDAR',
-    ].join('\r\n');
-
-    const blob = new Blob([icsData], { type: 'text/calendar;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `healthconsult-token-${confirmedToken}.ics`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  const fallbackSlots =
+    formData.shift === 'Morning'
+      ? ['09:30 AM', '10:00 AM', '10:30 AM', '11:15 AM', '12:00 PM']
+      : ['05:30 PM', '06:00 PM', '06:30 PM', '07:00 PM', '07:30 PM'];
+  const slotList = liveSlots.length > 0 ? liveSlots : isDayClosed ? [] : fallbackSlots;
 
   return (
-    <div style={{ minHeight: '100vh', background: '#FFFFFF', color: theme.text, fontFamily: 'var(--font-sans, system-ui)' }}>
-      {/* Shared Public Header */}
-      <PublicHeader content={content} theme={theme} />
+    <div className="ms-public-shell">
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
 
-      {/* Hero Banner */}
-      <section
-        style={{
-          background: `linear-gradient(180deg, ${theme.bg} 0%, #FFFFFF 100%)`,
-          padding: '60px 24px 30px 24px',
-          borderBottom: '1px solid #E2E8F0',
-        }}
-      >
-        <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '6px 14px',
-              borderRadius: '999px',
-              background: '#FFFFFF',
-              border: '1px solid #CBD5E1',
-              fontSize: '12px',
-              fontWeight: 700,
-              color: theme.primary,
-              marginBottom: '16px',
-            }}
-          >
-            <CalendarIcon size={14} color={theme.primary} />
-            <span>ONLINE APPOINTMENT DESK &bull; LIVE TOKEN QUEUE CONFIRMATION</span>
-          </div>
+      <PublicHeader content={content} />
 
-          <h1 style={{ fontSize: '36px', fontWeight: 800, color: '#0F172A', margin: '0 0 12px 0' }}>
-            Book Consultation &amp; Visit Clinic
-          </h1>
-          <p
-            style={{
-              fontSize: '16px',
-              color: '#64748B',
-              maxWidth: '750px',
-              margin: '0 auto',
-              lineHeight: '1.6',
-            }}
-          >
-            Reserve an outpatient appointment with Dr. Maanvita Kumari (MBBS, MD) at HealthConsult Family Clinic, Sector 18, Noida. Receive immediate digital token confirmation.
-          </p>
-        </div>
-      </section>
-
-      {/* Main Grid: Form + Clinic Details */}
-      <section style={{ padding: '60px 24px', maxWidth: '1200px', margin: '0 auto' }}>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
-            gap: '40px',
-            alignItems: 'flex-start',
-          }}
-        >
-          {/* Left Column: Interactive Appointment Form */}
-          <div
-            style={{
-              borderRadius: '16px',
-              border: '1px solid #E2E8F0',
-              background: '#FFFFFF',
-              padding: '36px',
-              boxShadow: '0 4px 20px rgba(15, 23, 42, 0.05)',
-            }}
-          >
-            {submitSuccess ? (
-              <div style={{ textAlign: 'center', padding: '20px 0' }}>
-                <div
-                  style={{
-                    width: '64px',
-                    height: '64px',
-                    borderRadius: '50%',
-                    background: '#DCFCE7',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    margin: '0 auto 16px auto',
-                  }}
-                >
-                  <CheckCircleIcon size={36} color="#059669" />
-                </div>
-                <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#0F172A', margin: '0 0 8px 0' }}>
-                  Appointment Confirmed!
-                </h2>
-                <div style={{ fontSize: '15px', color: '#64748B', marginBottom: '24px' }}>
-                  Your estimated token is <strong>#{confirmedToken}</strong> for <strong>{formData.patientName}</strong>.
-                </div>
-
-                <div
-                  style={{
-                    background: '#F8FAFC',
-                    borderRadius: '10px',
-                    border: '1px solid #E2E8F0',
-                    padding: '20px',
-                    textAlign: 'left',
-                    marginBottom: '24px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '8px',
-                    fontSize: '13px',
-                  }}
-                >
-                  <div><strong>Doctor:</strong> {content.doctor.name}</div>
-                  <div><strong>Consultation:</strong> {formData.service}</div>
-                  <div><strong>Session / Slot:</strong> {formData.shift} ({selectedSlot})</div>
-                  <div><strong>Location:</strong> HealthConsult Clinic, Sector 18 Noida</div>
-                  <div><strong>OPD Consultation Fee:</strong> ₹{content.doctor.consultationFee} (Payable at clinic desk)</div>
-                </div>
-
-                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                  <button
-                    type="button"
-                    onClick={() => setShowSlipModal(true)}
-                    style={{
-                      background: '#0D5C46',
-                      color: '#FFFFFF',
-                      padding: '10px 18px',
-                      borderRadius: '8px',
-                      border: 'none',
-                      fontWeight: 700,
-                      fontSize: '13px',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      boxShadow: '0 2px 4px rgba(13,92,70,0.25)',
-                    }}
-                  >
-                    <PrinterIcon size={15} color="#FFFFFF" />
-                    <span>Print Appointment Slip</span>
-                  </button>
-
-                  <a
-                    href={getGoogleCalendarUrl({
-                      patientName: formData.patientName,
-                      doctorName: content.doctor.name,
-                      clinicName: content.clinic.name,
-                      service: formData.service,
-                      date: formData.preferredDate || new Date().toISOString().split('T')[0] || '',
-                      time: selectedSlot,
-                      tokenNumber: confirmedToken,
-                      clinicAddress: `${content.clinic.street}, ${content.clinic.area}, ${content.clinic.city}`,
-                      phone: content.doctor.phone,
-                    })}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      background: '#FFFFFF',
-                      color: '#0284C7',
-                      padding: '10px 16px',
-                      borderRadius: '8px',
-                      border: '1px solid #BAE6FD',
-                      fontWeight: 700,
-                      fontSize: '13px',
-                      textDecoration: 'none',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                    }}
-                  >
-                    <CalendarIcon size={15} color="#0284C7" />
-                    <span>Google Calendar</span>
-                  </a>
-
-                  <button
-                    type="button"
-                    onClick={() => downloadIcsFile({
-                      patientName: formData.patientName,
-                      doctorName: content.doctor.name,
-                      clinicName: content.clinic.name,
-                      service: formData.service,
-                      date: formData.preferredDate || new Date().toISOString().split('T')[0] || '',
-                      time: selectedSlot,
-                      tokenNumber: confirmedToken,
-                      clinicAddress: `${content.clinic.street}, ${content.clinic.area}, ${content.clinic.city}`,
-                      phone: content.doctor.phone,
-                    })}
-                    style={{
-                      background: '#FFFFFF',
-                      color: '#334155',
-                      padding: '10px 16px',
-                      borderRadius: '8px',
-                      border: '1px solid #CBD5E1',
-                      fontWeight: 700,
-                      fontSize: '13px',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                    }}
-                  >
-                    <ClockIcon size={15} color="#D97706" />
-                    <span>Apple / .ics</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSubmitSuccess(false);
-                      setFormData({ patientName: '', phone: '', service: 'General Internal Medicine & OPD Consultation', preferredDate: '', shift: 'Evening', notes: '' });
-                    }}
-                    style={{
-                      background: '#FFFFFF',
-                      color: '#475569',
-                      padding: '10px 18px',
-                      borderRadius: '8px',
-                      border: '1px solid #CBD5E1',
-                      fontWeight: 700,
-                      fontSize: '13px',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Book Another Slot
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <form onSubmit={handleBook}>
-                <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#0F172A', margin: '0 0 6px 0' }}>
-                  In-Clinic Appointment Booking
-                </h2>
-                <p style={{ fontSize: '13px', color: '#64748B', margin: '0 0 24px 0' }}>
-                  Fill out the form below. Average OPD wait time is under 15 minutes.
-                </p>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-                  {/* Patient Name */}
-                  <div>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                      Patient Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Ramesh Sharma"
-                      value={formData.patientName}
-                      onChange={(e) => setFormData({ ...formData, patientName: e.target.value })}
-                      style={{
-                        width: '100%',
-                        padding: '10px 14px',
-                        borderRadius: '8px',
-                        border: '1px solid #CBD5E1',
-                        fontSize: '14px',
-                        boxSizing: 'border-box',
-                      }}
-                    />
-                  </div>
-
-                  {/* Phone Number */}
-                  <div>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                      Contact Mobile Number *
-                    </label>
-                    <input
-                      type="tel"
-                      required
-                      placeholder="e.g. +91 98765 43210"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      style={{
-                        width: '100%',
-                        padding: '10px 14px',
-                        borderRadius: '8px',
-                        border: '1px solid #CBD5E1',
-                        fontSize: '14px',
-                        boxSizing: 'border-box',
-                      }}
-                    />
-                    <span style={{ fontSize: '11px', color: '#64748B', marginTop: '4px', display: 'block' }}>
-                      Encrypted under DPDP Act 2023. Used solely for consultation confirmation.
-                    </span>
-                  </div>
-
-                  {/* Service Selection */}
-                  <div>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                      Clinical Specialty / Treatment
-                    </label>
-                    <select
-                      value={formData.service}
-                      onChange={(e) => setFormData({ ...formData, service: e.target.value })}
-                      style={{
-                        width: '100%',
-                        padding: '10px 14px',
-                        borderRadius: '8px',
-                        border: '1px solid #CBD5E1',
-                        fontSize: '14px',
-                        background: '#FFFFFF',
-                        boxSizing: 'border-box',
-                      }}
-                    >
-                      {content.services.map((s) => (
-                        <option key={s.id} value={s.title}>
-                          {s.title}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Shift & Time Slot */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                        Preferred OPD Session
-                      </label>
-                      <select
-                        value={formData.shift}
-                        onChange={(e) => setFormData({ ...formData, shift: e.target.value as any })}
-                        style={{
-                          width: '100%',
-                          padding: '10px 14px',
-                          borderRadius: '8px',
-                          border: '1px solid #CBD5E1',
-                          fontSize: '14px',
-                          background: '#FFFFFF',
-                          boxSizing: 'border-box',
-                        }}
-                      >
-                        <option value="Morning">Morning (09:00 AM - 01:00 PM)</option>
-                        <option value="Evening">Evening (05:00 PM - 08:00 PM)</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                        Preferred Slot Time
-                      </label>
-                      <select
-                        value={selectedSlot}
-                        onChange={(e) => setSelectedSlot(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '10px 14px',
-                          borderRadius: '8px',
-                          border: '1px solid #CBD5E1',
-                          fontSize: '14px',
-                          background: '#FFFFFF',
-                          boxSizing: 'border-box',
-                        }}
-                      >
-                        {formData.shift === 'Morning' ? (
-                          <>
-                            <option value="09:30 AM">09:30 AM</option>
-                            <option value="10:00 AM">10:00 AM</option>
-                            <option value="10:30 AM">10:30 AM</option>
-                            <option value="11:15 AM">11:15 AM</option>
-                            <option value="12:00 PM">12:00 PM</option>
-                          </>
-                        ) : (
-                          <>
-                            <option value="05:30 PM">05:30 PM</option>
-                            <option value="06:00 PM">06:00 PM</option>
-                            <option value="06:30 PM">06:30 PM</option>
-                            <option value="07:00 PM">07:00 PM</option>
-                            <option value="07:30 PM">07:30 PM</option>
-                          </>
-                        )}
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Clinical Notes / Symptoms */}
-                  <div>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                      Primary Symptoms or Medical Concerns (Optional)
-                    </label>
-                    <textarea
-                      rows={3}
-                      placeholder="e.g. Elevated fasting blood glucose, fever for 3 days, routine annual health checkup..."
-                      value={formData.notes}
-                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      style={{
-                        width: '100%',
-                        padding: '10px 14px',
-                        borderRadius: '8px',
-                        border: '1px solid #CBD5E1',
-                        fontSize: '14px',
-                        boxSizing: 'border-box',
-                      }}
-                    />
-                  </div>
-
-                  {/* DPDP Act Patient Consent Checkbox */}
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                    <input
-                      type="checkbox"
-                      id="consent-check"
-                      required
-                      defaultChecked
-                      style={{ marginTop: '3px' }}
-                    />
-                    <label htmlFor="consent-check" style={{ fontSize: '12px', color: '#475569', lineHeight: '1.5' }}>
-                      I consent to HealthConsult Family Clinic securely recording my appointment details and transmitting token notifications via SMS/WhatsApp in compliance with DPDP Act 2023.
-                    </label>
-                  </div>
-
-                  {/* Submit Button */}
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    style={{
-                      background: theme.primary,
-                      color: '#FFFFFF',
-                      padding: '14px 24px',
-                      borderRadius: '8px',
-                      border: 'none',
-                      fontWeight: 800,
-                      fontSize: '15px',
-                      cursor: submitting ? 'not-allowed' : 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                      transition: 'all 150ms ease',
-                    }}
-                  >
-                    <CalendarIcon size={18} color="#FFFFFF" />
-                    <span>{submitting ? 'Confirming Token...' : 'Confirm In-Clinic Appointment'}</span>
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-
-          {/* Right Column: Clinic Information & Map */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            {/* Quick Contact Desk */}
-            <div
-              style={{
-                borderRadius: '16px',
-                border: '1px solid #E2E8F0',
-                background: '#FFFFFF',
-                padding: '28px',
-                boxShadow: '0 2px 10px rgba(15, 23, 42, 0.03)',
-              }}
-            >
-              <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0F172A', margin: '0 0 16px 0' }}>
-                Clinic Location &amp; Contact Desk
-              </h3>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                  <MapPinIcon size={20} color={theme.primary} style={{ marginTop: '2px', flexShrink: 0 }} />
-                  <div>
-                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#0F172A' }}>
-                      {content.clinic.name}
-                    </div>
-                    <div style={{ fontSize: '13px', color: '#475569', marginTop: '2px', lineHeight: '1.5' }}>
-                      {content.clinic.street}, {content.clinic.area}, {content.clinic.city}, {content.clinic.state} - {content.clinic.pincode}
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#64748B', marginTop: '4px' }}>
-                      {content.clinic.transitGuidance}
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <PhoneIcon size={18} color={theme.primary} style={{ flexShrink: 0 }} />
-                  <div>
-                    <div style={{ fontSize: '12px', color: '#64748B' }}>Front Desk Telephone:</div>
-                    <a
-                      href={`tel:${content.doctor.phone.replace(/[^0-9+]/g, '')}`}
-                      style={{ fontSize: '14px', fontWeight: 700, color: theme.primary, textDecoration: 'none' }}
-                    >
-                      {content.doctor.phone}
-                    </a>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <MessageCircleIcon size={18} color="#25D366" style={{ flexShrink: 0 }} />
-                  <div>
-                    <div style={{ fontSize: '12px', color: '#64748B' }}>WhatsApp Consultation Desk:</div>
-                    <a
-                      href={`https://wa.me/${content.doctor.whatsappNumber.replace(/[^0-9]/g, '')}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      style={{ fontSize: '14px', fontWeight: 700, color: '#059669', textDecoration: 'none' }}
-                    >
-                      Chat on WhatsApp (+91 98765 43210)
-                    </a>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                  <ClockIcon size={18} color={theme.primary} style={{ marginTop: '2px', flexShrink: 0 }} />
-                  <div style={{ fontSize: '13px', color: '#334155', lineHeight: '1.6' }}>
-                    <strong>OPD Timings:</strong><br />
-                    Mon - Fri: {content.clinic.schedule.weekdayHours}<br />
-                    Saturday: {content.clinic.schedule.saturdayHours}<br />
-                    Sunday: {content.clinic.schedule.sundayHours}
-                  </div>
-                </div>
-              </div>
+      <main id="main-content">
+        <section className="ms-subhero">
+          <div className="ms-wrap ms-subhero-centered">
+            <div className="ms-badge-pill">
+              <span className="ms-dot-live" aria-hidden="true" />
+              <span>Online Appointment Desk &bull; Live Token Queue Confirmation</span>
             </div>
 
-            {/* Click-to-load Google Maps Facade (SD-045) */}
-            <div
-              style={{
-                borderRadius: '16px',
-                border: '1px solid #E2E8F0',
-                background: '#FFFFFF',
-                overflow: 'hidden',
-                boxShadow: '0 2px 10px rgba(15, 23, 42, 0.03)',
-              }}
-            >
-              <div style={{ padding: '16px 20px', borderBottom: '1px solid #F1F5F9' }}>
-                <div style={{ fontWeight: 800, fontSize: '14px', color: '#0F172A' }}>
-                  Interactive Clinic Map
-                </div>
-                <div style={{ fontSize: '12px', color: '#64748B' }}>
-                  Sector 18 Central Market &bull; Metro Station Gate No. 2
-                </div>
-              </div>
+            <h1 className="ms-hero-title" style={{ maxWidth: '820px', marginBottom: '12px' }}>
+              Book Consultation &amp;{' '}
+              <span className="ms-hero-serif">Visit Clinic</span>
+            </h1>
+            <p className="ms-desc" style={{ maxWidth: '720px', margin: 0 }}>
+              Reserve an outpatient appointment with {content.doctor.name}, {content.doctor.degree}, at {content.clinic.name}, {content.clinic.area}, {content.clinic.city}.
+            </p>
+          </div>
+        </section>
 
-              <div style={{ height: '240px', background: '#F1F5F9', position: 'relative' }}>
-                {mapLoaded ? (
-                  <iframe
-                    src={content.clinic.googleMapEmbedUrl}
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0 }}
-                    loading="lazy"
-                    title="HealthConsult Clinic Location"
-                  />
-                ) : (
+        <section className="ms-section" style={{ background: '#FFFFFF' }}>
+          <div className="ms-wrap ms-split-2">
+            {/* Left Column: Editorial Multi-Doctor Booking Card */}
+            <div
+              id="lead-form"
+              className="ms-editorial-card"
+              style={{ padding: 'clamp(22px, 3vw, 34px)', boxShadow: 'var(--shadow-editorial-md)' }}
+            >
+              {submitSuccess ? (
+                <div style={{ textAlign: 'center', padding: '12px 0' }}>
                   <div
                     style={{
-                      height: '100%',
+                      width: '62px',
+                      height: '62px',
+                      borderRadius: '50%',
+                      background: 'var(--mint)',
+                      border: '1px solid var(--border)',
                       display: 'flex',
-                      flexDirection: 'column',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '10px',
-                      padding: '20px',
-                      textAlign: 'center',
+                      margin: '0 auto 14px auto',
                     }}
                   >
-                    <MapPinIcon size={32} color={theme.primary} />
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>
-                      Click to load Google Maps location
+                    <CheckCircleIcon size={32} color="var(--brand)" />
+                  </div>
+                  <h2 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--ink)', margin: '0 0 8px 0' }}>
+                    Appointment Confirmed
+                  </h2>
+                  <p className="ms-desc" style={{ marginBottom: '20px' }}>
+                    Estimated Token <strong>#{confirmedToken}</strong> for <strong>{formData.patientName}</strong>.
+                  </p>
+
+                  <div
+                    className="ms-surface-box"
+                    style={{
+                      textAlign: 'left',
+                      marginBottom: '22px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px',
+                      fontSize: '14px',
+                      color: 'var(--ink)',
+                    }}
+                  >
+                    <div><strong>Specialist:</strong> {formData.doctor}</div>
+                    <div><strong>Consultation:</strong> {formData.service}</div>
+                    <div><strong>Session / Slot:</strong> {formData.shift} ({selectedSlot})</div>
+                    <div>
+                      <strong>Location:</strong> {content.clinic.name}, {content.clinic.area}, {content.clinic.city}
                     </div>
+                    <div>
+                      <strong>OPD Fee:</strong> &#8377;{content.doctor.consultationFee} (Payable at clinic desk)
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
                     <button
                       type="button"
-                      onClick={() => setMapLoaded(true)}
-                      style={{
-                        background: theme.primary,
-                        color: '#FFFFFF',
-                        border: 'none',
-                        padding: '8px 16px',
-                        borderRadius: '6px',
-                        fontSize: '12px',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                      }}
+                      onClick={() => setShowSlipModal(true)}
+                      className="ms-pill ms-pill-dark"
+                      style={{ minHeight: '42px', fontSize: '13.5px' }}
                     >
-                      Load Interactive Map
+                      <PrinterIcon size={15} color="#FFFFFF" />
+                      <span>Print Appointment Slip</span>
+                    </button>
+
+                    <a
+                      href={getGoogleCalendarUrl({
+                        patientName: formData.patientName,
+                        doctorName: formData.doctor,
+                        clinicName: content.clinic.name,
+                        service: formData.service,
+                        date: formData.preferredDate || todayStr,
+                        time: selectedSlot,
+                        tokenNumber: confirmedToken,
+                        clinicAddress: `${content.clinic.street}, ${content.clinic.area}, ${content.clinic.city}`,
+                        phone: content.doctor.phone,
+                      })}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ms-pill ms-pill-light"
+                      style={{ minHeight: '42px', fontSize: '13.5px' }}
+                    >
+                      <CalendarIcon size={14} color="var(--brand)" />
+                      <span>Google Calendar</span>
+                    </a>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        downloadIcsFile({
+                          patientName: formData.patientName,
+                          doctorName: formData.doctor,
+                          clinicName: content.clinic.name,
+                          service: formData.service,
+                          date: formData.preferredDate || todayStr,
+                          time: selectedSlot,
+                          tokenNumber: confirmedToken,
+                          clinicAddress: `${content.clinic.street}, ${content.clinic.area}, ${content.clinic.city}`,
+                          phone: content.doctor.phone,
+                        })
+                      }
+                      className="ms-pill ms-pill-light"
+                      style={{ minHeight: '42px', fontSize: '13.5px' }}
+                    >
+                      <ClockIcon size={14} color="var(--brand)" />
+                      <span>Download .ics</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSubmitSuccess(false);
+                        setFormData((prev) => ({
+                          ...prev,
+                          patientName: '',
+                          phone: '',
+                          service: 'General Internal Medicine & OPD Consultation',
+                          preferredDate: todayStr,
+                          shift: 'Evening',
+                          notes: '',
+                        }));
+                      }}
+                      className="ms-pill ms-pill-light"
+                      style={{ minHeight: '42px', fontSize: '13.5px' }}
+                    >
+                      <span>Book Another Slot</span>
                     </button>
                   </div>
-                )}
-              </div>
+                </div>
+              ) : (
+                <form onSubmit={handleBook}>
+                  <h2 style={{ fontSize: '23px', fontWeight: 700, color: 'var(--ink)', margin: '0 0 6px 0' }}>
+                    In-Clinic Appointment Booking
+                  </h2>
+                  <p style={{ fontSize: '14px', color: 'var(--muted)', margin: '0 0 22px 0' }}>
+                    Real-time multi-doctor slot reservation. Average OPD wait time is under 15 minutes.
+                  </p>
+
+                  {bookingError && (
+                    <div role="alert" className="ms-alert-error" style={{ marginBottom: '16px' }}>
+                      {bookingError}
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <div className="ms-form-row-2">
+                      <div>
+                        <label htmlFor="contact-doctor" className="ms-label">
+                          Consulting Specialist *
+                        </label>
+                        <select
+                          id="contact-doctor"
+                          value={formData.doctor}
+                          onChange={(e) => {
+                            const docName = e.target.value;
+                            const matched = doctors.find((d) => d.name === docName);
+                            setBookingError(null);
+                            setFormData({
+                              ...formData,
+                              doctor: docName,
+                              doctorId: matched?.id || '',
+                            });
+                          }}
+                          className="ms-field"
+                        >
+                          {doctors.map((d) => (
+                            <option key={d.id} value={d.name}>
+                              {d.name}
+                              {d.department ? ` (${d.department})` : ''}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label htmlFor="contact-date" className="ms-label">
+                          Preferred Date *
+                        </label>
+                        <input
+                          id="contact-date"
+                          type="date"
+                          min={todayStr}
+                          value={formData.preferredDate}
+                          onChange={(e) => {
+                            setBookingError(null);
+                            setFormData({ ...formData, preferredDate: e.target.value });
+                          }}
+                          className="ms-field"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label htmlFor="contact-name" className="ms-label">
+                        Patient Full Name *
+                      </label>
+                      <input
+                        id="contact-name"
+                        type="text"
+                        required
+                        placeholder="e.g. Ramesh Sharma"
+                        value={formData.patientName}
+                        onChange={(e) => setFormData({ ...formData, patientName: e.target.value })}
+                        className="ms-field"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="contact-phone" className="ms-label">
+                        Contact Mobile Number *
+                      </label>
+                      <input
+                        id="contact-phone"
+                        type="tel"
+                        required
+                        placeholder="e.g. +91 98765 43210"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        className="ms-field"
+                      />
+                      <span style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '5px', display: 'block' }}>
+                        Encrypted under DPDP Act 2023. Used solely for consultation confirmation.
+                      </span>
+                    </div>
+
+                    <div className="ms-form-row-2">
+                      <div>
+                        <label htmlFor="contact-service" className="ms-label">
+                          Clinical Specialty / Treatment
+                        </label>
+                        <select
+                          id="contact-service"
+                          value={formData.service}
+                          onChange={(e) => setFormData({ ...formData, service: e.target.value })}
+                          className="ms-field"
+                        >
+                          {content.services.map((s) => (
+                            <option key={s.id} value={s.title}>
+                              {s.title}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label htmlFor="contact-shift" className="ms-label">
+                          Preferred OPD Session
+                        </label>
+                        <select
+                          id="contact-shift"
+                          value={formData.shift}
+                          onChange={(e) => setFormData({ ...formData, shift: e.target.value as any })}
+                          className="ms-field"
+                        >
+                          <option value="Morning">Morning (09:00 AM - 01:00 PM)</option>
+                          <option value="Evening">Evening (05:00 PM - 08:00 PM)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <span className="ms-label">Live OPD Time Slot *</span>
+                      {isDayClosed ? (
+                        <div className="ms-surface-box" style={{ padding: '12px 14px', fontSize: '13.5px', color: 'var(--muted)' }}>
+                          Specialist OPD is closed on the selected date. Please pick another day or specialist.
+                        </div>
+                      ) : (
+                        <div className="ms-slot-grid">
+                          {slotList.map((slot) => {
+                            const isBooked = bookedSlots.includes(slot);
+                            const isSelected = selectedSlot === slot;
+                            return (
+                              <button
+                                key={slot}
+                                type="button"
+                                disabled={isBooked}
+                                onClick={() => {
+                                  setBookingError(null);
+                                  setSelectedSlot(slot);
+                                }}
+                                className={`ms-slot-btn${isSelected ? ' active' : ''}`}
+                              >
+                                {slot}
+                                {isBooked ? ' (Booked)' : ''}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <label htmlFor="contact-notes" className="ms-label">
+                        Primary Symptoms or Concerns (Optional)
+                      </label>
+                      <textarea
+                        id="contact-notes"
+                        rows={3}
+                        placeholder="e.g. Elevated fasting blood glucose, fever for 3 days, routine annual checkup..."
+                        value={formData.notes}
+                        onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                        className="ms-field"
+                        style={{ minHeight: '88px', resize: 'vertical' }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                      <input
+                        type="checkbox"
+                        id="consent-check"
+                        required
+                        defaultChecked
+                        style={{ marginTop: '3px', width: '16px', height: '16px', accentColor: 'var(--brand)' }}
+                      />
+                      <label htmlFor="consent-check" style={{ fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.55 }}>
+                        I consent to {content.clinic.name} securely recording my appointment details and sending token notifications in compliance with DPDP Act 2023.
+                      </label>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={submitting || isDayClosed}
+                      className="ms-pill ms-pill-dark ms-pill-block"
+                    >
+                      <CalendarIcon size={16} color="#FFFFFF" />
+                      <span>
+                        {submitting ? 'Confirming Token...' : `Confirm Visit (${selectedSlot})`}
+                      </span>
+                      <PillArrowIcon />
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
 
-            {/* Emergency Notice */}
-            <div
-              style={{
-                borderRadius: '12px',
-                background: '#FEF2F2',
-                border: '1px solid #FCA5A5',
-                padding: '16px 20px',
-              }}
-            >
-              <div style={{ fontWeight: 800, fontSize: '13px', color: '#991B1B', marginBottom: '4px' }}>
-                Emergency Medical Care Protocol
+            {/* Right Column: Clinic Details, Map Facade & Emergency */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div className="ms-editorial-card" style={{ padding: '24px' }}>
+                <h3 style={{ fontSize: '19px', fontWeight: 700, color: 'var(--ink)', margin: '0 0 16px 0' }}>
+                  Clinic Location &amp; Contact Desk
+                </h3>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                    <div className="ms-icon-tile" style={{ width: '38px', height: '38px' }}>
+                      <MapPinIcon size={18} color="currentColor" />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '14.5px', fontWeight: 700, color: 'var(--ink)' }}>
+                        {content.clinic.name}
+                      </div>
+                      <div style={{ fontSize: '13.5px', color: 'var(--muted)', marginTop: '3px', lineHeight: 1.5 }}>
+                        {content.clinic.street}, {content.clinic.area}, {content.clinic.city}, {content.clinic.state} &ndash;{' '}
+                        {content.clinic.pincode}
+                      </div>
+                      <div style={{ fontSize: '12.5px', color: 'var(--brand)', fontWeight: 600, marginTop: '4px' }}>
+                        {content.clinic.transitGuidance}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div className="ms-icon-tile" style={{ width: '38px', height: '38px' }}>
+                      <PhoneIcon size={17} color="currentColor" />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '12px', color: 'var(--muted)' }}>Front Desk Telephone</div>
+                      <a
+                        href={`tel:${content.doctor.phone.replace(/[^0-9+]/g, '')}`}
+                        className="ms-action-link"
+                        style={{ minHeight: 'auto', fontSize: '15px' }}
+                      >
+                        {content.doctor.phone}
+                      </a>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div className="ms-icon-tile" style={{ width: '38px', height: '38px' }}>
+                      <MessageCircleIcon size={17} color="currentColor" />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '12px', color: 'var(--muted)' }}>WhatsApp Consultation Desk</div>
+                      <a
+                        href={`https://wa.me/${content.doctor.whatsappNumber.replace(/[^0-9]/g, '')}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="ms-action-link"
+                        style={{ minHeight: 'auto', fontSize: '14.5px' }}
+                      >
+                        Chat on WhatsApp ({content.doctor.whatsappNumber})
+                      </a>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                    <div className="ms-icon-tile" style={{ width: '38px', height: '38px' }}>
+                      <ClockIcon size={17} color="currentColor" />
+                    </div>
+                    <div style={{ fontSize: '13.5px', color: 'var(--ink)', lineHeight: 1.6 }}>
+                      <strong>OPD Timings</strong>
+                      <br />
+                      <span style={{ color: 'var(--muted)' }}>
+                        Mon &ndash; Fri: {content.clinic.schedule.weekdayHours}
+                        <br />
+                        Saturday: {content.clinic.schedule.saturdayHours}
+                        <br />
+                        Sunday: {content.clinic.schedule.sundayHours}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <p style={{ fontSize: '12px', color: '#7F1D1D', margin: 0, lineHeight: '1.5' }}>
-                For acute life-threatening emergencies (such as sudden chest pain, stroke signs, severe hemorrhage, or loss of consciousness), call national emergency services <strong>112</strong> or <strong>108</strong> immediately, or proceed to the nearest emergency trauma center at Fortis Hospital Noida Sector 62.
-              </p>
+
+              {/* Click-to-load Interactive Map Facade */}
+              <div className="ms-editorial-card" style={{ padding: 0, overflow: 'hidden' }}>
+                <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
+                  <div style={{ fontWeight: 700, fontSize: '15px', color: 'var(--ink)' }}>
+                    Interactive Clinic Map
+                  </div>
+                  <div style={{ fontSize: '12.5px', color: 'var(--muted)' }}>
+                    {content.clinic.area} &bull; {content.clinic.city}
+                  </div>
+                </div>
+
+                <div style={{ height: '240px', background: 'var(--surface)', position: 'relative' }}>
+                  {mapLoaded ? (
+                    <iframe
+                      src={content.clinic.googleMapEmbedUrl}
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      loading="lazy"
+                      title="Clinic Location Map"
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '12px',
+                        padding: '20px',
+                        textAlign: 'center',
+                      }}
+                    >
+                      <MapPinIcon size={30} color="var(--brand)" />
+                      <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ink)' }}>
+                        Click below to load interactive Google Maps directions
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setMapLoaded(true)}
+                        className="ms-pill ms-pill-dark"
+                        style={{ minHeight: '40px', padding: '0 18px', fontSize: '13.5px' }}
+                      >
+                        <span>Load Interactive Map</span>
+                        <PillArrowIcon />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Emergency Notice */}
+              <div className="ms-alert-emergency">
+                <div style={{ fontWeight: 700, fontSize: '13.5px', color: '#991B1B', marginBottom: '4px' }}>
+                  Emergency Medical Care Protocol
+                </div>
+                <p style={{ fontSize: '12.5px', color: '#7F1D1D', margin: 0, lineHeight: 1.55 }}>
+                  For acute life-threatening emergencies (sudden chest pain, stroke signs, severe hemorrhage, or loss of consciousness), call national emergency services <strong>112</strong> or <strong>108</strong> immediately, or proceed to the nearest emergency trauma center at Fortis Hospital Noida Sector 62.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
 
-      {/* Printable Appointment Slip Modal */}
       {showSlipModal && (
         <AppointmentSlipModal
           isOpen={showSlipModal}
@@ -719,7 +683,7 @@ export default function ContactAndBookingPage() {
             patientName: formData.patientName,
             phone: formData.phone,
             service: formData.service,
-            date: formData.preferredDate || new Date().toISOString().split('T')[0] || '',
+            date: formData.preferredDate || todayStr,
             time: selectedSlot,
             shift: formData.shift,
             id: submittedAptId,
@@ -728,8 +692,7 @@ export default function ContactAndBookingPage() {
         />
       )}
 
-      {/* Shared Public Footer */}
-      <PublicFooter content={content} theme={theme} />
+      <PublicFooter content={content} />
     </div>
   );
 }

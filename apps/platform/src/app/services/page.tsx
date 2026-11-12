@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useClinicContent } from '@/lib/useClinicContent';
-import { PublicHeader } from '@/components/public/PublicHeader';
+import { PublicHeader, PillArrowIcon } from '@/components/public/PublicHeader';
 import { PublicFooter } from '@/components/public/PublicFooter';
 import {
   StethoscopeIcon,
@@ -18,25 +18,24 @@ import {
   ClockIcon,
   SearchIcon,
   CalendarIcon,
-  ChevronRightIcon,
 } from '@/components/Icons';
 
-function getServiceIcon(id: string, color: string) {
+function getServiceIcon(id: string) {
   switch (id) {
-    case 'srv-1': return <StethoscopeIcon size={26} color={color} />;
-    case 'srv-2': return <HeartPulseIcon size={26} color={color} />;
-    case 'srv-3': return <ActivityIcon size={26} color={color} />;
-    case 'srv-4': return <ThermometerIcon size={26} color={color} />;
-    case 'srv-5': return <PillIcon size={26} color={color} />;
-    case 'srv-6': return <UserCheckIcon size={26} color={color} />;
-    case 'srv-7': return <SyringeIcon size={26} color={color} />;
-    case 'srv-8': return <MicroscopeIcon size={26} color={color} />;
-    default: return <ShieldCheckIcon size={26} color={color} />;
+    case 'srv-1': return <StethoscopeIcon size={22} color="currentColor" />;
+    case 'srv-2': return <HeartPulseIcon size={22} color="currentColor" />;
+    case 'srv-3': return <ActivityIcon size={22} color="currentColor" />;
+    case 'srv-4': return <ThermometerIcon size={22} color="currentColor" />;
+    case 'srv-5': return <PillIcon size={22} color="currentColor" />;
+    case 'srv-6': return <UserCheckIcon size={22} color="currentColor" />;
+    case 'srv-7': return <SyringeIcon size={22} color="currentColor" />;
+    case 'srv-8': return <MicroscopeIcon size={22} color="currentColor" />;
+    default: return <ShieldCheckIcon size={22} color="currentColor" />;
   }
 }
 
 export default function ServicesPage() {
-  const { content, theme } = useClinicContent();
+  const { content } = useClinicContent();
   const [search, setSearch] = useState('');
 
   const filteredServices = content.services.filter(
@@ -46,199 +45,138 @@ export default function ServicesPage() {
   );
 
   return (
-    <div style={{ minHeight: '100vh', background: '#FFFFFF', color: theme.text, fontFamily: 'var(--font-sans, system-ui)' }}>
-      {/* Shared Public Header */}
-      <PublicHeader content={content} theme={theme} />
+    <div className="ms-public-shell">
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
 
-      {/* Services Hero Section */}
-      <section
-        style={{
-          background: `linear-gradient(180deg, ${theme.bg} 0%, #FFFFFF 100%)`,
-          padding: '60px 24px 40px 24px',
-          borderBottom: '1px solid #E2E8F0',
-        }}
-      >
-        <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '6px 14px',
-              borderRadius: '999px',
-              background: '#FFFFFF',
-              border: '1px solid #CBD5E1',
-              fontSize: '12px',
-              fontWeight: 700,
-              color: theme.primary,
-              marginBottom: '16px',
-            }}
-          >
-            <StethoscopeIcon size={14} color={theme.primary} />
-            <span>SPECIALIZED INTERNAL MEDICINE TREATMENTS &bull; ALL 9 CLINICAL DOMAINS</span>
-          </div>
+      <PublicHeader content={content} />
 
-          <h1 style={{ fontSize: '36px', fontWeight: 800, color: '#0F172A', margin: '0 0 12px 0' }}>
-            Comprehensive Clinical Treatments &amp; Care
-          </h1>
-          <p
-            style={{
-              fontSize: '16px',
-              color: '#64748B',
-              maxWidth: '750px',
-              margin: '0 auto 28px auto',
-              lineHeight: '1.6',
-            }}
-          >
-            Evidence-based outpatient consultations by Dr. Maanvita Kumari (MBBS, MD) covering chronic disease management, metabolic disorders, acute seasonal illnesses, and preventive health screenings.
-          </p>
-
-          {/* Search Treatments Input */}
-          <div style={{ maxWidth: '480px', margin: '0 auto', position: 'relative' }}>
-            <input
-              type="search"
-              aria-label="Search clinical treatments"
-              placeholder="Search treatments (e.g., Diabetes, Dengue, Thyroid, ECG)..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '12px 20px 12px 42px',
-                borderRadius: '10px',
-                border: '1px solid #CBD5E1',
-                fontSize: '14px',
-                background: '#FFFFFF',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                boxSizing: 'border-box',
-              }}
-            />
-            <span
-              style={{
-                position: 'absolute',
-                left: '14px',
-                top: '14px',
-                color: '#94A3B8',
-                pointerEvents: 'none',
-              }}
-            >
-              <SearchIcon size={18} />
-            </span>
-          </div>
-        </div>
-      </section>
-
-      {/* Services Grid Section */}
-      <section style={{ padding: '60px 24px', maxWidth: '1200px', margin: '0 auto' }}>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-            gap: '24px',
-          }}
-        >
-          {filteredServices.map((service, index) => (
-            <div
-              key={service.id || index}
-              style={{
-                borderRadius: '14px',
-                border: '1px solid #E2E8F0',
-                background: '#FFFFFF',
-                padding: '28px',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                boxShadow: '0 2px 8px rgba(15, 23, 42, 0.03)',
-                transition: 'transform 150ms ease, box-shadow 150ms ease',
-              }}
-            >
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                  <div
-                    style={{
-                      width: '48px',
-                      height: '48px',
-                      borderRadius: '10px',
-                      background: theme.bg,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    {getServiceIcon(service.id, theme.primary)}
-                  </div>
-                  <span
-                    style={{
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      color: theme.primary,
-                      background: theme.bg,
-                      padding: '3px 8px',
-                      borderRadius: '4px',
-                    }}
-                  >
-                    OPD Consultation
-                  </span>
-                </div>
-
-                <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0F172A', margin: '0 0 10px 0' }}>
-                  {service.title}
-                </h2>
-                <p style={{ fontSize: '14px', color: '#475569', lineHeight: '1.6', margin: '0 0 20px 0' }}>
-                  {service.description}
-                </p>
-              </div>
-
-              <div>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '12px 0',
-                    borderTop: '1px solid #F1F5F9',
-                    marginBottom: '16px',
-                    fontSize: '13px',
-                  }}
-                >
-                  <span style={{ color: '#64748B', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <ClockIcon size={14} color="#64748B" />
-                    <span>20-30 Mins Consultation</span>
-                  </span>
-                  <span style={{ fontWeight: 700, color: '#0F172A' }}>
-                    Fee: ₹{content.doctor.consultationFee}
-                  </span>
-                </div>
-
-                <Link
-                  href={`/contact?service=${encodeURIComponent(service.title)}`}
-                  style={{
-                    width: '100%',
-                    background: theme.primary,
-                    color: '#FFFFFF',
-                    padding: '10px 16px',
-                    borderRadius: '8px',
-                    textDecoration: 'none',
-                    fontWeight: 700,
-                    fontSize: '13px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    boxSizing: 'border-box',
-                  }}
-                >
-                  <CalendarIcon size={14} color="#FFFFFF" />
-                  <span>Book This Consultation</span>
-                  <ChevronRightIcon size={14} color="#FFFFFF" />
-                </Link>
-              </div>
+      <main id="main-content">
+        <section className="ms-subhero">
+          <div className="ms-wrap ms-subhero-centered">
+            <div className="ms-badge-pill">
+              <StethoscopeIcon size={14} color="currentColor" />
+              <span>Specialized Internal Medicine &bull; {content.services.length} Clinical Domains</span>
             </div>
-          ))}
-        </div>
-      </section>
 
-      {/* Shared Public Footer */}
-      <PublicFooter content={content} theme={theme} />
+            <h1 className="ms-hero-title" style={{ maxWidth: '820px', marginBottom: '12px' }}>
+              Comprehensive Clinical{' '}
+              <span className="ms-hero-serif">Treatments &amp; Care</span>
+            </h1>
+            <p className="ms-desc" style={{ maxWidth: '700px', margin: '0 auto 24px auto' }}>
+              Evidence-based outpatient consultations by {content.doctor.name}, {content.doctor.degree}, covering chronic disease management, metabolic disorders, acute illnesses, and preventive screenings.
+            </p>
+
+            <div className="ms-search-wrap">
+              <input
+                type="search"
+                aria-label="Search clinical treatments"
+                placeholder="Search treatments (e.g., Diabetes, Dengue, Thyroid, ECG)..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="ms-search-input"
+              />
+              <span
+                style={{
+                  position: 'absolute',
+                  left: '16px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: 'var(--muted)',
+                  pointerEvents: 'none',
+                }}
+              >
+                <SearchIcon size={18} />
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <section className="ms-section" style={{ background: '#FFFFFF' }}>
+          <div className="ms-wrap">
+            {filteredServices.length === 0 ? (
+              <div className="ms-surface-box" style={{ textAlign: 'center', padding: '44px 20px' }}>
+                <p className="ms-desc" style={{ marginBottom: '14px' }}>
+                  No clinical treatments matched &ldquo;{search}&rdquo;.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setSearch('')}
+                  className="ms-pill ms-pill-dark"
+                >
+                  <span>Reset Search</span>
+                </button>
+              </div>
+            ) : (
+              <div className="ms-grid-3">
+                {filteredServices.map((service, index) => (
+                  <article
+                    key={service.id || index}
+                    className="ms-editorial-card"
+                    style={{ justifyContent: 'space-between', padding: '22px' }}
+                  >
+                    <div>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          marginBottom: '14px',
+                        }}
+                      >
+                        <div className="ms-icon-tile">{getServiceIcon(service.id)}</div>
+                        <span className="ms-tag">OPD Consultation</span>
+                      </div>
+
+                      <h2 style={{ fontSize: '18.5px', fontWeight: 700, color: 'var(--ink)', margin: '0 0 8px 0' }}>
+                        {service.title}
+                      </h2>
+                      <p style={{ fontSize: '14.5px', color: 'var(--muted)', lineHeight: 1.55, margin: '0 0 18px 0' }}>
+                        {service.description}
+                      </p>
+                    </div>
+
+                    <div>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '12px 0',
+                          borderTop: '1px solid var(--border)',
+                          marginBottom: '14px',
+                          fontSize: '13.5px',
+                        }}
+                      >
+                        <span style={{ color: 'var(--muted)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                          <ClockIcon size={14} color="currentColor" />
+                          <span>20&ndash;30 Mins</span>
+                        </span>
+                        <span style={{ fontWeight: 700, color: 'var(--ink)' }}>
+                          Fee: &#8377;{content.doctor.consultationFee}
+                        </span>
+                      </div>
+
+                      <Link
+                        href={`/contact?service=${encodeURIComponent(service.title)}`}
+                        className="ms-pill ms-pill-dark ms-pill-block"
+                        style={{ minHeight: '42px', fontSize: '14px' }}
+                      >
+                        <CalendarIcon size={14} color="#FFFFFF" />
+                        <span>Book Consultation</span>
+                        <PillArrowIcon />
+                      </Link>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      </main>
+
+      <PublicFooter content={content} />
     </div>
   );
 }

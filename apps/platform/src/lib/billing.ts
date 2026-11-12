@@ -3,7 +3,7 @@ import { pool } from '@/db';
 import { recordAuditEvent } from '@/lib/audit';
 import { AppError } from '@/lib/errors';
 
-export type PlanTier = 'basic' | 'growth' | 'professional';
+export type PlanTier = 'basic' | 'growth' | 'professional' | 'premium';
 export type BillingCycle = 'initial' | 'renewal';
 
 export const SAC_CODE = '998314';
@@ -19,6 +19,7 @@ export const PLAN_PRICING: Record<PlanTier, { label: string; initialPaise: numbe
   basic: { label: 'Basic Presence Plan', initialPaise: 699900, renewalPaise: 299900 },
   growth: { label: 'Growth Clinic Plan', initialPaise: 1299900, renewalPaise: 599900 },
   professional: { label: 'Professional Clinic Plan', initialPaise: 1899900, renewalPaise: 999900 },
+  premium: { label: 'Premium Clinic Plan (Multi-Doctor)', initialPaise: 2499900, renewalPaise: 1499900 },
 };
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

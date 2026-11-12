@@ -1,6 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import type { DoctorContent } from '@/lib/contentStore';
+import { FALLBACK_CONTENT } from '@/lib/useClinicContent';
 import {
   FileTextIcon,
   MonitorIcon,
@@ -20,71 +22,161 @@ export default function SiteBlockEditorPage() {
   const [saving, setSaving] = useState<boolean>(false);
   const [publishing, setPublishing] = useState<boolean>(false);
   const [previewKey, setPreviewKey] = useState<number>(1);
+  const baseContentRef = useRef<DoctorContent>(FALLBACK_CONTENT);
 
-  // Form State
+  // Form State (hydrated from /api/content on mount)
   const [formData, setFormData] = useState({
-    doctorName: 'Dr. Maanvita Kumari',
-    degrees: 'MBBS, MD (General Medicine)',
-    specialty: 'Consultant Physician & Diabetologist',
-    experienceYears: 12,
-    registrationNumber: 'DMC/R/14298',
-    medicalCouncil: 'Delhi Medical Council',
-    almaMater: 'Maulana Azad Medical College (MAMC), New Delhi',
-    bio: 'Senior Consultant Physician with over 12 years of clinical excellence managing adult chronic diseases, complex glycemic disorders, and infectious illnesses across premier medical institutions in Delhi NCR.',
-    clinicName: 'HealthConsult Family Clinic',
-    tagline: 'Compassionate Primary Healthcare & Preventive Medicine',
-    phone: '+919876543210',
-    whatsapp: '+919876543210',
-    email: 'contact@healthconsult.in',
-    consultationFee: 600,
+    doctorName: FALLBACK_CONTENT.doctor.name,
+    degrees: FALLBACK_CONTENT.doctor.degree,
+    specialty: FALLBACK_CONTENT.doctor.specialty,
+    experienceYears: FALLBACK_CONTENT.doctor.experienceYears,
+    registrationNumber: FALLBACK_CONTENT.doctor.registrationNumber,
+    medicalCouncil: FALLBACK_CONTENT.doctor.medicalCouncil,
+    almaMater: FALLBACK_CONTENT.doctor.college,
+    bio: FALLBACK_CONTENT.doctor.bio,
+    clinicName: FALLBACK_CONTENT.clinic.name,
+    tagline: FALLBACK_CONTENT.clinic.tagline,
+    phone: FALLBACK_CONTENT.doctor.phone,
+    whatsapp: FALLBACK_CONTENT.doctor.whatsappNumber,
+    email: FALLBACK_CONTENT.doctor.email,
+    consultationFee: FALLBACK_CONTENT.doctor.consultationFee,
     followupDays: 7,
-    street: 'Plot 14, Health Plaza, Central Market',
-    area: 'Sector 18',
-    city: 'Noida',
-    state: 'Uttar Pradesh',
-    pincode: '201301',
+    street: FALLBACK_CONTENT.clinic.street,
+    area: FALLBACK_CONTENT.clinic.area,
+    city: FALLBACK_CONTENT.clinic.city,
+    state: FALLBACK_CONTENT.clinic.state,
+    pincode: FALLBACK_CONTENT.clinic.pincode,
     theme: 'green',
   });
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('demo_site_content');
-      if (saved) {
-        try {
-          setFormData((prev) => ({ ...prev, ...JSON.parse(saved) }));
-        } catch {}
+    let active = true;
+    (async () => {
+      try {
+        const res = await fetch('/api/content', { cache: 'no-store' });
+        if (res.ok && active) {
+          const live: DoctorContent = await res.json();
+          baseContentRef.current = live;
+          setFormData((prev) => ({
+            ...prev,
+            doctorName: live.doctor?.name || prev.doctorName,
+            degrees: live.doctor?.degree || prev.degrees,
+            specialty: live.doctor?.specialty || prev.specialty,
+            experienceYears: live.doctor?.experienceYears ?? prev.experienceYears,
+            registrationNumber: live.doctor?.registrationNumber || prev.registrationNumber,
+            medicalCouncil: live.doctor?.medicalCouncil || prev.medicalCouncil,
+            almaMater: live.doctor?.college || prev.almaMater,
+            bio: live.doctor?.bio || prev.bio,
+            clinicName: live.clinic?.name || prev.clinicName,
+            tagline: live.clinic?.tagline || prev.tagline,
+            phone: live.doctor?.phone || prev.phone,
+            whatsapp: live.doctor?.whatsappNumber || prev.whatsapp,
+            email: live.doctor?.email || prev.email,
+            consultationFee: live.doctor?.consultationFee ?? prev.consultationFee,
+            street: live.clinic?.street || prev.street,
+            area: live.clinic?.area || prev.area,
+            city: live.clinic?.city || prev.city,
+            state: live.clinic?.state || prev.state,
+            pincode: live.clinic?.pincode || prev.pincode,
+            theme: live.theme === 'Teal Poster' ? 'teal' : 'green',
+          }));
+        }
+      } catch {
+        // Fallback to local snapshot if network unavailable
       }
-    }
+    })();
+    return () => {
+      active = false;
+    };
   }, []);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
+    setTimeout(() => setToastMessage(null), 3200);
   };
 
-  const handleSave = () => {
+  const buildMergedContent = (): DoctorContent => {
+    const base = baseContentRef.current;
+    return {
+      ...base,
+      theme: formData.theme === 'teal' ? 'Teal Poster' : 'Green Trust',
+      doctor: {
+        ...base.doctor,
+        name: formData.doctorName,
+        degree: formData.degrees,
+        specialty: formData.specialty,
+        experienceYears: Number(formData.experienceYears) || base.doctor.experienceYears,
+        registrationNumber: formData.registrationNumber,
+        medicalCouncil: formData.medicalCouncil,
+        college: formData.almaMater,
+        bio: formData.bio,
+        phone: formData.phone,
+        whatsappNumber: formData.whatsapp,
+        email: formData.email,
+        consultationFee: Number(formData.consultationFee) || base.doctor.consultationFee,
+      },
+      clinic: {
+        ...base.clinic,
+        name: formData.clinicName,
+        tagline: formData.tagline,
+        street: formData.street,
+        area: formData.area,
+        city: formData.city,
+        state: formData.state,
+        pincode: formData.pincode,
+        feePolicy: `Standard OPD consultation fee is ₹${Number(formData.consultationFee) || 600}. Includes complimentary follow-up within ${Number(formData.followupDays) || 7} days.`,
+      },
+    };
+  };
+
+  const handleSave = async () => {
     setSaving(true);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('demo_site_content', JSON.stringify(formData));
-    }
-    setTimeout(() => {
-      setSaving(false);
-      setPreviewKey((k) => k + 1);
-      showToast('Draft content sheet saved.');
-    }, 300);
-  };
-
-  const handlePublish = async () => {
-    setPublishing(true);
+    const merged = buildMergedContent();
     if (typeof window !== 'undefined') {
       localStorage.setItem('demo_site_content', JSON.stringify(formData));
     }
     try {
+      const res = await fetch('/api/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(merged),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error || 'Failed to save draft');
+      if (json.content) baseContentRef.current = json.content;
+      setPreviewKey((k) => k + 1);
+      showToast('Site changes saved & synced to live preview.');
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Unable to save draft.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handlePublish = async () => {
+    setPublishing(true);
+    const merged = buildMergedContent();
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('demo_site_content', JSON.stringify(formData));
+    }
+    try {
+      const contentRes = await fetch('/api/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(merged),
+      });
+      if (!contentRes.ok) {
+        const errJson = await contentRes.json().catch(() => ({}));
+        throw new Error(errJson.error || 'Failed to sync live site content');
+      }
+      const contentData = await contentRes.json().catch(() => ({}));
+      if (contentData.content) baseContentRef.current = contentData.content;
+
       const res = await fetch('/api/v1/sites/00000000-0000-0000-0000-000000000001/publish', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          data: formData,
+          data: merged,
           theme: formData.theme,
           notes: `Published block editor updates for ${formData.clinicName}`,
         }),
@@ -92,7 +184,7 @@ export default function SiteBlockEditorPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || data.title || 'Publish failed');
       setPreviewKey((k) => k + 1);
-      showToast(`Published release v${data.version} to live edge.`);
+      showToast(`Published release v${data.version} to live site.`);
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Unable to publish site changes.');
     } finally {
@@ -115,25 +207,18 @@ export default function SiteBlockEditorPage() {
         }}
       >
         {/* Editor Title & Section Tabs */}
-        <div style={{ padding: '18px 20px', borderBottom: '1px solid #E2E8F0' }}>
+        <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--color-border-subtle)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <h2 style={{ fontSize: '16px', fontWeight: 800, color: '#0F172A', margin: 0 }}>
-              Site Block Editor
+            <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--color-text-main)', margin: 0 }}>
+              Site Block <span className="ms-serif-italic" style={{ fontSize: '21px' }}>editor</span>
             </h2>
             <div style={{ display: 'flex', gap: '6px' }}>
               <button
                 type="button"
                 onClick={handleSave}
                 disabled={saving}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  border: '1px solid #CBD5E1',
-                  background: '#FFFFFF',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
+                className="ms-pill-light"
+                style={{ padding: '6px 12px', fontSize: '12px' }}
               >
                 {saving ? 'Saving...' : 'Save Draft'}
               </button>
@@ -141,23 +226,15 @@ export default function SiteBlockEditorPage() {
                 type="button"
                 onClick={handlePublish}
                 disabled={publishing}
-                style={{
-                  padding: '6px 14px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  background: '#0D5C46',
-                  color: '#FFFFFF',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                }}
+                className="ms-pill-dark"
+                style={{ padding: '6px 14px', fontSize: '12px' }}
               >
                 {publishing ? 'Publishing...' : 'Publish'}
               </button>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '4px', background: '#F1F5F9', padding: '3px', borderRadius: '8px' }}>
+          <div style={{ display: 'flex', gap: '4px', background: 'var(--color-bg-surface)', border: '1px solid var(--color-border-subtle)', padding: '3px', borderRadius: '9999px' }}>
             {[
               { id: 'doctor', label: 'Doctor Profile' },
               { id: 'clinic', label: 'Clinic & Fees' },
@@ -169,15 +246,14 @@ export default function SiteBlockEditorPage() {
                 onClick={() => setActiveSection(tab.id as any)}
                 style={{
                   flex: 1,
-                  padding: '6px 8px',
+                  padding: '6px 10px',
                   border: 'none',
-                  borderRadius: '6px',
-                  background: activeSection === tab.id ? '#FFFFFF' : 'transparent',
-                  color: activeSection === tab.id ? '#0D5C46' : '#64748B',
-                  fontWeight: activeSection === tab.id ? 700 : 500,
+                  borderRadius: '9999px',
+                  background: activeSection === tab.id ? '#183C4A' : 'transparent',
+                  color: activeSection === tab.id ? '#FFFFFF' : 'var(--color-text-muted)',
+                  fontWeight: activeSection === tab.id ? 600 : 500,
                   fontSize: '12px',
                   cursor: 'pointer',
-                  boxShadow: activeSection === tab.id ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
                 }}
               >
                 {tab.label}
@@ -430,16 +506,16 @@ export default function SiteBlockEditorPage() {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '12px', fontWeight: 700, color: '#475569' }}>Preview Device:</span>
-            <div style={{ display: 'flex', gap: '4px', background: '#F1F5F9', padding: '2px', borderRadius: '6px' }}>
+            <div style={{ display: 'flex', gap: '4px', background: 'var(--color-bg-surface)', border: '1px solid var(--color-border-subtle)', padding: '3px', borderRadius: '9999px' }}>
               <button
                 type="button"
                 onClick={() => setViewport('100%')}
                 style={{
-                  padding: '4px 8px',
-                  borderRadius: '4px',
+                  padding: '4px 10px',
+                  borderRadius: '9999px',
                   border: 'none',
-                  background: viewport === '100%' ? '#FFFFFF' : 'transparent',
-                  color: viewport === '100%' ? '#0D5C46' : '#64748B',
+                  background: viewport === '100%' ? '#183C4A' : 'transparent',
+                  color: viewport === '100%' ? '#FFFFFF' : 'var(--color-text-muted)',
                   fontWeight: 600,
                   fontSize: '11px',
                   cursor: 'pointer',
@@ -455,11 +531,11 @@ export default function SiteBlockEditorPage() {
                 type="button"
                 onClick={() => setViewport('768px')}
                 style={{
-                  padding: '4px 8px',
-                  borderRadius: '4px',
+                  padding: '4px 10px',
+                  borderRadius: '9999px',
                   border: 'none',
-                  background: viewport === '768px' ? '#FFFFFF' : 'transparent',
-                  color: viewport === '768px' ? '#0D5C46' : '#64748B',
+                  background: viewport === '768px' ? '#183C4A' : 'transparent',
+                  color: viewport === '768px' ? '#FFFFFF' : 'var(--color-text-muted)',
                   fontWeight: 600,
                   fontSize: '11px',
                   cursor: 'pointer',
@@ -475,11 +551,11 @@ export default function SiteBlockEditorPage() {
                 type="button"
                 onClick={() => setViewport('360px')}
                 style={{
-                  padding: '4px 8px',
-                  borderRadius: '4px',
+                  padding: '4px 10px',
+                  borderRadius: '9999px',
                   border: 'none',
-                  background: viewport === '360px' ? '#FFFFFF' : 'transparent',
-                  color: viewport === '360px' ? '#0D5C46' : '#64748B',
+                  background: viewport === '360px' ? '#183C4A' : 'transparent',
+                  color: viewport === '360px' ? '#FFFFFF' : 'var(--color-text-muted)',
                   fontWeight: 600,
                   fontSize: '11px',
                   cursor: 'pointer',
@@ -498,31 +574,23 @@ export default function SiteBlockEditorPage() {
             <button
               type="button"
               onClick={() => setPreviewKey((k) => k + 1)}
+              className="ms-pill-light"
               style={{
-                background: 'transparent',
-                border: '1px solid #CBD5E1',
-                borderRadius: '6px',
-                padding: '4px 8px',
+                padding: '5px 10px',
                 fontSize: '11px',
-                fontWeight: 600,
-                color: '#475569',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
               }}
             >
               <RefreshCwIcon size={12} />
               <span>Reload Preview</span>
             </button>
             <a
-              href="http://localhost:5173"
+              href="/"
               target="_blank"
               rel="noreferrer"
               style={{
                 fontSize: '12px',
                 fontWeight: 600,
-                color: '#0D5C46',
+                color: 'var(--color-brand-primary, #183C4A)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px',
@@ -542,16 +610,16 @@ export default function SiteBlockEditorPage() {
               width: viewport,
               height: '100%',
               background: '#FFFFFF',
-              borderRadius: viewport === '100%' ? '0' : '12px',
-              boxShadow: viewport === '100%' ? 'none' : '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
+              borderRadius: viewport === '100%' ? '12px' : '18px',
+              boxShadow: viewport === '100%' ? 'none' : '0 18px 36px -12px rgba(24, 60, 74, 0.16)',
               overflow: 'hidden',
               transition: 'width 250ms cubic-bezier(0.16, 1, 0.3, 1)',
-              border: '1px solid #E2E8F0',
+              border: '1px solid var(--color-border-subtle)',
             }}
           >
             <iframe
               key={previewKey}
-              src="http://localhost:5173"
+              src="/"
               title="Public Site Live Preview"
               style={{ width: '100%', height: '100%', border: 'none' }}
             />
@@ -561,7 +629,7 @@ export default function SiteBlockEditorPage() {
 
       {/* Toast Feedback */}
       {toastMessage && (
-        <div style={{ position: 'fixed', bottom: '24px', right: '24px', background: '#0D5C46', color: '#FFFFFF', padding: '12px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', zIndex: 200, display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ position: 'fixed', bottom: '24px', right: '24px', background: '#183C4A', color: '#FFFFFF', padding: '12px 20px', borderRadius: '9999px', fontSize: '13px', fontWeight: 600, boxShadow: '0 10px 24px rgba(24,60,74,0.28)', zIndex: 200, display: 'flex', alignItems: 'center', gap: '8px' }}>
           <CheckCircleIcon size={16} />
           <span>{toastMessage}</span>
         </div>

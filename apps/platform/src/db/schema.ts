@@ -57,7 +57,7 @@ export const users = pgTable('users', {
 export const sites = pgTable('sites', {
   id: uuid('id').defaultRandom().primaryKey(),
   tenantId: uuid('tenant_id').notNull().unique().references(() => tenants.id, { onDelete: 'cascade' }),
-  plan: text('plan', { enum: ['basic', 'growth', 'professional'] }).notNull().default('basic'),
+  plan: text('plan', { enum: ['basic', 'growth', 'professional', 'premium'] }).notNull().default('basic'),
   liveVersion: integer('live_version').default(0).notNull(),
   headVersion: integer('head_version').default(0).notNull(),
   schemaVersion: text('schema_version').notNull().default('1.0.0'),
@@ -134,7 +134,7 @@ export const leadEvents = pgTable('lead_events', {
 export const subscriptions = pgTable('subscriptions', {
   id: uuid('id').defaultRandom().primaryKey(),
   tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
-  plan: text('plan', { enum: ['basic', 'growth', 'professional'] }).notNull().default('basic'),
+  plan: text('plan', { enum: ['basic', 'growth', 'professional', 'premium'] }).notNull().default('basic'),
   status: text('status', { enum: ['active', 'past_due', 'canceled'] }).notNull().default('active'),
   currentPeriodEnd: date('current_period_end').notNull(),
   renewalPricePaise: integer('renewal_price_paise').notNull().default(299900),
@@ -194,6 +194,8 @@ export const appointments = pgTable(
     patientNameEnc: bytea('patient_name_enc').notNull(),
     patientPhoneEnc: bytea('patient_phone_enc').notNull(),
     patientEmailEnc: bytea('patient_email_enc'),
+    doctorId: uuid('doctor_id'),
+    doctorName: text('doctor_name'),
     serviceName: text('service_name').notNull(),
     preferredDate: date('preferred_date').notNull(),
     preferredTimeSlot: text('preferred_time_slot').notNull(),
@@ -332,6 +334,7 @@ export const usageCounters = pgTable('usage_counters', {
   enquiryCount: integer('enquiry_count').notNull().default(0),
   storageBytes: integer('storage_bytes').notNull().default(0),
   contentUpdatesUsed: integer('content_updates_used').notNull().default(0),
+  minorChangeMinutesUsed: integer('minor_change_minutes_used').notNull().default(0),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
@@ -349,6 +352,57 @@ export const mediaAssets = pgTable('media_assets', {
   category: text('category').notNull().default('clinic'),
   uploadedAt: timestamp('uploaded_at', { withTimezone: true }).defaultNow().notNull(),
 });
+
+// 22. Doctors Directory Table: Multi-doctor & specialty directory (Premium Clinic ₹24,999)
+export const doctors = pgTable(
+  'doctors',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+    slug: text('slug').notNull(),
+    name: text('name').notNull(),
+    role: text('role').notNull(),
+    degrees: text('degrees').notNull(),
+    college: text('college'),
+    registration: text('registration').notNull(),
+    department: text('department').notNull().default('General Medicine'),
+    specialties: text('specialties').array().notNull().default([]),
+    experience: text('experience'),
+    schedule: text('schedule'),
+    operatingHours: jsonb('operating_hours'),
+    fee: integer('fee').notNull().default(600),
+    bio: text('bio'),
+    photoUrl: text('photo_url'),
+    isActive: boolean('is_active').notNull().default(true),
+    displayOrder: integer('display_order').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('doctors_tenant_slug_idx').on(table.tenantId, table.slug),
+    index('doctors_tenant_order_idx').on(table.tenantId, table.displayOrder),
+  ]
+);
+
+// 23. Monthly Operations & Change Requests Table (5 updates + 1 hr minor changes / month + 30-day bug-fix SLA)
+export const opsRequests = pgTable(
+  'ops_requests',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+    kind: text('kind').notNull().default('content_update'),
+    title: text('title').notNull(),
+    description: text('description'),
+    minutesSpent: integer('minutes_spent').notNull().default(0),
+    status: text('status').notNull().default('queued'),
+    createdBy: text('created_by').notNull().default('clinic_owner'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    resolvedAt: timestamp('resolved_at', { withTimezone: true }),
+  },
+  (table) => [
+    index('ops_requests_tenant_created_idx').on(table.tenantId, table.createdAt),
+  ]
+);
 
 // ============================================================================
 // Exported TypeScript Schema Types
@@ -414,3 +468,9 @@ export type UsageCounters = typeof usageCounters.$inferSelect;
 export type NewUsageCounters = typeof usageCounters.$inferInsert;
 export type MediaAssetRecord = typeof mediaAssets.$inferSelect;
 export type NewMediaAssetRecord = typeof mediaAssets.$inferInsert;
+
+export type DoctorRecord = typeof doctors.$inferSelect;
+export type NewDoctorRecord = typeof doctors.$inferInsert;
+
+export type OpsRequestRecord = typeof opsRequests.$inferSelect;
+export type NewOpsRequestRecord = typeof opsRequests.$inferInsert;

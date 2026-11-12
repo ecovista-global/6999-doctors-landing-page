@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { updateAppointmentStatus } from '@/lib/contentStore';
+import { syncAppointmentToPostgres } from '@/lib/appointmentSync';
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -14,6 +15,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (!updated) {
       return NextResponse.json({ error: 'Appointment not found' }, { status: 404 });
     }
+    await syncAppointmentToPostgres(updated);
     return NextResponse.json({ success: true, appointment: updated });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Failed to update appointment' }, { status: 500 });

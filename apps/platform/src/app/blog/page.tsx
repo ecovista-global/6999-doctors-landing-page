@@ -6,10 +6,7 @@ import { useClinicContent } from '@/lib/useClinicContent';
 import { PublicHeader } from '@/components/public/PublicHeader';
 import { PublicFooter } from '@/components/public/PublicFooter';
 import {
-  FileTextIcon,
   ClockIcon,
-  UserCheckIcon,
-  CalendarIcon,
   SearchIcon,
   ChevronRightIcon,
   ShieldCheckIcon,
@@ -17,7 +14,7 @@ import {
 import { CLINICAL_BLOG_POSTS, ClinicalBlogPost } from '@/lib/blogPosts';
 
 export default function BlogIndexPage() {
-  const { content, theme } = useClinicContent();
+  const { content } = useClinicContent();
   const [allPosts, setAllPosts] = useState<ClinicalBlogPost[]>(CLINICAL_BLOG_POSTS);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -29,7 +26,6 @@ export default function BlogIndexPage() {
         if (res.ok) {
           const data = await res.json();
           if (data.posts && data.posts.length > 0) {
-            // Merge dynamic posts, avoiding duplicate slugs
             const dynamicSlugs = new Set(data.posts.map((p: any) => p.slug));
             const existingNonDuplicates = CLINICAL_BLOG_POSTS.filter((p) => !dynamicSlugs.has(p.slug));
             setAllPosts([...data.posts, ...existingNonDuplicates]);
@@ -37,10 +33,9 @@ export default function BlogIndexPage() {
           }
         }
       } catch {
-        // Fallback
+        // Fallback below
       }
 
-      // Check localStorage for offline demo posts
       if (typeof window !== 'undefined') {
         const saved = localStorage.getItem('demo_clinic_posts');
         if (saved) {
@@ -55,7 +50,7 @@ export default function BlogIndexPage() {
                 category: p.category,
                 readTime: p.readTime,
                 publishedDate: p.publishedAt || 'Recent',
-                author: 'Dr. Maanvita Kumari (MBBS, MD)',
+                author: content.doctor.name,
                 tags: [p.category],
               }));
             if (published.length > 0) {
@@ -71,7 +66,7 @@ export default function BlogIndexPage() {
     }
 
     loadDynamicPosts();
-  }, []);
+  }, [content.doctor.name]);
 
   const categories = [
     'All',
@@ -95,225 +90,181 @@ export default function BlogIndexPage() {
   });
 
   return (
-    <div style={{ minHeight: '100vh', background: '#FFFFFF', color: theme.text, fontFamily: 'var(--font-sans, system-ui)' }}>
-      {/* Shared Public Header */}
-      <PublicHeader content={content} theme={theme} />
+    <div className="ms-public-shell">
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
 
-      {/* Blog Hero Banner */}
-      <section
-        style={{
-          background: `linear-gradient(180deg, ${theme.bg} 0%, #FFFFFF 100%)`,
-          padding: '60px 24px 30px 24px',
-          borderBottom: '1px solid #E2E8F0',
-        }}
-      >
-        <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '6px 14px',
-              borderRadius: '999px',
-              background: '#FFFFFF',
-              border: '1px solid #CBD5E1',
-              fontSize: '12px',
-              fontWeight: 700,
-              color: theme.primary,
-              marginBottom: '16px',
-            }}
-          >
-            <ShieldCheckIcon size={14} color={theme.primary} />
-            <span>PHYSICIAN-AUTHORED MEDICAL EDUCATION &bull; EVIDENCE-BASED HEALTH</span>
-          </div>
+      <PublicHeader content={content} />
 
-          <h1 style={{ fontSize: '36px', fontWeight: 800, color: '#0F172A', margin: '0 0 12px 0' }}>
-            HealthConsult Clinical Blog &amp; Patient Guides
-          </h1>
-          <p
-            style={{
-              fontSize: '16px',
-              color: '#64748B',
-              maxWidth: '750px',
-              margin: '0 auto 28px auto',
-              lineHeight: '1.6',
-            }}
-          >
-            Accredited medical guidance, disease prevention advisories, and wellness insights written directly by Senior Consultant Physician Dr. Maanvita Kumari.
-          </p>
+      <main id="main-content">
+        <section className="ms-subhero">
+          <div className="ms-wrap ms-subhero-centered">
+            <div className="ms-badge-pill">
+              <ShieldCheckIcon size={14} color="currentColor" />
+              <span>Physician-Authored Medical Education &bull; Evidence-Based Guides</span>
+            </div>
 
-          {/* Search Input */}
-          <div style={{ maxWidth: '480px', margin: '0 auto 20px auto', position: 'relative' }}>
-            <input
-              type="search"
-              aria-label="Search medical blog articles"
-              placeholder="Search articles by keyword or condition..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '12px 20px 12px 42px',
-                borderRadius: '10px',
-                border: '1px solid #CBD5E1',
-                fontSize: '14px',
-                background: '#FFFFFF',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                boxSizing: 'border-box',
-              }}
-            />
-            <span
-              style={{
-                position: 'absolute',
-                left: '14px',
-                top: '14px',
-                color: '#94A3B8',
-                pointerEvents: 'none',
-              }}
-            >
-              <SearchIcon size={18} />
-            </span>
-          </div>
+            <h1 className="ms-hero-title" style={{ maxWidth: '820px', marginBottom: '12px' }}>
+              Clinical Blog &amp;{' '}
+              <span className="ms-hero-serif">Patient Guides</span>
+            </h1>
+            <p className="ms-desc" style={{ maxWidth: '700px', margin: '0 auto 24px auto' }}>
+              Accredited medical guidance, seasonal prevention advisories, and wellness insights authored by {content.doctor.name}.
+            </p>
 
-          {/* Category Filter Pills */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => setSelectedCategory(cat)}
+            <div className="ms-search-wrap" style={{ marginBottom: '20px' }}>
+              <input
+                type="search"
+                aria-label="Search medical blog articles"
+                placeholder="Search articles by keyword or condition..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="ms-search-input"
+              />
+              <span
                 style={{
-                  padding: '6px 14px',
-                  borderRadius: '999px',
-                  border: '1px solid',
-                  borderColor: selectedCategory === cat ? theme.primary : '#E2E8F0',
-                  background: selectedCategory === cat ? theme.primary : '#FFFFFF',
-                  color: selectedCategory === cat ? '#FFFFFF' : '#475569',
-                  fontSize: '12px',
-                  fontWeight: selectedCategory === cat ? 700 : 500,
-                  cursor: 'pointer',
-                  transition: 'all 150ms ease',
+                  position: 'absolute',
+                  left: '16px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: 'var(--muted)',
+                  pointerEvents: 'none',
                 }}
               >
-                {cat}
-              </button>
-            ))}
+                <SearchIcon size={18} />
+              </span>
+            </div>
+
+            <div className="ms-chip-bar" style={{ maxWidth: '920px' }}>
+              {categories.map((cat) => {
+                const active = selectedCategory === cat;
+                return (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`ms-chip-pill${active ? ' active' : ''}`}
+                    style={{ minHeight: '36px', fontSize: '12.5px', padding: '0 14px' }}
+                  >
+                    {cat}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Blog Article Cards */}
-      <section style={{ padding: '60px 24px', maxWidth: '1200px', margin: '0 auto' }}>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-            gap: '28px',
-          }}
-        >
-          {filteredPosts.map((post) => (
-            <article
-              key={post.slug}
-              style={{
-                borderRadius: '14px',
-                border: '1px solid #E2E8F0',
-                background: '#FFFFFF',
-                padding: '28px',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                boxShadow: '0 2px 10px rgba(15, 23, 42, 0.03)',
-              }}
-            >
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                  <span
-                    style={{
-                      background: theme.bg,
-                      color: theme.primary,
-                      padding: '3px 9px',
-                      borderRadius: '6px',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                    }}
-                  >
-                    {post.category}
-                  </span>
-                  <span style={{ fontSize: '12px', color: '#64748B', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <ClockIcon size={13} color="#64748B" />
-                    <span>{post.readTime}</span>
-                  </span>
-                </div>
-
-                <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0F172A', margin: '0 0 10px 0', lineHeight: '1.4' }}>
-                  <Link
-                    href={`/blog/${post.slug}`}
-                    style={{ color: 'inherit', textDecoration: 'none' }}
-                  >
-                    {post.title}
-                  </Link>
-                </h2>
-
-                <p style={{ fontSize: '14px', color: '#475569', lineHeight: '1.6', margin: '0 0 16px 0' }}>
-                  {post.excerpt}
+        <section className="ms-section" style={{ background: '#FFFFFF' }}>
+          <div className="ms-wrap">
+            {filteredPosts.length === 0 ? (
+              <div className="ms-surface-box" style={{ textAlign: 'center', padding: '44px 20px' }}>
+                <p className="ms-desc" style={{ marginBottom: '14px' }}>
+                  No patient guides matched your current filter.
                 </p>
-
-                {/* Tags */}
-                {post.tags && post.tags.length > 0 && (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '18px' }}>
-                    {post.tags.map((tag) => (
-                      <span
-                        key={tag}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedCategory('All');
+                    setSearch('');
+                  }}
+                  className="ms-pill ms-pill-dark"
+                >
+                  <span>View All Articles</span>
+                </button>
+              </div>
+            ) : (
+              <div className="ms-grid-3">
+                {filteredPosts.map((post) => (
+                  <article
+                    key={post.slug}
+                    className="ms-editorial-card"
+                    style={{ justifyContent: 'space-between', padding: '24px' }}
+                  >
+                    <div>
+                      <div
                         style={{
-                          background: '#F1F5F9',
-                          color: '#64748B',
-                          padding: '2px 8px',
-                          borderRadius: '4px',
-                          fontSize: '11px',
-                          fontWeight: 600,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '8px',
+                          marginBottom: '12px',
                         }}
                       >
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
+                        <span className="ms-tag">{post.category}</span>
+                        <span
+                          style={{
+                            fontSize: '12px',
+                            color: 'var(--muted)',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                          }}
+                        >
+                          <ClockIcon size={13} color="currentColor" />
+                          <span>{post.readTime}</span>
+                        </span>
+                      </div>
 
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  borderTop: '1px solid #F1F5F9',
-                  paddingTop: '16px',
-                }}
-              >
-                <div style={{ fontSize: '12px', color: '#64748B' }}>
-                  <strong>{post.author}</strong> &bull; {post.publishedDate}
-                </div>
-                <Link
-                  href={`/blog/${post.slug}`}
-                  style={{
-                    color: theme.primary,
-                    fontWeight: 700,
-                    fontSize: '13px',
-                    textDecoration: 'none',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                  }}
-                >
-                  <span>Read Article</span>
-                  <ChevronRightIcon size={14} color={theme.primary} />
-                </Link>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+                      <h2
+                        style={{
+                          fontSize: '18.5px',
+                          fontWeight: 700,
+                          color: 'var(--ink)',
+                          margin: '0 0 10px 0',
+                          lineHeight: 1.38,
+                        }}
+                      >
+                        <Link
+                          href={`/blog/${post.slug}`}
+                          style={{ color: 'inherit', textDecoration: 'none' }}
+                        >
+                          {post.title}
+                        </Link>
+                      </h2>
 
-      {/* Shared Public Footer */}
-      <PublicFooter content={content} theme={theme} />
+                      <p style={{ fontSize: '14px', color: 'var(--muted)', lineHeight: 1.6, margin: '0 0 14px 0' }}>
+                        {post.excerpt}
+                      </p>
+
+                      {post.tags && post.tags.length > 0 && (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '16px' }}>
+                          {post.tags.map((tag) => (
+                            <span key={tag} className="ms-tag-muted">
+                              #{tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '10px',
+                        borderTop: '1px solid var(--border)',
+                        paddingTop: '14px',
+                      }}
+                    >
+                      <div style={{ fontSize: '12px', color: 'var(--muted)' }}>
+                        <strong style={{ color: 'var(--ink)' }}>{post.author}</strong> &bull; {post.publishedDate}
+                      </div>
+                      <Link href={`/blog/${post.slug}`} className="ms-action-link" style={{ minHeight: 'auto', fontSize: '13.5px', flexShrink: 0 }}>
+                        <span>Read Article</span>
+                        <ChevronRightIcon size={14} color="currentColor" />
+                      </Link>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      </main>
+
+      <PublicFooter content={content} />
     </div>
   );
 }

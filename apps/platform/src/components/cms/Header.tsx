@@ -108,8 +108,8 @@ export function Header({
         </ol>
       </nav>
 
-      {/* Center: Global Search Bar */}
-      <div style={{ position: 'relative', width: '380px' }}>
+      {/* Center: Pill Search Bar */}
+      <div style={{ position: 'relative', width: '360px', maxWidth: '38vw' }}>
         <input
           type="search"
           aria-label="Search patients, appointments, services, reviews"
@@ -120,21 +120,21 @@ export function Header({
           className="cms-focus-ring"
           style={{
             width: '100%',
-            padding: '9px 36px 9px 36px',
-            borderRadius: 'var(--radius-md, 10px)',
-            border: '1px solid var(--color-border-subtle, #CBD5E1)',
+            padding: '9px 44px 9px 38px',
+            borderRadius: '9999px',
+            border: '1px solid var(--color-border-subtle, rgba(24, 60, 74, 0.12))',
             fontSize: '13px',
-            background: 'var(--color-bg-surface, #F8FAFC)',
-            color: 'var(--color-text-main, #0F172A)',
+            background: 'var(--color-bg-surface, #F5F8F9)',
+            color: 'var(--color-text-main, #162228)',
             boxSizing: 'border-box',
           }}
         />
         <span
           style={{
             position: 'absolute',
-            left: '12px',
-            top: '11px',
-            color: 'var(--color-text-muted, #94A3B8)',
+            left: '14px',
+            top: '10px',
+            color: 'var(--color-text-muted, #54666E)',
             pointerEvents: 'none',
             display: 'flex',
             alignItems: 'center',
@@ -145,12 +145,13 @@ export function Header({
         <span
           style={{
             position: 'absolute',
-            right: '10px',
-            top: '9px',
-            background: 'var(--color-border-subtle, #E2E8F0)',
-            color: 'var(--color-text-muted, #64748B)',
-            padding: '2px 6px',
-            borderRadius: 'var(--radius-xs, 4px)',
+            right: '12px',
+            top: '8px',
+            background: 'var(--color-bg-base, #FFFFFF)',
+            border: '1px solid var(--color-border-subtle, rgba(24, 60, 74, 0.12))',
+            color: 'var(--color-text-muted, #54666E)',
+            padding: '2px 7px',
+            borderRadius: '9999px',
             fontSize: '10px',
             fontWeight: 700,
             pointerEvents: 'none',
@@ -161,68 +162,54 @@ export function Header({
       </div>
 
       {/* Right: Actions, Theme Switcher & Doctor Avatar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-        {/* Dedicated Navbar Button for Page Slots (7 Pages) */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        {/* Dedicated Navbar Pill for Page Slots (Up to 10 Pages) */}
         <Link
           href="/cms/pages"
-          className="cms-focus-ring"
-          title="Open Page Slots Manager (7-Page Architecture)"
+          className="cms-focus-ring ms-pill-light"
+          title="Open Page Slots Manager (10-Page Architecture)"
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '7px',
-            padding: '7px 13px',
-            borderRadius: 'var(--radius-md, 10px)',
-            background: 'var(--color-bg-surface, #F1F5F9)',
-            color: 'var(--color-brand-primary, #0D5C46)',
+            padding: '6px 13px',
             fontSize: '12px',
-            fontWeight: 700,
+            fontWeight: 600,
+            color: 'var(--color-text-main, #162228)',
             textDecoration: 'none',
-            border: '1px solid var(--color-border-subtle, #CBD5E1)',
-            transition: 'all 150ms ease',
           }}
         >
-          <GlobeIcon size={14} color="var(--color-brand-primary, #0D5C46)" />
+          <GlobeIcon size={14} color="var(--color-brand-primary, #183C4A)" />
           <span>Page Slots</span>
           <span
             style={{
-              padding: '2px 6px',
-              borderRadius: '999px',
+              padding: '2px 7px',
+              borderRadius: '9999px',
               fontSize: '10px',
-              fontWeight: 800,
-              background: 'var(--color-brand-surface, #E6F4F1)',
-              color: 'var(--color-brand-primary, #0D5C46)',
-              border: '1px solid var(--color-border-subtle, #BFE3DC)',
+              fontWeight: 700,
+              background: 'var(--color-brand-surface, #E7F2F5)',
+              color: 'var(--color-brand-primary, #183C4A)',
             }}
           >
-            7 Active
+            10 Active
           </span>
         </Link>
 
-        {/* View Live Patient Website */}
+        {/* View Live Patient Website — Signature MedSphere Dark Pill CTA with white left circle */}
         <a
           href="/"
           target="_blank"
           rel="noreferrer"
-          className="cms-focus-ring"
+          className="cms-focus-ring ms-pill-dark"
           title="Open live patient website in a new tab"
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '7px 12px',
-            borderRadius: 'var(--radius-md, 10px)',
-            background: 'var(--color-brand-surface, #E6F4F1)',
-            color: 'var(--color-brand-primary, #0D5C46)',
+            padding: '4px 14px 4px 4px',
             fontSize: '12px',
-            fontWeight: 700,
+            fontWeight: 600,
             textDecoration: 'none',
-            border: '1px solid var(--color-border-subtle, #BFE3DC)',
-            transition: 'background-color 150ms ease',
           }}
         >
+          <span className="ms-pill-circle" style={{ width: '26px', height: '26px' }}>
+            <ExternalLinkIcon size={13} color="#183C4A" />
+          </span>
           <span>Live Site</span>
-          <ExternalLinkIcon size={13} color="currentColor" />
         </a>
 
         {/* Light / Dark Mode Toggle Switcher */}
@@ -230,23 +217,15 @@ export function Header({
           type="button"
           onClick={onToggleTheme}
           aria-label={`Toggle theme (currently ${theme})`}
-          className="cms-focus-ring"
+          className="cms-focus-ring ms-pill-light"
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '7px 12px',
-            borderRadius: 'var(--radius-md, 10px)',
-            border: '1px solid var(--color-border-subtle, #E2E8F0)',
-            background: 'var(--color-bg-base, #FFFFFF)',
-            color: 'var(--color-text-main, #0F172A)',
+            padding: '7px 13px',
             fontSize: '12px',
             fontWeight: 600,
             cursor: 'pointer',
-            transition: 'background-color 150ms ease',
           }}
         >
-          <PaletteIcon size={15} color="var(--color-brand-primary, #0D5C46)" />
+          <PaletteIcon size={14} color="var(--color-brand-primary, #183C4A)" />
           <span style={{ textTransform: 'capitalize' }}>{theme}</span>
         </button>
 
@@ -266,7 +245,7 @@ export function Header({
               width: '36px',
               height: '36px',
               borderRadius: '50%',
-              background: 'var(--color-brand-primary, #0D5C46)',
+              background: 'var(--color-brand-primary, #183C4A)',
               color: '#FFFFFF',
               display: 'flex',
               alignItems: 'center',

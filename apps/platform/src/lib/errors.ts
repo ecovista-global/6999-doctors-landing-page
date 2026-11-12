@@ -16,6 +16,7 @@ export type ErrorCode =
   | 'E-1605'
   | 'E-1606'
   | 'E-1607'
+  | 'E-1608'
   | 'E-2101'
   | 'E-2201'
   | 'E-2301'
@@ -189,6 +190,16 @@ export const ERROR_REGISTRY: Record<ErrorCode, ErrorDefinition> = {
       hi: 'अस्वीकृत HTML या स्क्रिप्ट टैग पाए गए।',
     },
     operatorAction: 'Remove disallowed tags',
+  },
+  'E-1608': {
+    code: 'E-1608',
+    status: 409,
+    title: 'Appointment slot conflict detected',
+    userMessage: {
+      en: 'Selected doctor time slot is already booked. Please choose another available slot.',
+      hi: 'चयनित डॉक्टर समय स्लॉट पहले से बुक है। कृपया दूसरा उपलब्ध स्लॉट चुनें।',
+    },
+    operatorAction: 'Pick an alternate time slot',
   },
   'E-2101': {
     code: 'E-2101',
